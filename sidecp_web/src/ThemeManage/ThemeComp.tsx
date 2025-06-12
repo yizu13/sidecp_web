@@ -1,10 +1,11 @@
 import { ThemeProvider } from "@mui/material/styles";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useSettingContext } from "../settingsComponent/contextSettings";
 
 type props={
     children : ReactNode
 }
+
 export default function ThemeComponent({children}: props){
     const settings = useSettingContext()
 

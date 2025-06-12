@@ -66,7 +66,7 @@ export default function Authsystem({ children }: props){
             axiosIntercep.interceptors.request.eject(resRequest);
             axiosIntercep.interceptors.response.eject(resResponse);
         })
-    }, [accessToken, refreshToken])
+    }, [accessToken, refreshToken, navigation])
 
        const login = async (credentials: any) => {
             const response = await axiosLog.post("/login", credentials);

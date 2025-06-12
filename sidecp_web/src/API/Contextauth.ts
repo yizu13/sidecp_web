@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { userProps } from './authProvider';
 
 
-export const Auth = createContext<userProps |undefined>(undefined)
+export const Auth = createContext<userProps |undefined>(undefined);
 
 
 export default function useAuthContext(){

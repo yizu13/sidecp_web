@@ -1,6 +1,7 @@
 import { type ReactNode, useMemo, useState } from "react"
 import { SettingsContext } from './contextSettings'
 import { createTheme } from '@mui/material/styles';
+import type { Theme } from "@emotion/react";
 
 const lightTheme = createTheme({
   palette: {
@@ -26,8 +27,8 @@ type props = {
 }
 
 export interface ThemeProps {
-    theme: any;
-    themefunc:  (data: any) => void;
+    theme: Theme;
+    themefunc:  (data: boolean) => void;
 }
 
 export default function SettingsComponent({ children }: props){
