@@ -1,8 +1,9 @@
 import axios from "axios";
 
+// AUTH SERVER
 const axiosLog = axios.create({
 
-        baseURL: "http://localhost:4000",
+        baseURL: import.meta.env.VITE_PORT_AUTH_SERVER,
         headers: {
             "Content-Type": "application/json"
         },
