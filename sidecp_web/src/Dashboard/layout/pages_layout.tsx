@@ -14,12 +14,13 @@ type Props = {
 
 export function TextPage({ pageObject }: Props){
     const navigation = useNavigate()
-    const committePage = [{label: "Crear", navigation: "/dashboard/inicio"}, {label: "Cerrar", navigation: "/dashboard/inicio"}];
+    const committePage = [{label: "Crear", navigation: "/dashboard/comisiones/crear"}, {label: "Cerrar", navigation: "/dashboard/comisiones/cerrar"}];
 
     return(
         <>
         <Typography color='white' typography='h5' sx={{
             position: 'sticky', 
+            cursor: pageObject.page === 0 ? 'default' : 'pointer',
             pl: 8,
             pr: 8,
             pt: 0.5,

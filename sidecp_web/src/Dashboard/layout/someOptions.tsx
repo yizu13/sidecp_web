@@ -38,7 +38,7 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                     borderRadius: 10,
                     textWrap: "nowrap",
                     transition: 'all 0.3s ease',
-                    backgroundColor: open || pageObject.subPage ? 'rgb(45, 119, 255)' : '',
+                    backgroundColor: open || pageObject.subPage === 0 || pageObject.subPage ? 'rgb(45, 119, 255)' : '',
                     '&:hover':{
                         backgroundColor: 'rgb(45, 119, 255)',
         
@@ -69,7 +69,7 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                         transition={{ duration: 0.3 }}
                    > 
                     {subPages.map((item, i)=>(
-                    <>
+                    <Box sx={{mt: i !== 0? 0.5: 0}}>
                     <Typography color='white' typography='h5' key={i} sx={{
                     position: 'sticky', 
                     cursor: pageObject.subPage === i ? 'default' : 'pointer',
@@ -93,7 +93,7 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                 }}
                 onClick={()=>{navigation(item.navigation)}}
                 >{item.label}</Typography>
-                    </>
+                    </Box>
                 ))}
                      </motion.div>
                      )

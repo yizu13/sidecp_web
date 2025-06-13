@@ -6,6 +6,8 @@ import { Typography } from "@mui/material";
 import Logout from "../logout/logout";
 
 const InicioDash = lazy(()=> import('../Dashboard/Inicio/dashboard_inicio'))
+const CommitteDashboardCreate = lazy(()=> import('../Dashboard/Comisiones/dashboard_comisiones_create'))
+const CommitteDashboardClose = lazy(()=> import('../Dashboard/Comisiones/dashboard_comisiones_close'))
 
 export default function Router(){
     const navigate = useNavigate()
@@ -49,7 +51,19 @@ export default function Router(){
                 {
                     path: "inicio",
                     element: <InicioDash/>
-                },
+                }, {
+                    path: "comisiones",
+                    children: [
+                        {
+                            path: "crear",
+                            element: <CommitteDashboardCreate/>
+                        },
+                        {
+                            path: "cerrar",
+                            element: <CommitteDashboardClose/>
+                        }
+                    ]
+                }
             ]
         }
     ]);
