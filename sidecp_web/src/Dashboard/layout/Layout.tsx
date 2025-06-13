@@ -1,14 +1,18 @@
 import { type ReactNode, useRef, useState } from 'react';
 import { Stack, Box, Typography } from '@mui/material';
-import { useSettingContext } from '../../settingsComponent/contextSettings';
 import { Icon } from '@iconify/react'
 import {TextPage} from './pages_layout'
 import {IconPage} from './pages_layout'
 import {motion} from 'framer-motion'
 import { useNavigate } from 'react-router-dom';
 
+type PageObject ={
+    page: number,
+    subPage : number | null
+}
+
 type props = {
-    setPage: any
+    setPage: PageObject
     children: ReactNode
 }
 
@@ -41,7 +45,10 @@ export default function MainLayout({ setPage, children }: props){
                         height: '100%',
                         justifyContent: 'start',
                         alignItems: 'center',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        paddingRight: 2,
+                        paddingLeft: 2,
+                        boxShadow: '0px 4px 20px rgba(0,0,0,0.15)'
                     }}
                     spacing={4}
                 >
@@ -50,20 +57,20 @@ export default function MainLayout({ setPage, children }: props){
                     src="/Cedil_logo.png"
                     sx={{
                     position: 'relative',
-                    width: '12vw',
+                    width: '8vw',
                     height: 'auto',
                     top: 0,
                     left: 0,
                     p: 3,
                     pt: 6,
-                    pb: 10,
+                    pb: 3,
                     }}
                 />
 
                 <TextPage pageObject={pageSelected.current}/>
 
                 <Icon icon='line-md:chevron-small-left' color="white" onClick={()=>{setSoft(true)}} style={{
-                    width: '4vw',
+                    width: '2vw',
                     height: '4vh',
                     alignSelf: 'flex-end',
                     justifySelf: 'flex-end',
@@ -74,8 +81,6 @@ export default function MainLayout({ setPage, children }: props){
 
                 <Typography color='white' typography='h5' sx={{
                             position: 'fixed',
-                            m: 3, 
-                            mt: 5,
                             cursor:'pointer',
                             pl: 8,
                             pr: 8,
@@ -88,9 +93,9 @@ export default function MainLayout({ setPage, children }: props){
                             },
                              bottom: 30,
                             typography: {
-                                xs: 'subtitle1', // Small screens (mobile)
-                                sm: 'h6', // Medium screens (tablet)
-                                md: 'h5', // Large screens (desktop)
+                               xs: 'subtitle2', 
+                                sm: 'subtitle1', 
+                                md: 'h6', 
                               }
                             
                         }}
@@ -104,13 +109,14 @@ export default function MainLayout({ setPage, children }: props){
                 <Stack
                     display="flex"
                     sx={{
-                        backgroundColor: 'rgb(65, 131, 255, 0.8)',
+                        backgroundColor: '#3b70d3',
                         width: 'auto', 
                         height: '100%',
                         justifyContent: 'start',
                         alignItems: 'center',
                         mr: '5vw',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0px 4px 20px rgba(0,0,0,0.15)'
                     }}
                     spacing={4}
                 >
@@ -127,7 +133,8 @@ export default function MainLayout({ setPage, children }: props){
                     borderRadius: 30,
                     cursor: 'pointer',
                     backgroundColor: "#679cff",
-                }} whileHover={{marginLeft: 5, transition: { duration: 0.2 }}} >
+                    zIndex: -1
+                }} whileHover={{marginLeft: 5, transition: { duration: 0.2 }}} onClick={()=>{setSoft(false)}}>
                 <Icon icon='line-md:chevron-small-right' color="white" onClick={()=>{setSoft(false)}} style={{
                     width: '4vw',
                     height: '4vh',

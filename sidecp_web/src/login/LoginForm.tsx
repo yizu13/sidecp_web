@@ -7,9 +7,8 @@ import { useForm } from 'react-hook-form'
 import FieldTForm from '../manageForm/FieldTxtForm'
 import FormManaged from '../manageForm/FormProvider'
 import { Icon } from '@iconify/react';
-import { userData } from '../API/userAPI'
 import  useAuthContext  from '../API/Contextauth'
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -60,12 +59,6 @@ export default function Loginform(){
     const onSubmit = handleSubmit(async (data)=>{
        await handleLogin(data.Email, data.Password);
     })
-
-    const getUser = async() => {
-        const userInfo = await userData();
-
-        console.log('user:', userInfo);
-    }
 
 
     return(

@@ -1,25 +1,37 @@
 import { type ReactNode, useState, useMemo, useEffect } from "react"
 import { Auth } from "./Contextauth"
-import axiosInstance from './axiosServer'
 import axiosLog from './AxiosLogServer'
 import { useNavigate } from "react-router-dom"
+import { axiosIntercep } from "./methods"
 
 type props = {
     children : ReactNode
 }
 
 export interface userProps {
-    login: (data: any) => Promise<void>,
+    login: (data: object) => Promise<void>,
     role: string,
 }
 
-export const axiosIntercep = axiosInstance.create()
 
 export default function Authsystem({ children }: props){
     const [accessToken, setAccesToken] = useState('token');
     const [refreshToken, setrefreshToken] = useState('refresh');
     const [role, setRole] = useState('role')
     const navigation = useNavigate()
+
+    useEffect(()=>{
+        if(refreshToken !== 'refresh'){
+            const autoCheck = setTimeout(()=>{
+                axiosIntercep.get("/userInfo");
+                setrefreshToken('refresh');
+            }, 605*1000)
+            console.log("flow")
+            return (()=>{
+                clearTimeout(autoCheck);
+            })
+        }
+    },[refreshToken])
 
     useEffect(()=>{
         const resRequest = axiosIntercep.interceptors.request.use(
@@ -43,7 +55,11 @@ export default function Authsystem({ children }: props){
                 if(err.response.status === 402 && !originRequest._retry){
                     originRequest._retry = true
                     try{
-                const newAccess = await axiosLog.post('/token', { token: refreshToken });
+                    const sessionToken = sessionStorage.getItem("token") ?? 'refresh';
+                if(refreshToken === 'refresh'){
+                    setrefreshToken(sessionToken);
+                }
+                const newAccess = await axiosLog.post('/token', { token: refreshToken === 'refresh'? sessionToken : refreshToken });
                 const newAccessToken = newAccess.data.accessToken;
                 setAccesToken(newAccessToken);
 
@@ -54,7 +70,8 @@ export default function Authsystem({ children }: props){
                 originRequest.headers['authorization'] = `Bearer`
                 // send to login
                 await axiosLog.delete('/logout', { data: { token: refreshToken } });
-                navigation('/login')
+                alert("session expired");
+                navigation('/login');
                 return Promise.reject(errorRefresh);
             }
 
@@ -68,11 +85,12 @@ export default function Authsystem({ children }: props){
         })
     }, [accessToken, refreshToken, navigation])
 
-       const login = async (credentials: any) => {
+       const login = async (credentials: object) => {
             const response = await axiosLog.post("/login", credentials);
             setAccesToken(response.data.accessToken);
             setrefreshToken(response.data.refreshToken);
-            setRole(response.data.role)
+            setRole(response.data.role);
+            sessionStorage.setItem("token", response.data.refreshToken)
         }
 
         const memo = useMemo(() => ({

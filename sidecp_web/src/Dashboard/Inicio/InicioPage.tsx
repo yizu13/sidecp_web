@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Stack, Button } from "@mui/material";
 import {
     animate,
     motion,
@@ -7,7 +7,8 @@ import {
     useMotionValueEvent,
     useScroll,
 } from "framer-motion"
-import { useRef } from "react"
+import { useCallback, useRef } from "react"
+import { userData } from "../../API/userAPI";
 
 
 
@@ -15,6 +16,11 @@ export default function InicioPage(){
     const ref = useRef(null)
     const { scrollYProgress } = useScroll({ container: ref })
     const maskImage = useScrollOverflowMask(scrollYProgress)
+
+    const callBack = useCallback(async()=>{
+        const response = await userData();
+        console.log(response);
+    },[])
 
     return(
 
@@ -37,7 +43,7 @@ export default function InicioPage(){
                 borderRadius: 20,
                 position: 'inherit',
                 flexShrink: 0
-                }}></Stack>
+                }}><Button variant="contained" sx={{width: "20%"}} onClick={callBack}>hola</Button></Stack>
             <Stack sx={{
                 width: '60vw', 
                 height: '600px', 
