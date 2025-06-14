@@ -6,10 +6,14 @@ import { Icon } from '@iconify/react';
 type props = {
     name: string;
     label: string;
-    variant: 'outlined' | 'filled' | 'standard';
+    variant: 'outlined' | 'filled' | 'standard',
+    sx?: object
+    multiline?: boolean
+    minRows?: number
+    maxRows?: number
 }
 
-export default function FieldTForm({ name, label, variant }: props){
+export default function FieldTForm({ name, label, variant , ...props}: props){
     const { control } = useFormContext();
     const [show, setShow] = useState(false)
 
@@ -38,6 +42,7 @@ export default function FieldTForm({ name, label, variant }: props){
             type={name.toLowerCase() === 'password' && !show ? "password": undefined}
             fullWidth
             placeholder={placeHolderFunc(name.toLowerCase())}
+             {...props}
             {...(name.toLowerCase() === 'password' && {
                 InputProps: {
                   endAdornment: (
@@ -74,7 +79,7 @@ export default function FieldTForm({ name, label, variant }: props){
                   ),
                 },
               })}
-            />
+           />
           )}
         />
     )
