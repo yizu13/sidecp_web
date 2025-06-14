@@ -4,16 +4,17 @@ import { useSettingContext } from "../../../settingsComponent/contextSettings";
 import FormManaged from "../../../manageForm/FormProvider";
 import FieldTForm from "../../../manageForm/FieldTxtForm";
 import { yupResolver } from '@hookform/resolvers/yup';
-import React, { useState} from 'react';
+import React, { useEffect, useState} from 'react';
 import { useForm } from 'react-hook-form';
+import DialogCreate from './dialogComponent';
 
 type currentDataObject = {
-     committeName: string,
+     committeName: string ,
      topic: string,
      institutionRepresentated: string,
-     location: string,
+     location: string ,
      events: { title: string; eventDescription?: string }[],
-     description: string,
+     description: string ,
 }
 type props = {
     currentData: currentDataObject | null
@@ -22,7 +23,9 @@ type props = {
 
 export default function CreateCommitte({currentData} : props ){
     const { theme } = useSettingContext()
-    const [eventList, setList] = useState([{ title: "Sesión de emergencia", eventDescription: "taltaltaltal" }, { title: "Sesión de emergencia", eventDescription: "taltaltaltal" }, { title: "Sesión de emergencia", eventDescription: "taltaltaltal" }, ])
+    const [eventList, setList] = useState([...(currentData?.events || [])])
+    const [boolOpenCreate, setOpenCreate] = useState(false);
+    const [check, setCheck] = useState({});
 
     const yupSchema = yup.object().shape({
         committeName: yup.string().required("Se necesita nombre del comité"),
@@ -43,9 +46,7 @@ export default function CreateCommitte({currentData} : props ){
         topic: currentData?.topic || '',
         institutionRepresentated: currentData?.institutionRepresentated || '',
         location: currentData?.location || '',
-        events: currentData?.events && currentData.events.length
-            ? currentData.events
-            : eventList,
+        events: eventList,
         description: currentData?.description || '',
     }
 
@@ -54,19 +55,38 @@ export default function CreateCommitte({currentData} : props ){
         resolver: yupResolver(yupSchema)
     })
 
-    const {handleSubmit, reset} = methods
+    const {handleSubmit, reset, setValue} = methods
 
-    const onSubmit = handleSubmit(async (data) => {
+    useEffect(()=>{
+            setValue("events", eventList)
+    },[eventList]);
+
+    const clearAll = ()=>{
+          setList([]);
+          reset();
+    }
+
+    useEffect(()=>{
+        const execute = async ()=>{
+            console.log(check)
+            if(check){
+            clearAll();
+    }
+        }
+        execute();
+    },[check])
+
+    const onSubmit = handleSubmit((data) => {
         try {
-            console.log(data)
-            reset();
-            setList([])
+            setCheck(data)
         } catch (err) {
-            console.log("error:", err)
+            console.log("error:", err);
         }
     })
 
+
     return(
+        <>
         <FormManaged onSubmit={onSubmit} methods={methods}>
        <Stack spacing={4} sx={{
                 width: '60vw', 
@@ -105,13 +125,13 @@ export default function CreateCommitte({currentData} : props ){
                 flexShrink: 0
                 }}>
                     <Box display="flex" flexDirection="row" columnGap={6} paddingLeft={6} paddingRight={6} paddingBottom={0}>
-                        <Box display="flex" flexDirection="column" rowGap={2} sx={{mb: -6}}>
+                        <Box display="flex" flexDirection="column" rowGap={2} sx={{mb: 6}}>
                                 <Box
                                     sx={{
-                                    height: "60%",
+                                    height: 200,
                                     width: "100%",
                                     overflowY: "auto",
-                                    overflowX: "hidden",
+                                    overflowX: "auto",
                                     '&::-webkit-scrollbar-button': {
                                     display: 'none',
                                     height: 0,
@@ -136,7 +156,7 @@ export default function CreateCommitte({currentData} : props ){
                         <Typography typography="h6" color="textPrimary" display="flex">
                             Eventos
                         </Typography>
-                        <List sx={{ width: '100%', maxWidth: 800, bgcolor: 'transparent' }} >
+                        <List sx={{ width: '150%', minWidth: 450, maxWidth: 450, bgcolor: 'transparent' }} >
                         {!currentData?.events.length && (
                             eventList.map((item,i)=>(
                                <ListItem alignItems="flex-start" key={i}>
@@ -147,6 +167,7 @@ export default function CreateCommitte({currentData} : props ){
                                 primary={item?.title}
                                 slotProps={{primary: {
                                     color: "textPrimary",
+                                    textAlign: "justify",
                                     fontWeight: "bold",
                                     variant: "subtitle1",
                                     noWrap: true
@@ -156,7 +177,7 @@ export default function CreateCommitte({currentData} : props ){
                                     <Typography
                                         component="span"
                                         variant="body2"
-                                        sx={{ color: 'text.primary', display: 'inline' }}
+                                        sx={{ color: 'gray', display: 'inline' }}
                                     >
                                         {item?.eventDescription}
                                     </Typography>
@@ -169,7 +190,7 @@ export default function CreateCommitte({currentData} : props ){
                         )}
                         </List>
                         </Box>
-                        <Button variant="contained" color="success"  sx={{borderRadius: 3, width: 200, alignSelf: "flex-end"}}>
+                        <Button variant="contained" color="success" onClick={()=>{setOpenCreate(true)}} sx={{borderRadius: 3, width: 200, alignSelf: "flex-end"}}>
                             Agregar evento
                         </Button>
                         </Box>
@@ -182,5 +203,11 @@ export default function CreateCommitte({currentData} : props ){
                         </Box>
                     </Stack>
              </FormManaged>
+             <DialogCreate boolOpenCreate={boolOpenCreate} setOpenCreate={setOpenCreate} setList={setList}/>
+             </>
     )
+}
+
+function async() {
+    throw new Error('Function not implemented.');
 }
