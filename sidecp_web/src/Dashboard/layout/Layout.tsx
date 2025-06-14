@@ -5,6 +5,7 @@ import {TextPage} from './pages_layout'
 import {IconPage} from './pages_layout'
 import {motion} from 'framer-motion'
 import { useNavigate } from 'react-router-dom';
+import { useSettingContext } from '../../settingsComponent/contextSettings';
 
 type PageObject ={
     page: number,
@@ -20,6 +21,7 @@ export default function MainLayout({ setPage, children }: props){
     const pageSelected = useRef(setPage) 
     const [changeSoft, setSoft] = useState(false)
     const navigation = useNavigate()
+    const { theme, themefunc } = useSettingContext()
     
         return (
             <Stack
@@ -147,10 +149,10 @@ export default function MainLayout({ setPage, children }: props){
                 <Stack
                     display="flex"
                     sx={{
-                       // backgroundColor: 'black',
+                       backgroundColor: theme.palette.mode === "dark"? 'black': 'white',
                         width: 'auto', // Half of the parent width
                         height: '100%', // Full height of the parent
-                        opacity: 0.5,
+                        opacity: 1,
                         justifyContent: 'start',
                         alignItems: 'center',
                         p: '3%'

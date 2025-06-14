@@ -1,25 +1,6 @@
 import { type ReactNode, useMemo, useState } from "react"
 import { SettingsContext } from './contextSettings'
-import { createTheme } from '@mui/material/styles';
-import type { Theme } from "@emotion/react";
-
-const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-    },
-  },
-});
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#90caf9',
-    },
-  },
-});
+import { createTheme, type Theme, type PaletteMode } from '@mui/material/styles';
 
 
 type props = {
@@ -28,17 +9,30 @@ type props = {
 
 export interface ThemeProps {
     theme: Theme;
-    themefunc:  (data: boolean) => void;
+    themefunc:  (data: string) => void;
 }
 
 export default function SettingsComponent({ children }: props){
-    const [isDark, setDark] = useState(false);
+    const [mode, setMode] = useState<PaletteMode>('light');
 
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+        },
+      }),
+    [mode]
+  );
 
     const themeProps = useMemo(()=> ({
-        theme: isDark ? darkTheme : lightTheme,
-        themefunc: (value: boolean) => {setDark(value)}
-    }),[isDark])
+        theme: theme,
+        themefunc: (value: string) => {
+            if (value === 'light' || value === 'dark') {
+                setMode(value);
+            }
+        }
+    }),[theme])
 
     return(
     <SettingsContext.Provider value={themeProps}>{children}</SettingsContext.Provider>

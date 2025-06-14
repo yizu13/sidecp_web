@@ -69,7 +69,7 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                         transition={{ duration: 0.3 }}
                    > 
                     {subPages.map((item, i)=>(
-                    <Box sx={{mt: i !== 0? 0.5: 0}}>
+                    <Box sx={{mt: i !== 0? 0.5: 0}} key={i}>
                     <Typography color='white' typography='h5' key={i} sx={{
                     position: 'sticky', 
                     cursor: pageObject.subPage === i ? 'default' : 'pointer',

@@ -13,7 +13,7 @@ export default function ThemeComponent({children}: props){
 
     return(
         <ThemeProvider theme={theme}>
-              {children}
+                {children}
         </ThemeProvider>
     )
 }

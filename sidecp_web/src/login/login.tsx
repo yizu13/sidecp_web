@@ -6,9 +6,10 @@ import Loginform from './LoginForm';
 
 export default function Login(){
     const settings = useSettingContext()
-    const {themefunc} = settings;
+    const {theme, themefunc} = settings;
 
-      themefunc(false);
+      themefunc('light');
+      console.log(theme.palette.mode)
 
     return (
       
