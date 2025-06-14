@@ -25,7 +25,6 @@ export default function CreateCommitte({currentData} : props ){
     const { theme } = useSettingContext()
     const [eventList, setList] = useState([...(currentData?.events || [])])
     const [boolOpenCreate, setOpenCreate] = useState(false);
-    const [check, setCheck] = useState({});
 
     const yupSchema = yup.object().shape({
         committeName: yup.string().required("Se necesita nombre del comité"),
@@ -42,12 +41,12 @@ export default function CreateCommitte({currentData} : props ){
     })
     
     const defaultvalue = {
-        committeName: currentData?.committeName || '',
-        topic: currentData?.topic || '',
-        institutionRepresentated: currentData?.institutionRepresentated || '',
-        location: currentData?.location || '',
+        committeName: '',
+        topic: '',
+        institutionRepresentated:  '',
+        location: '',
         events: eventList,
-        description: currentData?.description || '',
+        description:  '',
     }
 
     const methods = useForm<currentDataObject>({
@@ -66,24 +65,14 @@ export default function CreateCommitte({currentData} : props ){
           reset();
     }
 
-    useEffect(()=>{
-        const execute = async ()=>{
-            console.log(check)
-            if(check){
-            clearAll();
-    }
-        }
-        execute();
-    },[check])
-
     const onSubmit = handleSubmit((data) => {
-        try {
-            setCheck(data)
-        } catch (err) {
-            console.log("error:", err);
-        }
-    })
-
+    try {
+        console.log("Datos enviados:", JSON.parse(JSON.stringify(data)));
+        clearAll(); 
+    } catch (err) {
+        console.log("error:", err);
+    }
+})
 
     return(
         <>
@@ -206,8 +195,4 @@ export default function CreateCommitte({currentData} : props ){
              <DialogCreate boolOpenCreate={boolOpenCreate} setOpenCreate={setOpenCreate} setList={setList}/>
              </>
     )
-}
-
-function async() {
-    throw new Error('Function not implemented.');
 }
