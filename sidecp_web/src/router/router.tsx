@@ -9,6 +9,7 @@ import { useSettingContext } from "../settingsComponent/contextSettings";
 const InicioDash = lazy(()=> import('../Dashboard/Inicio/dashboard_inicio'))
 const CommitteDashboardCreate = lazy(()=> import('../Dashboard/Comisiones/dashboard_comisiones_create'))
 const CommitteDashboardClose = lazy(()=> import('../Dashboard/Comisiones/dashboard_comisiones_close'))
+const EvaluatorsLayout = lazy(()=> import("../Dashboard/Usuarios/evaluatorsLayout"))
 
 export default function Router(){
     const navigate = useNavigate()
@@ -72,6 +73,16 @@ export default function Router(){
                         {
                             path: "cerrar",
                             element: <CommitteDashboardClose/>
+                        }
+                    ]
+                },
+                {
+                    path: "usuarios",
+                    children: [
+                        {
+                            path: "evaluadores",
+                            element: <EvaluatorsLayout/>
+
                         }
                     ]
                 }
