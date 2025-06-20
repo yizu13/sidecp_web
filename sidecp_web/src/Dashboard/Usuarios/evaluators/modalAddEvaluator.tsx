@@ -1,7 +1,6 @@
 import * as yup from "yup"
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
 import FormManaged from "../../../manageForm/FormProvider"
-import FieldTForm from "../../../manageForm/FieldTxtForm"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import AutocompleteForm from "../../../manageForm/AutocompleteForm"
