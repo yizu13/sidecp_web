@@ -6,7 +6,7 @@ type Props = {
   label: string;
   variant: 'outlined' | 'filled' | 'standard';
   sx?: object;
-  options: any[]; 
+  options: any[] | undefined; 
   getOptionLabel?: (option: any) => string; 
 
 };
@@ -21,26 +21,30 @@ export default function AutocompleteController({
 
   return (
     <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState: { error } }) => (
-        <Autocomplete
-          {...props}
-          value={field.value || null}
-          onChange={(_, data) => field.onChange(data)}
-          onBlur={field.onBlur}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={label}
-              variant={variant}
-              error={!!error}
-              helperText={error?.message}
-              sx={{width: "15vw"}}
-            />
-          )}
+  name={name}
+  control={control}
+  render={({ field, fieldState: { error } }) => (
+    <Autocomplete
+      {...props}
+      options={props.options ?? []}
+      value={
+        props.options?.find(option => option.id === field.value) || null
+      }
+      onChange={(_, data) => field.onChange(data?.id ?? '')}
+      onBlur={field.onBlur}
+      getOptionLabel={(option) => option.label || ''} 
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          variant={variant}
+          error={!!error}
+          helperText={error?.message}
+          sx={{ width: "15vw" }}
         />
       )}
     />
+  )}
+/>
   );
 }

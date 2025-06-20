@@ -1,5 +1,5 @@
 import MainLayout from "../layout/Layout";
-
+import ListCommities from "./listCommitte/commities";
 
 
 export default function CommitteDashboardClose(){

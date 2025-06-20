@@ -14,3 +14,23 @@ export const getEventsById = async (id: string)=>{
     const response = await axiosIntercep.get(`/events/${id}`);
     return response
 }
+
+export const getUsers = async ()=>{
+    const response = await axiosIntercep.get(`/users`);
+    return response
+}
+
+export const getCommitties = async ()=>{
+    const response = await axiosIntercep.get(`/committies`);
+    return response
+}
+
+export const getEvaluators = async ()=>{
+    const response = await axiosIntercep.get(`/evaluators`);
+    return response
+}
+
+export const createEvaluator = async (payload: any)=>{
+    const response = await axiosIntercep.post(`/createEvaluators`, payload);
+    return response
+}

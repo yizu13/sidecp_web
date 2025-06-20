@@ -1,8 +1,11 @@
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 import { Button, Stack } from '@mui/material';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ModalEvaluator from './modalAddEvaluator';
+import { getUsers } from '../../../API/userAPI';
+import { getCommitties } from '../../../API/userAPI';
+import { getEvaluators } from '../../../API/userAPI';
 
 
 export default function EvaluatorsComp(){
@@ -12,6 +15,9 @@ export default function EvaluatorsComp(){
 const [open, setOpen] = useState(false);
 const [selectRow, setRow] = useState({ userId: null,
     committe: null});
+const [users, setUsers] = useState([])
+const [commities, setCommities] = useState([])
+const [evaluators, setEvaluators] = useState([])
 const columns: GridColDef<(typeof rows)[number]>[] = [
   
   { field: 'evaluatorId', headerName: 'Id', width: 150 },
@@ -29,7 +35,42 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
   },
 ];
 
-const rows = [
+useEffect(()=>{
+      const callUsers = async ()=>{
+        const response = await getUsers();
+        setUsers(response.data?.users);
+      }
+      const callCommities = async ()=>{
+        try{
+          const response = await getCommitties();
+          setCommities(response.data.committies);
+        }catch(err){
+          console.log(err)
+        }
+        
+      }
+      const callEvaluators = async ()=>{
+        try{
+          const response = await getEvaluators();
+          console.log(response.data.evaluators)
+          setEvaluators(response.data.evaluators);
+        }catch(err){
+          console.log(err);
+        }
+        
+      }
+      callCommities();
+      callUsers();
+      callEvaluators();
+},[])
+
+const transformDataRow = ()=>{
+  return evaluators.map((evaluator: any, i: number)=> ({id: i, evaluatorId: i, 
+    fullName: users.find((i: any)=> i.userid === evaluator.userid)?.name, 
+    committeName: commities.find((i: any)=> i.committeid === evaluator.committeid)?.committename }))
+}
+
+const rows = transformDataRow() /* [
   { id: 1 ,evaluatorId: 1, fullName: 'Snow', committeName: 14 },
   { id: 2 ,evaluatorId: 2, fullName: 'Lannister', committeName: 31 },
   { id: 3 ,evaluatorId: 3, fullName: 'Lannister', committeName: 31 },
@@ -39,7 +80,7 @@ const rows = [
   { id: 7 ,evaluatorId: 7, fullName: 'Clifford', committeName: 44 },
   { id: 8 ,evaluatorId: 8, fullName: 'Frances', committeName: 36 },
   { id: 9 ,evaluatorId: 9, fullName: 'Roxie', committeName: 65 },
-];
+]; */
 
 const {theme} = useSettingContext()
 
@@ -66,7 +107,7 @@ const {theme} = useSettingContext()
 
         />
         </Stack>
-                <ModalEvaluator currentData={selectRow} setOpen={setOpen} open={open}/>
+                <ModalEvaluator currentData={selectRow} setOpen={setOpen} open={open} usersData={users} commities={commities}/>
         </>
     )
 }

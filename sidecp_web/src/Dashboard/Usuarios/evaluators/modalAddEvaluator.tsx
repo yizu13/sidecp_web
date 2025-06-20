@@ -4,20 +4,29 @@ import FormManaged from "../../../manageForm/FormProvider"
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import AutocompleteForm from "../../../manageForm/AutocompleteForm"
+import { createEvaluator } from '../../../API/userAPI';
 
 type currentdata ={
     userId: string | null,
     committe: string | null
 }
 
+type User = {
+        name: string;
+        lastname: string;
+        userid: string;
+    };
+
 type props ={
     currentData: currentdata,
     setOpen: (data: boolean)=>void
     open: boolean
+    usersData: Array<User>
+    commities: Array<any>
 }
 
 
-export default function ModalEvaluator({currentData, setOpen, open}: props){
+export default function ModalEvaluator({currentData, setOpen, open, usersData, commities}: props){
     const schema = yup.object().shape({
         userId: yup.string().required("Se requiere usuario"),
         committeId: yup.string().required("Se requiere comité")
@@ -33,15 +42,37 @@ export default function ModalEvaluator({currentData, setOpen, open}: props){
         resolver: yupResolver(schema)
     })
 
-    const {handleSubmit} = methods
+    const { handleSubmit, reset } = methods
 
-    const onSubmit = handleSubmit((data)=>{
+    const onSubmit = handleSubmit(async (data)=>{
         try{
-            console.log(data)
+            await createEvaluator(data);
+            reset();
+            setOpen(false)
         }catch(err){
             console.log("error: ", err)
         }
     })
+    
+    const convertUsersToAutocomplete = (userArray: Array<User>)=>{
+        try{
+            const newObjectArray = userArray.map((user: User)=> ({label: `${user.name} ${user.lastname}`, id: user.userid}))
+        return newObjectArray;
+        }catch(err){
+            console.log('err')
+        }
+        
+    }
+
+     const convertCommitiesToAutocomplete = (committiesArray: Array<any>)=>{
+        try{
+            const newObjectArray = committiesArray.map((committie: any)=> ({label: committie.committename, id: committie.committeid}))
+        return newObjectArray;
+        }catch(err){
+            console.log('err')
+        }
+        
+    }
 
      return(
     <>
@@ -54,20 +85,14 @@ export default function ModalEvaluator({currentData, setOpen, open}: props){
                         name="userId"
                         label="Usuario"
                         variant="outlined"
-                        options={[
-                            { label: "John Doe", id: 1 },
-                            { label: "Jane Smith", id: 2 }
-                        ]}
+                        options={convertUsersToAutocomplete(usersData)}
                         getOptionLabel={(option) => option.label}
                         />
                     <AutocompleteForm
                         name="committeId"
                         label="Comité"
                         variant="outlined"
-                        options={[
-                            { label: "John Doe", id: 1 },
-                            { label: "Jane Smith", id: 2 }
-                        ]}
+                        options={convertCommitiesToAutocomplete(commities)}
                         getOptionLabel={(option) => option.label}
                         />
                     </Box>
