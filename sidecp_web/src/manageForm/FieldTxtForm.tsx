@@ -15,7 +15,7 @@ type props = {
 
 export default function FieldTForm({ name, label, variant , ...props}: props){
     const { control } = useFormContext();
-    const [show, setShow] = useState(false)
+    const [show, setShow] = useState(false);
 
     const placeHolderFunc = useCallback((param: string)=>{
         if(param == 'email'){
