@@ -5,6 +5,7 @@ import FormManaged from "../../../manageForm/FormProvider";
 import FieldTForm from "../../../manageForm/FieldTxtForm";
 import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useEffect, useState} from 'react';
+import { createCommitte } from '../../../API/userAPI';
 import { useForm } from 'react-hook-form';
 import DialogCreate from './dialogComponent';
 
@@ -60,15 +61,12 @@ export default function CreateCommitte({currentData} : props ){
             setValue("events", eventList)
     },[eventList]);
 
-    const clearAll = ()=>{
-          setList([]);
-          reset();
-    }
-
-    const onSubmit = handleSubmit((data) => {
+    const onSubmit = handleSubmit(async (data) => {
     try {
-        console.log("Datos enviados:", JSON.parse(JSON.stringify(data)));
-        clearAll(); 
+       const response = await createCommitte(data)
+        console.log(response.data)
+        reset(); 
+        setList([]);
     } catch (err) {
         console.log("error:", err);
     }

@@ -18,8 +18,12 @@ export default function InicioPage(){
     const maskImage = useScrollOverflowMask(scrollYProgress)
 
     const callBack = useCallback(async()=>{
+        try{
         const response = await userData();
         console.log(response);
+    }catch(err){
+        console.log(err)
+    }
     },[])
 
     return(
