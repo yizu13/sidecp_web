@@ -1,11 +1,13 @@
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { Button, Stack } from '@mui/material';
+import { Button, IconButton, Stack } from '@mui/material';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
 import { useEffect, useState } from 'react';
 import ModalEvaluator from './modalAddEvaluator';
 import { getUsers } from '../../../API/userAPI';
 import { getCommitties } from '../../../API/userAPI';
 import { getEvaluators } from '../../../API/userAPI';
+import { deleteEvaluator } from "../../../API/userAPI"
+import { Icon } from '@iconify/react';
 
 
 export default function EvaluatorsComp(){
@@ -13,11 +15,19 @@ export default function EvaluatorsComp(){
     // three columns evaluatorId, fullName(name, fullName)(get this from users table), committeName(get this from committe table)
 
 const [open, setOpen] = useState(false);
-const [selectRow, setRow] = useState({ userId: null,
-    committe: null});
+const [selectRow, setRow] = useState({ userId: null, committe: null, evaluatorId: null});
 const [users, setUsers] = useState([])
 const [commities, setCommities] = useState([])
 const [evaluators, setEvaluators] = useState([])
+
+ const handleEdit = (data: any)=>{
+    setRow({ userId: users.find((i: any)=> `${i.name} ${i.lastname}` === data.fullName)?.userid, committe: commities.find((i: any)=> i.committename === data.committeName)?.committeid, evaluatorId: data.id})
+    setOpen(true)
+  }
+  const handleDelete = async (data: any) =>{
+    await deleteEvaluator(data.id)
+  }
+
 const columns: GridColDef<(typeof rows)[number]>[] = [
   
   { field: 'evaluatorId', headerName: 'Id', width: 150 },
@@ -32,6 +42,29 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
     description: 'This column has a value getter and is not sortable.',
     sortable: false,
     width: 300
+  },{
+    field: 'actions',
+    headerName: 'Acciones',
+    width: 150,
+    sortable: false,
+    filterable: false,
+    disableExport: true,
+    renderCell: (params) => (
+      <>
+        <IconButton
+          onClick={() => handleEdit(params.row)}
+          color="primary"
+        >
+          <Icon icon="ic:baseline-edit"/>
+        </IconButton>
+        <IconButton
+          onClick={() => handleDelete(params.row)}
+          color="error"
+        >
+          <Icon icon="weui:delete-filled"/>
+        </IconButton>
+      </>
+    ),
   },
 ];
 
@@ -65,8 +98,8 @@ useEffect(()=>{
 },[])
 
 const transformDataRow = ()=>{
-  return evaluators.map((evaluator: any, i: number)=> ({id: i, evaluatorId: i, 
-    fullName: users.find((i: any)=> i.userid === evaluator.userid)?.name, 
+  return evaluators.map((evaluator: any, i: number)=> ({id: evaluator.evaluatorid, evaluatorId: i, 
+    fullName: `${users.find((i: any)=> i.userid === evaluator.userid)?.name} ${users.find((i: any)=> i.userid === evaluator.userid)?.lastname}`, 
     committeName: commities.find((i: any)=> i.committeid === evaluator.committeid)?.committename }))
 }
 
@@ -107,7 +140,7 @@ const {theme} = useSettingContext()
 
         />
         </Stack>
-                <ModalEvaluator currentData={selectRow} setOpen={setOpen} open={open} usersData={users} commities={commities}/>
+                <ModalEvaluator currentData={selectRow} setOpen={setOpen} open={open} usersData={users} commities={commities} setRow={setRow}/>
         </>
     )
 }

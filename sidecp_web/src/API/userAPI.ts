@@ -34,3 +34,8 @@ export const createEvaluator = async (payload: any)=>{
     const response = await axiosIntercep.post(`/createEvaluators`, payload);
     return response
 }
+
+export const deleteEvaluator = async (id: any)=>{
+    const response = await axiosIntercep.delete(`/evaluators/${id}`);
+    return response
+}

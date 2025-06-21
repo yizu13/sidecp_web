@@ -1,4 +1,5 @@
 import * as yup from "yup"
+import { useEffect } from "react"
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
 import FormManaged from "../../../manageForm/FormProvider"
 import { useForm } from "react-hook-form"
@@ -9,6 +10,7 @@ import { createEvaluator } from '../../../API/userAPI';
 type currentdata ={
     userId: string | null,
     committe: string | null
+    evaluatorId: string | null
 }
 
 type User = {
@@ -23,10 +25,12 @@ type props ={
     open: boolean
     usersData: Array<User>
     commities: Array<any>
+    setRow: (data: Array<any>)=>void
 }
 
 
-export default function ModalEvaluator({currentData, setOpen, open, usersData, commities}: props){
+export default function ModalEvaluator({currentData, setOpen, open, usersData, commities, setRow}: props){
+    console.log(currentData)
     const schema = yup.object().shape({
         userId: yup.string().required("Se requiere usuario"),
         committeId: yup.string().required("Se requiere comité")
@@ -37,6 +41,15 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
         committeId: currentData?.committe || ""
     }
 
+    useEffect(() => {
+  if (currentData) {
+    reset({
+      userId: currentData.userId || "",
+      committeId: currentData.committe || ""
+    });
+  }
+}, [currentData]);
+
     const methods = useForm({
         defaultValues,
         resolver: yupResolver(schema)
@@ -46,7 +59,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
 
     const onSubmit = handleSubmit(async (data)=>{
         try{
-            await createEvaluator(data);
+            await createEvaluator({evaluatorId: currentData.evaluatorId , ...data});
             reset();
             setOpen(false)
         }catch(err){
@@ -78,7 +91,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
     <>
     <Dialog open={open} slotProps={{paper: {sx: {borderRadius: 6}}}}>
                 <FormManaged methods={methods} onSubmit={onSubmit}>
-                <DialogTitle sx={{p: 2, ml: 1, mt: 1}}>Crear evaluador</DialogTitle>
+                <DialogTitle sx={{p: 2, ml: 1, mt: 1}}>{Object.keys(currentData || {}).length > 0 ? "Editar evaluador" : "Crear evaluador"}</DialogTitle>
                 <DialogContent>
                     <Box display="flex" flexDirection="row" columnGap={2} sx={{p: 2}}>
                     <AutocompleteForm
@@ -98,7 +111,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>
-                    <Button variant="outlined" color="error" onClick={()=>{setOpen(false)}} sx={{borderRadius: 3, width: "40%"}} >Cerrar</Button>
+                    <Button variant="outlined" color="error" onClick={()=>{setOpen(false); setRow([])}} sx={{borderRadius: 3, width: "40%"}} >Cerrar</Button>
                     <Button variant="contained" type='submit' sx={{borderRadius: 3}} fullWidth>Agregar</Button>
                 </DialogActions>
                 </FormManaged>
