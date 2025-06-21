@@ -26,6 +26,7 @@ const [evaluators, setEvaluators] = useState([])
   }
   const handleDelete = async (data: any) =>{
     await deleteEvaluator(data.id)
+    setEvaluators(prev=> prev.filter((item: any)=> item.evaluatorid !== data.id))
   }
 
 const columns: GridColDef<(typeof rows)[number]>[] = [
@@ -52,13 +53,13 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
     renderCell: (params) => (
       <>
         <IconButton
-          onClick={() => handleEdit(params.row)}
+          onClick={() => {handleEdit(params.row)}}
           color="primary"
         >
           <Icon icon="ic:baseline-edit"/>
         </IconButton>
         <IconButton
-          onClick={() => handleDelete(params.row)}
+          onClick={() => {handleDelete(params.row)}}
           color="error"
         >
           <Icon icon="weui:delete-filled"/>
@@ -95,7 +96,7 @@ useEffect(()=>{
       callCommities();
       callUsers();
       callEvaluators();
-},[])
+},[open])
 
 const transformDataRow = ()=>{
   return evaluators.map((evaluator: any, i: number)=> ({id: evaluator.evaluatorid, evaluatorId: i, 

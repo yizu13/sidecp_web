@@ -30,7 +30,6 @@ type props ={
 
 
 export default function ModalEvaluator({currentData, setOpen, open, usersData, commities, setRow}: props){
-    console.log(currentData)
     const schema = yup.object().shape({
         userId: yup.string().required("Se requiere usuario"),
         committeId: yup.string().required("Se requiere comité")
@@ -62,6 +61,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
             await createEvaluator({evaluatorId: currentData.evaluatorId , ...data});
             reset();
             setOpen(false)
+            setRow([])
         }catch(err){
             console.log("error: ", err)
         }
@@ -112,7 +112,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>
                     <Button variant="outlined" color="error" onClick={()=>{setOpen(false); setRow([])}} sx={{borderRadius: 3, width: "40%"}} >Cerrar</Button>
-                    <Button variant="contained" type='submit' sx={{borderRadius: 3}} fullWidth>Agregar</Button>
+                    <Button variant="contained" type='submit' onClick={()=>{}} sx={{borderRadius: 3}} fullWidth>Agregar</Button>
                 </DialogActions>
                 </FormManaged>
              </Dialog>
