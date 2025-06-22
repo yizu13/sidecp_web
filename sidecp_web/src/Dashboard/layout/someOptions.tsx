@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEditCommitte } from "../../router/committeEditContext/committeContextEdit";
 
 type PageObject = {
     page: number,
@@ -24,6 +25,7 @@ type props = {
 export default function OptionsNavigation({subPages, pageObject, title, mainReference}: props){
 
     const [open, setOpen] = useState(false);
+    const { setCommitteForEdit } = useEditCommitte()
     const navigation = useNavigate();
     const inPage = pageObject.page === mainReference
 
@@ -94,7 +96,10 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
                       },
                     
                 }}
-                onClick={()=>{navigation(item.navigation)}}
+                onClick={()=>{
+                    navigation(item.navigation); 
+                    if(item.label === "Lista"){setCommitteForEdit(null)}
+                }}
                 >{item.label}</Typography>
                     </Box>
                 ))}

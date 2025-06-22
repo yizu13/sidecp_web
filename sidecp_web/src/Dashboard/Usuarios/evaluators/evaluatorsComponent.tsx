@@ -100,8 +100,14 @@ useEffect(()=>{
 
 const transformDataRow = ()=>{
   return evaluators.map((evaluator: any, i: number)=> ({id: evaluator.evaluatorid, evaluatorId: i, 
-    fullName: `${users.find((i: any)=> i.userid === evaluator.userid)?.name} ${users.find((i: any)=> i.userid === evaluator.userid)?.lastname}`, 
-    committeName: commities.find((i: any)=> i.committeid === evaluator.committeid)?.committename }))
+    fullName: users.map((i: any)=> i.userid).includes(evaluator.userid)? 
+    `${users.find((i: any)=> i.userid === evaluator.userid)?.name} ${users.find((i: any)=> i.userid === evaluator.userid)?.lastname}`: 
+    "no existe",
+
+    committeName: commities.map((i: any)=> i.committeid).includes(evaluator.committeid)? 
+    commities.find((i: any)=> i.committeid === evaluator.committeid)?.committename: 
+    "no existe" 
+  }))
 }
 
 const rows = transformDataRow() /* [

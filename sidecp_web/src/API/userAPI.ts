@@ -30,12 +30,17 @@ export const getEvaluators = async ()=>{
     return response
 }
 
-export const createEvaluator = async (payload: any)=>{
+export const createEvaluator = async (payload: string)=>{
     const response = await axiosIntercep.post(`/createEvaluators`, payload);
     return response
 }
 
-export const deleteEvaluator = async (id: any)=>{
+export const deleteEvaluator = async (id: string)=>{
     const response = await axiosIntercep.delete(`/evaluators/${id}`);
     return response
+}
+
+export const deleteCommitte = async (id: string)=>{
+    const response = await axiosIntercep.delete(`/committies/${id}`);
+    return response;
 }

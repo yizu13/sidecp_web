@@ -16,7 +16,7 @@ export function TextPage({ pageObject }: Props){
     const navigation = useNavigate()
     const committePage = [
         {label: "Crear", navigation: "/dashboard/comisiones/crear"}, 
-        {label: "Cerrar", navigation: "/dashboard/comisiones/cerrar"}
+        {label: "Lista", navigation: "/dashboard/comisiones/cerrar"}
     ];
      const usersPage = [
         {label: "Delegaciones", navigation: "/Dashboard/inicio"}, 

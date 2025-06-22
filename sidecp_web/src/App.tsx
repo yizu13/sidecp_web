@@ -3,6 +3,7 @@ import Router from './router/router';
 import SettingsComponent from './settingsComponent/settingsComp';
 import ThemeComponent from './ThemeManage/ThemeComp';
 import Authsystem from './API/authProvider'
+import CommitteEdit from './router/committeEditContext/committeEdit';
 
 function App() {
 
@@ -11,7 +12,9 @@ function App() {
     <SettingsComponent>
       <Authsystem>
     <ThemeComponent>
+      <CommitteEdit>
       <Router/>
+      </CommitteEdit>
       </ThemeComponent>
       </Authsystem>
       </SettingsComponent>
