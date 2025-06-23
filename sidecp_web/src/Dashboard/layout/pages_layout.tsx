@@ -19,7 +19,7 @@ export function TextPage({ pageObject }: Props){
         {label: "Lista", navigation: "/dashboard/comisiones/cerrar"}
     ];
      const usersPage = [
-        {label: "Delegaciones", navigation: "/Dashboard/inicio"}, 
+        {label: "Delegaciones", navigation: "/Dashboard/usuarios/delegaciones"}, 
         {label:  "Evaluadores", navigation: "/Dashboard/usuarios/evaluadores"}
     ];
 
