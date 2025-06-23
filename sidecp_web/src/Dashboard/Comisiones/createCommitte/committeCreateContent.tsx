@@ -22,7 +22,7 @@ type currentDataObject = {
 
 type events = {
     title: string
-    eventDescription: string
+    eventDescription: string | undefined
 }
 
 
