@@ -30,7 +30,13 @@ export const getEvaluators = async ()=>{
     return response
 }
 
-export const createEvaluator = async (payload: string)=>{
+type evaluatorInfo = {
+    committeId: string
+    userId: string
+    evaluatorId: string | undefined
+}
+
+export const createEvaluator = async (payload: evaluatorInfo)=>{
     const response = await axiosIntercep.post(`/createEvaluators`, payload);
     return response
 }

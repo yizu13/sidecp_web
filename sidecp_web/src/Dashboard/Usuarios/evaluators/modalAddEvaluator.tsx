@@ -7,10 +7,10 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import AutocompleteForm from "../../../manageForm/AutocompleteForm"
 import { createEvaluator } from '../../../API/userAPI';
 
-type currentdata ={
-    userId: string | null,
-    committe: string | null
-    evaluatorId: string | null
+type row = { 
+  userId: string | undefined
+  committe: string | undefined
+  evaluatorId: string | undefined
 }
 
 type User = {
@@ -19,13 +19,24 @@ type User = {
         userid: string;
     };
 
+type committe = {
+  committeid: string
+  committename: string
+  creationdate: string
+  description: string
+  events: string
+  location: string
+  relatedinstitution: string
+  topic: string
+}
+
 type props ={
-    currentData: currentdata,
+    currentData: row | undefined,
     setOpen: (data: boolean)=>void
     open: boolean
     usersData: Array<User>
-    commities: Array<any>
-    setRow: (data: Array<any>)=>void
+    commities: Array<committe>
+    setRow: (data: row |undefined)=>void
 }
 
 
@@ -40,6 +51,13 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
         committeId: currentData?.committe || ""
     }
 
+      const methods = useForm({
+        defaultValues,
+        resolver: yupResolver(schema)
+    })
+
+    const { handleSubmit, reset } = methods
+
     useEffect(() => {
   if (currentData) {
     reset({
@@ -47,24 +65,18 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
       committeId: currentData.committe || ""
     });
   }
-}, [currentData]);
-
-    const methods = useForm({
-        defaultValues,
-        resolver: yupResolver(schema)
-    })
-
-    const { handleSubmit, reset } = methods
+}, [currentData, reset]);
 
     const onSubmit = handleSubmit(async (data)=>{
+    
         try{
-            await createEvaluator({evaluatorId: currentData.evaluatorId , ...data});
+            await createEvaluator({evaluatorId: currentData?.evaluatorId , ...data});
             reset();
             setOpen(false)
-            setRow([])
+            setRow(undefined)
         }catch(err){
             console.log("error: ", err)
-        }
+        } 
     })
     
     const convertUsersToAutocomplete = (userArray: Array<User>)=>{
@@ -72,17 +84,17 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
             const newObjectArray = userArray.map((user: User)=> ({label: `${user.name} ${user.lastname}`, id: user.userid}))
         return newObjectArray;
         }catch(err){
-            console.log('err')
+            console.log('err', err)
         }
         
     }
 
-     const convertCommitiesToAutocomplete = (committiesArray: Array<any>)=>{
+     const convertCommitiesToAutocomplete = (committiesArray: Array<committe>)=>{
         try{
-            const newObjectArray = committiesArray.map((committie: any)=> ({label: committie.committename, id: committie.committeid}))
+            const newObjectArray = committiesArray.map((committie: committe)=> ({label: committie.committename, id: committie.committeid}))
         return newObjectArray;
         }catch(err){
-            console.log('err')
+            console.log('err', err)
         }
         
     }
@@ -111,7 +123,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>
-                    <Button variant="outlined" color="error" onClick={()=>{setOpen(false); setRow([])}} sx={{borderRadius: 3, width: "40%"}} >Cerrar</Button>
+                    <Button variant="outlined" color="error" onClick={()=>{setOpen(false); setRow(undefined)}} sx={{borderRadius: 3, width: "40%"}} >Cerrar</Button>
                     <Button variant="contained" type='submit' onClick={()=>{}} sx={{borderRadius: 3}} fullWidth>Agregar</Button>
                 </DialogActions>
                 </FormManaged>
