@@ -50,3 +50,27 @@ export const deleteCommitte = async (id: string)=>{
     const response = await axiosIntercep.delete(`/committies/${id}`);
     return response;
 }
+
+type row = { 
+  name: string | undefined
+  lastName: string | undefined
+  committeId: string | undefined
+  studentId: string | undefined
+  delegation : string | undefined
+  scoreId: string | undefined
+}
+
+export const createStudent = async(payload: row)=>{
+    const response = await axiosIntercep.post(`/createStudents`, payload)
+    return response
+}
+
+export const getStudents = async () =>{
+    const response = await axiosIntercep.get("/students");
+    return response
+}
+
+export const deleteStudent = async (id: string)=>{
+    const response = await axiosIntercep.delete(`/student/${id}`);
+    return response
+}
