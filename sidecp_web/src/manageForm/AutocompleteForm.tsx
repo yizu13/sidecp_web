@@ -40,7 +40,6 @@ export default function AutocompleteController({
           variant={variant}
           error={!!error}
           helperText={error?.message}
-          sx={{ width: "15vw" }}
         />
       )}
     />

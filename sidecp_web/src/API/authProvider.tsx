@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useMemo, useEffect } from "react"
+import { type ReactNode, useState, useMemo, useEffect, useCallback } from "react"
 import { Auth } from "./Contextauth"
 import axiosLog from './AxiosLogServer'
 import { useNavigate } from "react-router-dom"
@@ -8,16 +8,25 @@ type props = {
     children : ReactNode
 }
 
+type user ={
+    email: string
+    lastname: string
+    name: string
+    role: string
+}
+
 export interface userProps {
     login: (data: object) => Promise<void>,
-    role: string,
+    role: string | null,
+    user: user | undefined | null
 }
 
 
 export default function Authsystem({ children }: props){
     const [accessToken, setAccesToken] = useState('token');
     const [refreshToken, setrefreshToken] = useState('refresh');
-    const [role, setRole] = useState('role')
+    const [ user, setUser ] = useState<user | null>();
+    const [role, setRole] = useState<string | null>('role')
     const navigation = useNavigate()
 
     useEffect(()=>{
@@ -85,18 +94,27 @@ export default function Authsystem({ children }: props){
         })
     }, [accessToken, refreshToken, navigation])
 
-       const login = async (credentials: object) => {
-            const response = await axiosLog.post("/login", credentials);
-            setAccesToken(response.data.accessToken);
-            setrefreshToken(response.data.refreshToken);
-            setRole(response.data.role);
-            sessionStorage.setItem("token", response.data.refreshToken)
-        }
+       const login = useCallback(async (credentials: object) => {
+    try {
+        const response = await axiosLog.post("/login", credentials);
+        setAccesToken(response.data.accessToken);
+        setrefreshToken(response.data.refreshToken);
+        setRole(response.data.role);
+        setUser(response.data.user);
+        sessionStorage.setItem("user", response.data.user)
+        sessionStorage.setItem("token", response.data.refreshToken)
+    } catch (err) {
+        setRole(null);
+        setUser(null);
+        throw new Error(`problem when login, ${err}`)
+    }
+}, [setAccesToken, setrefreshToken, setRole, setUser]);
 
-        const memo = useMemo(() => ({
-            login: login,
-            role: role
-        }),[login])
+    const memo = useMemo(() => ({
+        login,
+        role,
+        user
+    }), [login, user, role]);
 
 
     return (

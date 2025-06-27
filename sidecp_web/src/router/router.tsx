@@ -5,6 +5,8 @@ import { useNavigate } from "react-router";
 import { Typography, Stack } from "@mui/material";
 import Logout from "../logout/logout";
 import { useSettingContext } from "../settingsComponent/contextSettings";
+import ProtectedRoute from "./protectedRoutes";
+
 
 const InicioDash = lazy(()=> import('../Dashboard/Inicio/dashboard_inicio'))
 const CommitteDashboardCreate = lazy(()=> import('../Dashboard/Comisiones/dashboard_comisiones_create'))
@@ -48,6 +50,7 @@ export default function Router(){
             path: "/dashboard",
             element: (
                 <Suspense fallback={<Charging/>}>
+                    <ProtectedRoute>
                      <Stack sx={{
                         width: "100%", 
                         height: "100%", 
@@ -58,6 +61,7 @@ export default function Router(){
                         }}>
                     <Outlet/>
                     </Stack>
+                    </ProtectedRoute>
                     </Suspense>
             ),
             children:[
