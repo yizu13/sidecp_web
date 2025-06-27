@@ -6,6 +6,7 @@ import { Typography, Stack } from "@mui/material";
 import Logout from "../logout/logout";
 import { useSettingContext } from "../settingsComponent/contextSettings";
 import ProtectedRoute from "./protectedRoutes";
+import { AdminRoute } from "./RoutesBlocked";
 
 
 const InicioDash = lazy(()=> import('../Dashboard/Inicio/dashboard_inicio'))
@@ -70,6 +71,7 @@ export default function Router(){
                     element: <InicioDash/>
                 }, {
                     path: "comisiones",
+                    element: (<AdminRoute><Outlet/></AdminRoute>),
                     children: [
                         {
                             path: "crear",
@@ -83,6 +85,7 @@ export default function Router(){
                 },
                 {
                     path: "usuarios",
+                    element: (<AdminRoute><Outlet/></AdminRoute>),
                     children: [
                         {
                             path: "evaluadores",

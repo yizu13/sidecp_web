@@ -51,8 +51,8 @@ export function TextPage({ pageObject }: Props){
         >Inicio</Typography>
 
         
-        <OptionsNavigation title="Comisiones" subPages={committePage} pageObject={pageObject} mainReference={1}/>
-        <OptionsNavigation title="Usuarios" subPages={usersPage} pageObject={pageObject} mainReference={2}/>
+        <OptionsNavigation title="Comisiones" subPages={committePage} pageObject={pageObject} mainReference={1} role="admin"/>
+        <OptionsNavigation title="Usuarios" subPages={usersPage} pageObject={pageObject} mainReference={2} role="admin"/>
         
         </>
     )

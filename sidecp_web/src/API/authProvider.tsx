@@ -99,8 +99,9 @@ export default function Authsystem({ children }: props){
         const response = await axiosLog.post("/login", credentials);
         setAccesToken(response.data.accessToken);
         setrefreshToken(response.data.refreshToken);
-        setRole(response.data.role);
+        setRole(response.data.user.role);
         setUser(response.data.user);
+        sessionStorage.setItem("role", response.data.user.role);
         sessionStorage.setItem("user", response.data.user)
         sessionStorage.setItem("token", response.data.refreshToken)
     } catch (err) {

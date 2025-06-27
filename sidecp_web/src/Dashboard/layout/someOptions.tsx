@@ -20,18 +20,20 @@ type props = {
     subPages: Array<subPage>,
     pageObject: PageObject,
     mainReference: number
+    role: string
 }
 
-export default function OptionsNavigation({subPages, pageObject, title, mainReference}: props){
+export default function OptionsNavigation({subPages, pageObject, title, mainReference, role}: props){
 
     const [open, setOpen] = useState(false);
     const { setCommitteForEdit } = useEditCommitte()
     const navigation = useNavigate();
     const inPage = pageObject.page === mainReference
+    const userRole = sessionStorage.getItem("role")
 
     return(
         <>   
-        <Typography color='white'  sx={{
+        {role === userRole && <><Typography color='white'  sx={{
                     position: 'sticky', 
                     cursor: inPage ? 'default' : 'pointer',
                     pl: 4,
@@ -106,7 +108,7 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
                      </motion.div>
                      )
                    }
-                   </AnimatePresence>
+                   </AnimatePresence> </>}
         </>
     )
 }

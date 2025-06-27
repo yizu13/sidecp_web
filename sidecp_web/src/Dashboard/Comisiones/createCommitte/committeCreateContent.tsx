@@ -33,7 +33,6 @@ export default function CreateCommitte(){
     const [ boolOpenCreate, setOpenCreate ] = useState(false);
 
     useEffect(()=>{
-        console.log(committeForEdit)
         const callEvents = async ()=>{
             if(committeForEdit?.events){
             const response = await getEventsById(committeForEdit?.events ?? "")
