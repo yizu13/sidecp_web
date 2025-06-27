@@ -5,8 +5,11 @@ import FormManaged from "../../../manageForm/FormProvider";
 import FieldTForm from "../../../manageForm/FieldTxtForm";
 import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useEffect, useState} from 'react';
-import { useForm } from 'react-hook-form';
+import { createCommitte } from '../../../API/userAPI';
+import { useForm, type Resolver } from 'react-hook-form';
 import DialogCreate from './dialogComponent';
+import { getEventsById } from '../../../API/userAPI';
+import { useEditCommitte } from '../../../router/committeEditContext/committeContextEdit';
 
 type currentDataObject = {
      committeName: string ,
@@ -16,15 +19,29 @@ type currentDataObject = {
      events: { title: string; eventDescription?: string }[],
      description: string ,
 }
-type props = {
-    currentData: currentDataObject | null
+
+type events = {
+    title: string
+    eventDescription: string | undefined
 }
 
 
-export default function CreateCommitte({currentData} : props ){
+export default function CreateCommitte(){
     const { theme } = useSettingContext()
-    const [eventList, setList] = useState([...(currentData?.events || [])])
-    const [boolOpenCreate, setOpenCreate] = useState(false);
+    const { committeForEdit, setCommitteForEdit } = useEditCommitte()
+    const [ eventList, setList ] = useState<events[]>([])
+    const [ boolOpenCreate, setOpenCreate ] = useState(false);
+
+    useEffect(()=>{
+        console.log(committeForEdit)
+        const callEvents = async ()=>{
+            if(committeForEdit?.events){
+            const response = await getEventsById(committeForEdit?.events ?? "")
+            setList([...(response.data || [])])
+        }
+    }
+        callEvents()
+    },[committeForEdit?.events, committeForEdit])
 
     const yupSchema = yup.object().shape({
         committeName: yup.string().required("Se necesita nombre del comité"),
@@ -41,34 +58,36 @@ export default function CreateCommitte({currentData} : props ){
     })
     
     const defaultvalue = {
-        committeName: '',
-        topic: '',
-        institutionRepresentated:  '',
-        location: '',
+        committeName: committeForEdit?.committeName || '',
+        topic: committeForEdit?.topic || '',
+        institutionRepresentated: committeForEdit?.institutionRepresentated || '',
+        location: committeForEdit?.location || '',
         events: eventList,
-        description:  '',
+        description: committeForEdit?.description || '',
     }
 
     const methods = useForm<currentDataObject>({
         defaultValues: defaultvalue,
-        resolver: yupResolver(yupSchema)
+        resolver: yupResolver(yupSchema) as Resolver<currentDataObject>
     })
 
-    const {handleSubmit, reset, setValue} = methods
+    const {handleSubmit, setValue} = methods
 
     useEffect(()=>{
             setValue("events", eventList)
-    },[eventList]);
+    },[eventList, setValue]);
 
-    const clearAll = ()=>{
-          setList([]);
-          reset();
-    }
-
-    const onSubmit = handleSubmit((data) => {
+    const onSubmit = handleSubmit(async (data) => {
     try {
-        console.log("Datos enviados:", JSON.parse(JSON.stringify(data)));
-        clearAll(); 
+      const response = await createCommitte({committeId: committeForEdit?.id ,eventsId: committeForEdit?.events,...data})
+      console.log(response)
+      setCommitteForEdit(null)
+       setList([]);
+        setValue("committeName", "");
+        setValue("topic", "");
+        setValue("institutionRepresentated", "");
+        setValue("location", "");
+        setValue("description", ""); 
     } catch (err) {
         console.log("error:", err);
     }
@@ -146,7 +165,7 @@ export default function CreateCommitte({currentData} : props ){
                             Eventos
                         </Typography>
                         <List sx={{ width: '150%', minWidth: 450, maxWidth: 450, bgcolor: 'transparent' }} >
-                        {!currentData?.events.length && (
+                        {
                             eventList.map((item,i)=>(
                                <ListItem alignItems="flex-start" key={i}>
                                 <ListItemAvatar>
@@ -176,7 +195,7 @@ export default function CreateCommitte({currentData} : props ){
                                           <Divider variant="inset" /> 
                             </ListItem>
                             ))  
-                        )}
+                        }
                         </List>
                         </Box>
                         <Button variant="contained" color="success" onClick={()=>{setOpenCreate(true)}} sx={{borderRadius: 3, width: 200, alignSelf: "flex-end"}}>

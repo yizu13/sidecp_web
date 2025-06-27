@@ -21,7 +21,7 @@ export default function MainLayout({ setPage, children }: props){
     const pageSelected = useRef(setPage) 
     const [changeSoft, setSoft] = useState(false)
     const navigation = useNavigate()
-    const { theme, themefunc } = useSettingContext()
+    const { theme } = useSettingContext()
     
         return (
             <Stack

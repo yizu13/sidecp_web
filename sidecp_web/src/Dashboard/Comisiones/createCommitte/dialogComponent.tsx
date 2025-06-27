@@ -6,13 +6,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FieldTForm from '../../../manageForm/FieldTxtForm';
 
 type EventItem = {
-    title: string;
-    eventDescription: string;
+    title: string 
+    eventDescription: string | undefined
 }
 
 type props ={
     setOpenCreate: (data: boolean)=>void,
-    setList: (data: EventItem[])=>void,
+    setList: (data: (prev: EventItem[]) => EventItem[])=>void,
     boolOpenCreate: boolean
 }
 
@@ -37,7 +37,7 @@ export default function DialogCreate({setOpenCreate, boolOpenCreate, setList}: p
 
     const onSubmit = handleSubmit((data)=>{
         try{
-            setList((prev: Array<object>)=> [...prev, { title: data.title, eventDescription: data.eventDescription }]);
+            setList((prev: EventItem[]) => [...prev, { title: data.title, eventDescription: data.eventDescription }] );
             reset()
             setOpenCreate(false)
         }catch(err){

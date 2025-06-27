@@ -3,6 +3,7 @@ import { Icon } from "@iconify/react/dist/iconify.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEditCommitte } from "../../router/committeEditContext/committeContextEdit";
 
 type PageObject = {
     page: number,
@@ -18,18 +19,21 @@ type props = {
     title: string,
     subPages: Array<subPage>,
     pageObject: PageObject,
+    mainReference: number
 }
 
-export default function OptionsNavigation({subPages, pageObject, title}: props){
+export default function OptionsNavigation({subPages, pageObject, title, mainReference}: props){
 
     const [open, setOpen] = useState(false);
+    const { setCommitteForEdit } = useEditCommitte()
     const navigation = useNavigate();
+    const inPage = pageObject.page === mainReference
 
     return(
         <>   
         <Typography color='white'  sx={{
                     position: 'sticky', 
-                    cursor: pageObject.page === 1 ? 'default' : 'pointer',
+                    cursor: inPage ? 'default' : 'pointer',
                     pl: 4,
                     pr: 2,
                     pt: 0.5,
@@ -38,7 +42,8 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                     borderRadius: 10,
                     textWrap: "nowrap",
                     transition: 'all 0.3s ease',
-                    backgroundColor: open || pageObject.subPage === 0 || pageObject.subPage ? 'rgb(45, 119, 255)' : '',
+                    backgroundColor: open || (pageObject.subPage === 0 && inPage) || 
+                    (pageObject.subPage && inPage) ? 'rgb(45, 119, 255)' : '',
                     '&:hover':{
                         backgroundColor: 'rgb(45, 119, 255)',
         
@@ -72,14 +77,14 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                     <Box sx={{mt: i !== 0? 0.5: 0}} key={i}>
                     <Typography color='white' typography='h5' key={i} sx={{
                     position: 'sticky', 
-                    cursor: pageObject.subPage === i ? 'default' : 'pointer',
+                    cursor: (pageObject.subPage === i && inPage) ? 'default' : 'pointer',
                     pl: 4,
                     pr: 4,
                     pt: 0.5,
                     pb: 0.5,
                     borderRadius: 10,
                     transition: 'all 0.3s ease',
-                    backgroundColor: pageObject.subPage === i ? 'rgb(45, 119, 255)' : '',
+                    backgroundColor: (pageObject.subPage === i && inPage) ? 'rgb(45, 119, 255)' : '',
                     '&:hover':{
                         backgroundColor: 'rgb(45, 119, 255)',
         
@@ -91,7 +96,10 @@ export default function OptionsNavigation({subPages, pageObject, title}: props){
                       },
                     
                 }}
-                onClick={()=>{navigation(item.navigation)}}
+                onClick={()=>{
+                    navigation(item.navigation); 
+                    if(item.label === "Lista"){setCommitteForEdit(null)}
+                }}
                 >{item.label}</Typography>
                     </Box>
                 ))}

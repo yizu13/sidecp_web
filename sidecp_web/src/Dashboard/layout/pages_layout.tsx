@@ -14,7 +14,14 @@ type Props = {
 
 export function TextPage({ pageObject }: Props){
     const navigation = useNavigate()
-    const committePage = [{label: "Crear", navigation: "/dashboard/comisiones/crear"}, {label: "Cerrar", navigation: "/dashboard/comisiones/cerrar"}];
+    const committePage = [
+        {label: "Crear", navigation: "/dashboard/comisiones/crear"}, 
+        {label: "Lista", navigation: "/dashboard/comisiones/cerrar"}
+    ];
+     const usersPage = [
+        {label: "Delegaciones", navigation: "/Dashboard/usuarios/delegaciones"}, 
+        {label:  "Evaluadores", navigation: "/Dashboard/usuarios/evaluadores"}
+    ];
 
     return(
         <>
@@ -44,7 +51,8 @@ export function TextPage({ pageObject }: Props){
         >Inicio</Typography>
 
         
-        <OptionsNavigation title="Comisiones" subPages={committePage} pageObject={pageObject}/>
+        <OptionsNavigation title="Comisiones" subPages={committePage} pageObject={pageObject} mainReference={1}/>
+        <OptionsNavigation title="Usuarios" subPages={usersPage} pageObject={pageObject} mainReference={2}/>
         
         </>
     )
