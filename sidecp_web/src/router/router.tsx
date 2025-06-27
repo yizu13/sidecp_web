@@ -6,7 +6,7 @@ import { Typography, Stack } from "@mui/material";
 import Logout from "../logout/logout";
 import { useSettingContext } from "../settingsComponent/contextSettings";
 import ProtectedRoute from "./protectedRoutes";
-import { AdminRoute } from "./RoutesBlocked";
+import { AdminRoute, EvaluatorRoute } from "./RoutesBlocked";
 
 
 const InicioDash = lazy(()=> import('../Dashboard/Inicio/dashboard_inicio'))
@@ -14,6 +14,7 @@ const CommitteDashboardCreate = lazy(()=> import('../Dashboard/Comisiones/dashbo
 const CommitteDashboardClose = lazy(()=> import('../Dashboard/Comisiones/dashboard_comisiones_close'))
 const EvaluatorsLayout = lazy(()=> import("../Dashboard/Usuarios/evaluatorsLayout"))
 const DelegationsLayout = lazy(()=> import("../Dashboard/Usuarios/delegationsLayout"))
+const DelegationEvaluatorLayout = lazy(()=> import("../Dashboard/Delegation/delegationEvaluator"))
 
 export default function Router(){
     const navigate = useNavigate()
@@ -97,6 +98,9 @@ export default function Router(){
                             element: <DelegationsLayout/>
                         }
                     ]
+                },{
+                    path: "delegados",
+                    element:(<EvaluatorRoute><DelegationEvaluatorLayout/></EvaluatorRoute>),
                 }
             ]
         }

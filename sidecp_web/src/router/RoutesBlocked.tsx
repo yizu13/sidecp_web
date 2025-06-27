@@ -15,3 +15,16 @@ export function AdminRoute({ children }: props) {
 
   return children;
 }
+
+export function EvaluatorRoute({ children }: props) {
+  const role = sessionStorage.getItem("role")
+  console.log(role)
+
+  if (role === "admin") {
+    return children;
+  } else if(role === "evaluator"){
+    return children;
+  } else{
+      return <Navigate to="/dashboard/inicio" replace />;
+  }
+}

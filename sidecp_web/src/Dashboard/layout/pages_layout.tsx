@@ -14,6 +14,7 @@ type Props = {
 
 export function TextPage({ pageObject }: Props){
     const navigation = useNavigate()
+    const role = sessionStorage.getItem("role")
     const committePage = [
         {label: "Crear", navigation: "/dashboard/comisiones/crear"}, 
         {label: "Lista", navigation: "/dashboard/comisiones/cerrar"}
@@ -22,6 +23,7 @@ export function TextPage({ pageObject }: Props){
         {label: "Delegaciones", navigation: "/Dashboard/usuarios/delegaciones"}, 
         {label:  "Evaluadores", navigation: "/Dashboard/usuarios/evaluadores"}
     ];
+     
 
     return(
         <>
@@ -49,6 +51,31 @@ export function TextPage({ pageObject }: Props){
         }}
         onClick={()=>{navigation('/dashboard/inicio')}}
         >Inicio</Typography>
+
+        {("evaluator" === role || "admin" === role) && 
+        <Typography color='white' typography='h5' sx={{
+            position: 'sticky', 
+            cursor: pageObject.page === 3 ? 'default' : 'pointer',
+            pl: 6,
+            pr: 6,
+            pt: 0.5,
+            pb: 0.5,
+            userSelect: "none",
+            borderRadius: 10,
+            transition: 'all 0.3s ease',
+            backgroundColor: pageObject.page === 3 ? 'rgb(45, 119, 255)' : '',
+            '&:hover':{
+                backgroundColor: 'rgb(45, 119, 255)',
+
+            },
+            typography: {
+                xs: 'subtitle2', 
+                sm: 'subtitle1', 
+                md: 'h6', 
+              }
+        }}
+        onClick={()=>{navigation('/dashboard/delegados')}}
+        >Delegados</Typography>}
 
         
         <OptionsNavigation title="Comisiones" subPages={committePage} pageObject={pageObject} mainReference={1} role="admin"/>
