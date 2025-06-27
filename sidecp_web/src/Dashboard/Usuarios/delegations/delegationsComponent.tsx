@@ -4,6 +4,7 @@ import { useSettingContext } from '../../../settingsComponent/contextSettings';
 import { useEffect, useState } from 'react';
 import ModalDelegation from './modalAddDelegation';
 import { getCommitties } from '../../../API/userAPI';
+import { getStudents, deleteStudent } from '../../../API/userAPI';
 import { Icon } from '@iconify/react';
 
 type data = {
@@ -11,6 +12,7 @@ type data = {
   evaluatorId: number
   fullName: string
   id: string
+  delegation: string
 }
 
 type committe = {
@@ -29,6 +31,8 @@ type row = {
   lastName: string | undefined
   committe: string | undefined
   studentId: string | undefined
+  delegation : string | undefined
+  scoreId: string | undefined
 }
 
 type student = {
@@ -44,19 +48,20 @@ type student = {
 export default function DelegationsComp_(){
     
     // three columns evaluatorId, fullName(name, fullName)(get this from users table), committeName(get this from committe table)
-
 const [open, setOpen] = useState(false);
-const [selectRow, setRow] = useState<row>();
+const [selectRow, setRow] = useState<row | null>();
 const [commities, setCommities] = useState<committe[]>([])
-const [ students, setStudents ] = useState([])
+const [ students, setStudents ] = useState<student[]>([])
+
+console.log(selectRow)
 
  const handleEdit = (data: data)=>{
     const names = data.fullName.split(" ")
-    setRow({ name: names[0], lastName: names[1], committe: commities.find((i: committe)=> i.committename === data.committeName)?.committeid, studentId: data.id})
+    setRow({ name: names[0], lastName: names[1], committe: commities.find((i: committe)=> i.committename === data.committeName)?.committeid, studentId: data.id, delegation: data.delegation, scoreId: students.find((i: student)=>i.studentid === data.id)?.scoreid})
     setOpen(true)
   }
   const handleDelete = async (data: data) =>{
-   // await deleteEvaluator(data.id)
+   await deleteStudent(data.id)
     setStudents(prev=> prev.filter((item: student)=> item.studentid !== data.id))
   }
 
@@ -118,8 +123,8 @@ useEffect(()=>{
       }
       const callStudents = async ()=>{
         try{
-         // const response = await getEvaluators(); 
-         // setStudents(response.data.evaluators); // TODO
+         const response = await getStudents();
+          setStudents(response.data.students); 
         }catch(err){
           console.log(err);
         }

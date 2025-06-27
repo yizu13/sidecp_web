@@ -59,13 +59,18 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
     const { handleSubmit, reset } = methods
 
     useEffect(() => {
-  if (currentData) {
-    reset({
-      userId: currentData.userId || "",
-      committeId: currentData.committe || ""
-    });
-  }
-}, [currentData, reset]);
+    if (open && currentData) {
+        reset({
+            userId: currentData.userId || "",
+            committeId: currentData.committe || ""
+        });
+    } else if (open && !currentData) {
+        reset({
+            userId: "",
+            committeId: ""
+        });
+    }
+}, [currentData, reset, open]);
 
     const onSubmit = handleSubmit(async (data)=>{
     
