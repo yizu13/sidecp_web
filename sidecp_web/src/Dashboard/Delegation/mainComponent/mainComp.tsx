@@ -120,7 +120,7 @@ export default function DelegationEval(){
         }} columnGap={13}>
     {studentsFiltered.map((item: student, i: number) => 
     <Stack key={i} sx={{p: 2}}>
-    <Card sx={{ maxWidth: 350, height: "auto", borderRadius: 4 }}>
+    <Card sx={{ width: 350, height: "auto", borderRadius: 4 }}>
       <CardMedia
         component="img"
         alt={`Bandera de ${item.delegation}`}

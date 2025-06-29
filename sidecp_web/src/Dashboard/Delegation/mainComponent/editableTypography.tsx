@@ -28,7 +28,7 @@ export default function EditableTypography({ variant = 'body2' }) {
     <Typography
       typography={variant}
       onClick={() => setEditing(true)}
-      sx={{ cursor: 'text', pt: 2 }}>
+      sx={{ cursor: 'text', pt: 2, textWrap: "wrap" }}>
       {value}
     </Typography>)}
     {(!value && !editing) && <Typography sx={{cursor: 'text'}} onClick={() => setEditing(true)}>
