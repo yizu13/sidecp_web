@@ -30,6 +30,11 @@ export const getEvaluators = async ()=>{
     return response
 }
 
+export const getEvaluator = async (id: string)=>{
+    const response = await axiosIntercep.get(`/evaluator/${id}`);
+    return response
+}
+
 type evaluatorInfo = {
     committeId: string
     userId: string

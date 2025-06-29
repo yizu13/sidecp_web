@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 import { createStudent } from "../../../API/userAPI"
 import AutocompleteForm from "../../../manageForm/AutocompleteForm"
 import FieldTForm from "../../../manageForm/FieldTxtForm"
+import { countriesWithLabelId } from "../../../../public/flags"
 
 type row = { 
   name: string | undefined
@@ -126,7 +127,13 @@ export default function ModalDelegation({currentData, setOpen, open, commities, 
                         options={convertCommitiesToAutocomplete(commities)}
                         getOptionLabel={(option) => option.label}
                         />
-                        <FieldTForm name="delegation" label="Delegación" variant="outlined"/>
+                        <AutocompleteForm
+                        name="delegation"
+                        label="Delegación"
+                        variant="outlined"
+                        options={countriesWithLabelId}
+                        getOptionLabel={(option) => option.label}
+                        />
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{p: 2}}>

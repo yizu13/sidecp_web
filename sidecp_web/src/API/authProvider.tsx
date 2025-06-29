@@ -102,7 +102,8 @@ export default function Authsystem({ children }: props){
         setRole(response.data.user.role);
         setUser(response.data.user);
         sessionStorage.setItem("role", response.data.user.role);
-        sessionStorage.setItem("user", response.data.user)
+        sessionStorage.setItem("user", JSON.stringify(response.data.user))
+        console.log(JSON.stringify(response.data.user))
         sessionStorage.setItem("token", response.data.refreshToken)
     } catch (err) {
         setRole(null);
@@ -110,6 +111,11 @@ export default function Authsystem({ children }: props){
         throw new Error(`problem when login, ${err}`)
     }
 }, [setAccesToken, setrefreshToken, setRole, setUser]);
+    useEffect(()=>{
+        if(role === undefined || user === undefined){
+            setRole(sessionStorage.getItem("role"));
+        }
+    },[login, user, role])
 
     const memo = useMemo(() => ({
         login,

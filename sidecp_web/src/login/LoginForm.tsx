@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Box, Stack, Typography, Link } from '@mui/material';
+import { AxiosError } from 'axios';
+import { Box, Stack, Typography, Link, Chip, Fade } from '@mui/material';
 import Button from '@mui/material/Button';
 import * as yup from "yup"
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -9,6 +10,8 @@ import FormManaged from '../manageForm/FormProvider'
 import { Icon } from '@iconify/react';
 import  useAuthContext  from '../API/Contextauth'
 import { useNavigate } from 'react-router-dom';
+import { red } from "@mui/material/colors";
+import { alpha } from "@mui/material/styles";
 
 
 
@@ -21,6 +24,7 @@ export default function Loginform(){
     const { login } = useAuthContext()
     const navigate = useNavigate()
     const [userNotFound, setNotFound] = useState(false);
+    const [serverError, setError] = useState(false);
 
     const yupSchema= yup.object().shape({
         Email: yup.string().email("Debe ser un email válido").required("Se requiere correo"),
@@ -47,8 +51,15 @@ export default function Loginform(){
 
         navigate("/dashboard/inicio")
         }catch(err){
+            const error = err as AxiosError
             console.error('An error occur', err);
-            setNotFound(!!err)
+            if(error.message.includes("500")){
+                setError(true);
+                setNotFound(false)
+            }else{
+                 setNotFound(!!err);
+                 setError(false)
+            }
         }
     }
     
@@ -65,10 +76,29 @@ export default function Loginform(){
         <>
         <FormManaged onSubmit={onSubmit} methods={methods}>
         <Typography variant='h4' sx={{ml: 8, mb: -3, color: '#ffffff'}}>Bienvenido de nuevo</Typography>
-            <Stack spacing={5} sx={{backgroundColor: "#ffffff", width: "30vw", 
+            <Stack rowGap={6} sx={{backgroundColor: "#ffffff", width: "30vw", 
                 height: 'auto', borderRadius: 5, ml: 15, mt: 5,  p: 7, boxShadow: '7px 10px 15px rgba(0, 0, 0, 0.5)'}}>
+                    <Stack m={-2} display="flex" justifyContent="center" alignContent="center">
+                        <Box >
+             
+                    {userNotFound && (
+                    <Fade in timeout={500}>
+                    <Chip
+                    label="Correo o contraseña son incorrectos"
+                    sx={{ typography: "body1", color: red[50], backgroundColor: alpha(red[900], 0.9), fontWeight: "bold", borderRadius: 2, padding: "0 8px", height: 40, ".MuiChip-icon": { marginLeft: 4, marginRight: 0, } }}
+                    />
+                    </Fade>)}
+
+                    {serverError && (
+                    <Fade in timeout={500}>
+                    <Chip
+                    label="Error inesperado"
+                    sx={{ typography: "body1", color: red[50], backgroundColor: alpha(red[900], 0.9), fontWeight: "bold", borderRadius: 2, padding: "0 8px", height: 40, ".MuiChip-icon": { marginLeft: 4, marginRight: 0, } }}
+                    />
+                    </Fade>)}
+                    </Box>
+                    </Stack>
                     <Box>
-                {userNotFound && <Typography color='error' typography='subtitle2' sx={{mb: 1.5, mt: -3.5}}>Correo o contraseña son incorrectos</Typography>}
                 <FieldTForm name="Email" label="Correo" variant="outlined" />
                     </Box>
                 <FieldTForm name="Password" label="Contraseña" variant="outlined" />
@@ -82,7 +112,7 @@ export default function Loginform(){
                     >
                         Entrar
                     </Button>
-                    <Link variant='body2' underline="hover" href="#" color='inherit' sx={{mt: 1, ml: 2, 
+                    <Link variant='body2' underline="hover" href="#" color='inherit' sx={{mt: 1, ml: 2, mb: -2,
                         display: "flex", justifySelf: "start", alignSelf: "start"}} >¿Olvidaste tu contraseña?</Link>
                 </Box>
             </Stack>
