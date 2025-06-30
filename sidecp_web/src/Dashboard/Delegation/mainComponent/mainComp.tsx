@@ -12,6 +12,7 @@ import { countriesWithFlags } from "../../../../public/flags"
 import SimpleSelect from './selectComponentCommitte';
 import { getStudents } from '../../../API/userAPI';
 import { getCommitties, getEvaluator } from '../../../API/userAPI';
+import ModalCalification from './ModalCalification';
 
 
 type flags = {
@@ -48,6 +49,8 @@ export default function DelegationEval(){
     const [ committeDefined, setCommitteDef ] = useState<string | undefined>(undefined);
     const [commities, setCommities] = useState<Committe[]>([]);
     const [committeId, setCommitteId] = useState('');
+    const [ open, setOpen ] = useState(false);
+    const [ currentStudent, setCurrent ] = useState<student | null>();
 
       const handleChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setSelected(event.target.value);
@@ -137,11 +140,12 @@ export default function DelegationEval(){
         <EditableTypography/>
       </CardContent>
       <CardActions sx={{padding: 2}}>
-        <Button variant='contained' color='primary' fullWidth>Calificar</Button>
+        <Button variant='contained' color='primary' onClick={()=> {setOpen(true); setCurrent(item)}} fullWidth>Calificar</Button>
       </CardActions>
     </Card>
     </Stack>)}
     </Stack>
+    <ModalCalification open={open} setOpen={setOpen} student={currentStudent} setStudent_={setCurrent}/>
     </>
   );
 }

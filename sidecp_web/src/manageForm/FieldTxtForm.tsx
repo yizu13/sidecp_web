@@ -11,76 +11,91 @@ type props = {
     multiline?: boolean
     minRows?: number
     maxRows?: number
+    type?: string;
+    inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+    InputProps?: Partial<React.ComponentProps<typeof TextField>>["InputProps"]; // ✅ ← aquí está
 }
 
-export default function FieldTForm({ name, label, variant , ...props}: props){
+export default function FieldTForm({ name, label, variant, type, inputProps = {}, ...props }: props) {
     const { control } = useFormContext();
     const [show, setShow] = useState(false);
 
-    const placeHolderFunc = useCallback((param: string)=>{
-        if(param == 'email'){
-            return "M20-0080@ipl.edu.do"
-        } else if(param == 'password'){
-            return "password@123"
-        }else{
-            return undefined
-        }
-    }, [])
+    const placeHolderFunc = useCallback((param: string) => {
+        if (param === 'email') return "M20-0080@ipl.edu.do";
+        if (param === 'password') return "password@123";
+        return undefined;
+    }, []);
 
-    return(
-        <Controller 
-        name={name}
-        control={control}
-        render={({ field, fieldState: {error} }) => (
-            <TextField 
-            {...field}
-            id={name}
-            label={label} 
-            variant={variant}
-            error={!!error}
-            helperText={error?.message}
-            type={name.toLowerCase() === 'password' && !show ? "password": undefined}
-            fullWidth
-            placeholder={placeHolderFunc(name.toLowerCase())}
-             {...props}
-            {...(name.toLowerCase() === 'password' && {
-                InputProps: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Icon
-                        icon={
-                          show
-                            ? 'ion:eye'
-                            : 'ion:eye-off'
-                        }
+    // Construye inputProps dinámicamente
+    let dynamicInputProps = { ...inputProps };
+
+    if (type === 'number') {
+        dynamicInputProps = {
+            ...dynamicInputProps,
+            max: 100,
+            min: 0,
+            onInput: (e: React.ChangeEvent<HTMLInputElement>) => {
+                let value = parseInt(e.target.value);
+                if (value > 100) e.target.value = "100";
+                if (value < 0) e.target.value = "0";
+            }
+        };
+    }
+
+    const baseInputProps = {
+        inputProps: dynamicInputProps,
+        ...props,
+    };
+
+    // Password input adornments
+    if (name.toLowerCase() === 'password') {
+        baseInputProps["InputProps"] = {
+            endAdornment: (
+                <InputAdornment position="end">
+                    <Icon
+                        icon={show ? 'ion:eye' : 'ion:eye-off'}
                         onClick={() => setShow(!show)}
-                        cursor='pointer'
-                      />
-                    </InputAdornment>
-                  ), startAdornment: (
-                    <InputAdornment position="start">
-                      <Icon
-                        icon='ant-design:key-outlined'
-                        cursor='pointer'
-                      />
-                    </InputAdornment>
-                  )
-                },
-              })}
-              {...(name.toLowerCase() === 'email' && {
-                InputProps: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Icon
-                        icon="line-md:email-alt-twotone"
-                        cursor='default'
-                      />
-                    </InputAdornment>
-                  ),
-                },
-              })}
-           />
-          )}
+                        cursor="pointer"
+                    />
+                </InputAdornment>
+            ),
+            startAdornment: (
+                <InputAdornment position="start">
+                    <Icon icon="ant-design:key-outlined" />
+                </InputAdornment>
+            ),
+        };
+    }
+
+    // Email input adornment
+    if (name.toLowerCase() === 'email') {
+        baseInputProps["InputProps"] = {
+            startAdornment: (
+                <InputAdornment position="start">
+                    <Icon icon="line-md:email-alt-twotone" />
+                </InputAdornment>
+            ),
+        };
+    }
+
+    return (
+        <Controller
+            name={name}
+            control={control}
+            render={({ field, fieldState: { error } }) => (
+                <TextField
+                    {...field}
+                    id={name}
+                    label={label}
+                    variant={variant}
+                    error={!!error}
+                    helperText={error?.message}
+                    type={name.toLowerCase() === 'password' && !show ? "password" : type}
+                    fullWidth
+                    placeholder={placeHolderFunc(name.toLowerCase())}
+                    {...baseInputProps}
+                />
+            )}
         />
-    )
+    );
 }
