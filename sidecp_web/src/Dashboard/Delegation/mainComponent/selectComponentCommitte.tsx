@@ -36,7 +36,7 @@ export default function SimpleSelect({selected, handleChange, commities, user, c
     {user.role !== "admin" && 
     <Chip
     label={committeDefined? committeDefined: "No existe"}
-    sx={{ typography: "body1", color: blue[50], backgroundColor: alpha(blue[900], 0.9), fontWeight: "bold", borderRadius: 2, padding: "0 8px", height: 40, ".MuiChip-icon": { marginLeft: 4, marginRight: 0, } }}
+    sx={{ typography: "body1", color: blue[50], backgroundColor: alpha(blue[900], 0.9), fontWeight: "bold", borderRadius: 2, padding: "0 8px", height: 40,  maxWidth: "90vw", }}
           />
     }
     {user.role === "admin" && 

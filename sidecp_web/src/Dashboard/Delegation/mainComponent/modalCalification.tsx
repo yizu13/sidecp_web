@@ -1,12 +1,13 @@
 import * as yup from "yup";
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import FieldTForm from "../../../manageForm/FieldTxtForm";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import FormManaged from "../../../manageForm/FormProvider";
 import { useEffect, useState, type SetStateAction } from "react";
-import { blue, red, yellow, grey } from "@mui/material/colors";
+import { red, yellow, grey, green } from "@mui/material/colors";
 import { alpha } from '@mui/material';
+import { scoresUpdate, getStudents } from "../../../API/userAPI";
 
 type student = {
   committeid: string
@@ -17,11 +18,23 @@ type student = {
   scoreid: string
 }
 
+type scoresCalifications = {
+    scoreid: string
+    knowledgeskills: string
+    negotiationskills : string
+    communicationskills: string
+    interpersonalskills: string
+    analyticalskills: string
+    modified: boolean
+}
+
 type props = {
     open: boolean,
     student: student | undefined | null,    
     setOpen: (data: boolean)=>void,
     setStudent_: React.Dispatch<SetStateAction<student | null | undefined>>
+    setStudents: React.Dispatch<SetStateAction<student[]>>
+    scores: scoresCalifications[] 
 }
 
 type generalCal = {
@@ -32,11 +45,12 @@ type generalCal = {
     analytical: boolean
 }
 
-export default function ModalCalification({open, setOpen, student, setStudent_}: props){
+export default function ModalCalification({open, setOpen, student, setStudent_, scores, setStudents}: props){
     const [ bad, setBad ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false});
     const [ regular, setRegular ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false});
     const [ good, setGood ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false})
     const [ defaultCal, setDefaultCal ] = useState<generalCal>({knowledge: true, negotiation: true, communication: true, interpersonal: true, analytical: true})
+    const currentScore = scores?.find((ite: scoresCalifications)=> ite.scoreid === student?.scoreid)
 
     const yupSchema = yup.object().shape({
         knowledgeSkills: yup.number().required().max(100, "Máximo 100"),
@@ -46,19 +60,33 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
         analyticalSkills: yup.number().required().max(100, "Máximo 100")
     });
     const defaultValues = {
-        knowledgeSkills: 0,
-        negotiationSkills: 0,
-        communicationSkills: 0,
-        interpersonalSkills: 0,
-        analyticalSkills: 0
+        knowledgeSkills: Number(currentScore?.knowledgeskills) || 0,
+        negotiationSkills: Number(currentScore?.negotiationskills) || 0,
+        communicationSkills: Number(currentScore?.communicationskills) || 0,
+        interpersonalSkills: Number(currentScore?.interpersonalskills) || 0,
+        analyticalSkills: Number(currentScore?.analyticalskills) || 0
     }
 
-    const methods = useForm({
+    const methods = useForm<{
+        knowledgeSkills: number;
+        negotiationSkills: number;
+        communicationSkills: number;
+        interpersonalSkills: number;
+        analyticalSkills: number;
+    }>({
         defaultValues,
         resolver: yupResolver(yupSchema)
     })
 
-    const {handleSubmit, reset, getValues, watch} = methods
+    const {handleSubmit, reset, getValues, watch, setValue} = methods
+
+    useEffect(()=>{
+        setValue("knowledgeSkills", Number(currentScore?.knowledgeskills))
+        setValue("negotiationSkills", Number(currentScore?.negotiationskills))
+        setValue("communicationSkills", Number(currentScore?.communicationskills))
+        setValue("interpersonalSkills", Number(currentScore?.interpersonalskills))
+        setValue("analyticalSkills", Number(currentScore?.analyticalskills))
+    },[currentScore, setValue])
 
     const knowledgeSkills = watch("knowledgeSkills");
     const negotiationSkills = watch("negotiationSkills");
@@ -185,14 +213,17 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
             setGood(prev => ({ ...prev, analytical: true }));
             setBad(prev => ({ ...prev, analytical: false }));
         }
-    },[knowledgeSkills, negotiationSkills, communicationSkills, interpersonalSkills, analyticalSkills])
+    },[knowledgeSkills, negotiationSkills, communicationSkills, interpersonalSkills, analyticalSkills, getValues])
 
     const onSubmit = handleSubmit(async (data)=>{
             try{
-                console.log({scoreId: student?.scoreid , ...data})
+                await scoresUpdate({scoreId: student?.scoreid , ...data})
+                const response = await getStudents()
+                setStudents(response.data.students)
+                setOpen(false);
                 reset();
-                setStudent_(null)
-                setOpen(false)
+                setStudent_(null);
+                    
             }catch(err){
                 console.log("error: ", err)
             } 
@@ -202,14 +233,17 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
     return (
         <Dialog open={open} maxWidth="md" slotProps={{paper: {sx: {borderRadius: 6}}}}>
             <FormManaged methods={methods} onSubmit={onSubmit}>
-            <DialogTitle sx={{ justifyContent: "center", display: "flex" }}>Calificaciones</DialogTitle>
+            <DialogTitle sx={{ alignItems: "center" ,justifyContent: "center", display: "flex", flexDirection: "column"}}>
+                    Calificaciones
+                <Typography color={grey[500]} typography="caption">Si cierra la pestaña sin confirmar no se guardaran los cambios.</Typography>
+                </DialogTitle>
             <DialogContent>
                 <Stack sx={{p: 2}} display="flex" flexDirection="row" columnGap={2}>
                     <Stack display="flex" flexDirection="column" rowGap={2}>
                         <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
                 <Chip
                 label="Habilidades del conocimiento"
-                sx={{ typography: "caption", color: defaultCal.knowledge? grey[50]: bad.knowledge? red[50]: regular.knowledge? yellow[50]: good.knowledge? blue[50]: grey[50], backgroundColor: alpha(defaultCal.knowledge? grey[900]: bad.knowledge? red[900]: regular.knowledge? yellow[900]: good.knowledge? blue[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
+                sx={{ typography: "caption", color: defaultCal.knowledge? grey[50]: bad.knowledge? red[50]: regular.knowledge? yellow[50]: good.knowledge? green[50]: grey[50], backgroundColor: alpha(defaultCal.knowledge? grey[900]: bad.knowledge? red[900]: regular.knowledge? yellow[900]: good.knowledge? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
           />
                 <FieldTForm name="knowledgeSkills" label="" variant='outlined' type="number" 
                 inputProps={{ max: 100 }}
@@ -234,7 +268,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
                 <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
                 <Chip
                 label="Habilidades del negociación"
-                sx={{ typography: "caption", color: defaultCal.negotiation? grey[50]: bad.negotiation? red[50]: regular.negotiation? yellow[50]: good.negotiation? blue[50]: grey[50], backgroundColor: alpha(defaultCal.negotiation? grey[900]: bad.negotiation? red[900]: regular.negotiation? yellow[900]: good.negotiation? blue[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
+                sx={{ typography: "caption", color: defaultCal.negotiation? grey[50]: bad.negotiation? red[50]: regular.negotiation? yellow[50]: good.negotiation? green[50]: grey[50], backgroundColor: alpha(defaultCal.negotiation? grey[900]: bad.negotiation? red[900]: regular.negotiation? yellow[900]: good.negotiation? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
           />
                 <FieldTForm name="negotiationSkills" label="" variant='outlined' type="number" 
                 sx={{
@@ -259,7 +293,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
                     <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
                 <Chip
                 label="Habilidades de comunicación"
-                sx={{ typography: "caption", color: defaultCal.communication? grey[50]: bad.communication? red[50]: regular.communication? yellow[50]: good.communication? blue[50]: grey[50], backgroundColor: alpha(defaultCal.communication? grey[900]: bad.communication? red[900]: regular.communication? yellow[900]: good.communication? blue[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
+                sx={{ typography: "caption", color: defaultCal.communication? grey[50]: bad.communication? red[50]: regular.communication? yellow[50]: good.communication? green[50]: grey[50], backgroundColor: alpha(defaultCal.communication? grey[900]: bad.communication? red[900]: regular.communication? yellow[900]: good.communication? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
           />
                 <FieldTForm name="communicationSkills" label="" variant='outlined' type="number" sx={{
                     '& .MuiOutlinedInput-root': {
@@ -281,7 +315,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
                 <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
                 <Chip
                 label="Habilidades interpersonales"
-                sx={{ typography: "caption", color: defaultCal.interpersonal? grey[50]: bad.interpersonal? red[50]: regular.interpersonal? yellow[50]: good.interpersonal? blue[50]: grey[50], backgroundColor: alpha(defaultCal.interpersonal? grey[900]: bad.interpersonal? red[900]: regular.interpersonal? yellow[900]: good.interpersonal? blue[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
+                sx={{ typography: "caption", color: defaultCal.interpersonal? grey[50]: bad.interpersonal? red[50]: regular.interpersonal? yellow[50]: good.interpersonal? green[50]: grey[50], backgroundColor: alpha(defaultCal.interpersonal? grey[900]: bad.interpersonal? red[900]: regular.interpersonal? yellow[900]: good.interpersonal? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
           />
                 <FieldTForm name="interpersonalSkills" label="" variant='outlined' type="number" 
                 sx={{
@@ -306,7 +340,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
                     <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
                 <Chip
                 label="Habilidades analíticas"
-                sx={{ typography: "caption", color: defaultCal.analytical? grey[50]: bad.analytical? red[50]: regular.analytical? yellow[50]: good.analytical? blue[50]: grey[50], backgroundColor: alpha(defaultCal.analytical? grey[900]: bad.analytical? red[900]: regular.analytical? yellow[900]: good.analytical? blue[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
+                sx={{ typography: "caption", color: defaultCal.analytical? grey[50]: bad.analytical? red[50]: regular.analytical? yellow[50]: good.analytical? green[50]: grey[50], backgroundColor: alpha(defaultCal.analytical? grey[900]: bad.analytical? red[900]: regular.analytical? yellow[900]: good.analytical? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
           />
                     <FieldTForm name="analyticalSkills" label="" variant='outlined' type="number" 
                     sx={{
@@ -330,7 +364,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_}:
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button variant='outlined' color='error' onClick={()=> {setOpen(false)}}  sx={{width: "20%", borderRadius: 6}}>Cerrar</Button>
+                <Button variant='outlined' color='error' onClick={()=> {setOpen(false); reset()}}  sx={{width: "20%", borderRadius: 6}}>Cerrar</Button>
                 <Button variant='contained' color='primary'  type="submit" sx={{borderRadius: 6}} fullWidth>Confirmar</Button>
             </DialogActions>
             </FormManaged>

@@ -6,13 +6,15 @@ import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import { Box } from '@mui/material' 
+import { Box, InputAdornment, TextField, Tooltip } from '@mui/material' 
 import EditableTypography from './editableTypography';
 import { countriesWithFlags } from "../../../../public/flags"
 import SimpleSelect from './selectComponentCommitte';
 import { getStudents } from '../../../API/userAPI';
-import { getCommitties, getEvaluator } from '../../../API/userAPI';
-import ModalCalification from './ModalCalification';
+import { getCommitties, getEvaluator, getScores } from '../../../API/userAPI';
+import ModalCalification from './modalCalification';
+import { useSettingContext } from '../../../settingsComponent/contextSettings';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
 
 type flags = {
@@ -38,6 +40,17 @@ type Committe = {
     location: string
     relatedinstitution: string
     topic: string
+    committeopen: boolean
+}
+
+type scoresCalifications = {
+    scoreid: string
+    knowledgeskills: string
+    negotiationskills : string
+    communicationskills: string
+    interpersonalskills: string
+    analyticalskills: string
+    modified: boolean
 }
 
 export default function DelegationEval(){
@@ -47,10 +60,20 @@ export default function DelegationEval(){
     const userString = sessionStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
     const [ committeDefined, setCommitteDef ] = useState<string | undefined>(undefined);
-    const [commities, setCommities] = useState<Committe[]>([]);
-    const [committeId, setCommitteId] = useState('');
+    const [ commities, setCommities ] = useState<Committe[]>([]);
+    const [ committeId, setCommitteId ] = useState('');
     const [ open, setOpen ] = useState(false);
     const [ currentStudent, setCurrent ] = useState<student | null>();
+    const [ scores, setScores ] = useState<scoresCalifications[]>([])
+    const { theme } = useSettingContext();
+    const [search, setSearch] = useState('');
+
+    const filteredStudents = studentsFiltered.filter(
+    (item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.lastname.toLowerCase().includes(search.toLowerCase()) ||
+      item.delegation.toLowerCase().includes(search.toLowerCase())
+  );
 
       const handleChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setSelected(event.target.value);
@@ -62,7 +85,7 @@ export default function DelegationEval(){
       setStudents(response.data.students)
     }
     studentData()
-  },[selected])
+  },[selected, open])
 
   useEffect(()=>{
     const filter = ()=>{
@@ -89,14 +112,30 @@ export default function DelegationEval(){
                const response = await getCommitties()
                setCommities(response.data.committies)
             }
+            const scores = async ()=>{
+              const response = await getScores();
+              setScores(response.data.scores);
+            }
+            scores()
             data()
-        },[])
+        },[open])
 
     return (
         <>
         <Stack display="flex" flexDirection="row" justifyContent="center" alignContent="end" sx={{width: "100%"}}>
-            <Box width="15vw" sx={{mb: 2}}>
+            <Box width="40vw" sx={{mb: 2}} flexDirection="row" display="flex" columnGap={6}>
             <SimpleSelect handleChange={handleChange} selected={selected} committeDefined={committeDefined} commities={commities} user={user}/>
+            <TextField fullWidth placeholder='Buscar delegaciones...' 
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            slotProps={{
+                            input: {
+                              startAdornment: ( 
+                                <InputAdornment position='start'>
+                                  <Icon icon="iconamoon:search-duotone"/>
+                                </InputAdornment>
+                              )
+                            }}}/>
             </Box>
         </Stack>
         <Stack sx={{
@@ -118,12 +157,12 @@ export default function DelegationEval(){
             backgroundColor: '#555',
             },
             '&::-webkit-scrollbar-track': {
-            backgroundColor: '#f1f1f1',
+            backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white',
             },
-        }} columnGap={13}>
-    {studentsFiltered.map((item: student, i: number) => 
-    <Stack key={i} sx={{p: 2}}>
-    <Card sx={{ width: 350, height: "auto", borderRadius: 4 }}>
+        }} columnGap={3} rowGap={3}>
+    {filteredStudents.map((item: student, i: number) => 
+    <Stack key={i} sx={{p: 2, flex: '1 1 30%', maxWidth: '33.33%', boxSizing: 'border-box' }}>
+    <Card sx={{ width: 350, height: "auto", borderRadius: 4, backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white', boxShadow: '0px 4px 16px rgba(22, 22, 22, 0.15)', }}>
       <CardMedia
         component="img"
         alt={`Bandera de ${item.delegation}`}
@@ -140,12 +179,17 @@ export default function DelegationEval(){
         <EditableTypography/>
       </CardContent>
       <CardActions sx={{padding: 2}}>
-        <Button variant='contained' color='primary' onClick={()=> {setOpen(true); setCurrent(item)}} fullWidth>Calificar</Button>
+        <Tooltip title={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen?"La comisión está cerrada": ""} placement='top'>
+          <Box width="100%">
+        {scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified &&<Button disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} variant='contained' color='primary' onClick={()=> {setOpen(true); setCurrent(item)}} fullWidth>Modificar</Button>}
+        {!scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified && <Button disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} variant='contained' color='primary' onClick={()=> {setOpen(true); setCurrent(item)}} fullWidth>Calificar</Button>}
+        </Box>
+        </Tooltip>
       </CardActions>
     </Card>
     </Stack>)}
     </Stack>
-    <ModalCalification open={open} setOpen={setOpen} student={currentStudent} setStudent_={setCurrent}/>
+    <ModalCalification open={open} setOpen={setOpen} student={currentStudent} setStudent_={setCurrent} scores={scores} setStudents={setStudents}/>
     </>
   );
 }

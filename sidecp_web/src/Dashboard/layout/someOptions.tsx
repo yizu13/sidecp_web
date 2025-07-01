@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEditCommitte } from "../../router/committeEditContext/committeContextEdit";
+import { useSettingContext } from "../../settingsComponent/contextSettings";
 
 type PageObject = {
     page: number,
@@ -30,6 +31,7 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
     const navigation = useNavigate();
     const inPage = pageObject.page === mainReference
     const userRole = sessionStorage.getItem("role")
+    const {theme} = useSettingContext()
 
     return(
         <>   
@@ -45,10 +47,14 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
                     textWrap: "nowrap",
                     transition: 'all 0.3s ease',
                     backgroundColor: open || (pageObject.subPage === 0 && inPage) || 
-                    (pageObject.subPage && inPage) ? 'rgb(45, 119, 255)' : '',
+                    (pageObject.subPage && inPage) ? theme.palette.mode === "dark" ?'#10151b': "#eeeeee" : '',
+                    boxShadow: open || (pageObject.subPage === 0 && inPage) || 
+                    (pageObject.subPage && inPage) ? '0px 4px 16px rgba(30, 52, 94, 0.2)': "",
+                    color: open || (pageObject.subPage === 0 && inPage) || 
+                    (pageObject.subPage && inPage) ? theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f": theme.palette.mode === "dark" ?'#cccccc': "#8a8a8a",
                     '&:hover':{
-                        backgroundColor: 'rgb(45, 119, 255)',
-        
+                        backgroundColor: theme.palette.mode === "dark" ?'#10151b': "#eeeeee",
+                          boxShadow: '0px 4px 16px rgba(28, 66, 136, 0.2)',
                     },
                     typography: {
                         xs: 'subtitle2', 
@@ -86,10 +92,12 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
                     pb: 0.5,
                     borderRadius: 10,
                     transition: 'all 0.3s ease',
-                    backgroundColor: (pageObject.subPage === i && inPage) ? 'rgb(45, 119, 255)' : '',
+                    backgroundColor: (pageObject.subPage === i && inPage)  ? theme.palette.mode === "dark" ?'#10151b': "#eeeeee" : '',
+                    boxShadow: (pageObject.subPage === i && inPage)  ? '0px 4px 16px rgba(30, 52, 94, 0.2)': "",
+                    color: (pageObject.subPage === i && inPage)  ? theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f": theme.palette.mode === "dark" ?'#cccccc': "#8a8a8a",
                     '&:hover':{
-                        backgroundColor: 'rgb(45, 119, 255)',
-        
+                        backgroundColor: theme.palette.mode === "dark" ?'#10151b': "#eeeeee",
+                        boxShadow: '0px 4px 16px rgba(45,119,255,0.2)',
                     },
                     typography: {
                         xs: 'body1', 

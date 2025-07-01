@@ -1,11 +1,13 @@
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { Box, Button, IconButton, Stack } from '@mui/material';
+import { Box, Breadcrumbs, Button, createTheme, IconButton, Stack, ThemeProvider, Typography, Link } from '@mui/material';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ModalDelegation from './modalAddDelegation';
 import { getCommitties } from '../../../API/userAPI';
 import { getStudents, deleteStudent } from '../../../API/userAPI';
 import { Icon } from '@iconify/react';
+import { esES } from '@mui/x-data-grid/locales';
+import { Link as RouterLink } from 'react-router-dom';
 
 type data = {
   committeName: string
@@ -154,12 +156,87 @@ const rows = transformDataRow();
 
 const {theme} = useSettingContext()
 
+const dataGridTheme = useMemo(() =>
+  createTheme({
+    palette: {
+      mode: theme.palette.mode,
+      primary: {
+        main: '#1976d2',
+        contrastText: '#fff'
+      },
+      background: {
+        default: theme.palette.mode === 'dark' ? '#141a21' : '#f1f1f1',
+        paper: theme.palette.mode === 'dark' ? '#222b3a' : '#f1f1f1',
+      },
+      text: {
+        primary: theme.palette.mode === 'dark' ? '#ffffff' : '#222b3a',
+      }
+    },
+    components: {
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            '& .MuiFormControlLabel-label': {
+              color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+            },
+            '& .MuiTypography-root': {
+              color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+            }
+          }
+        }
+      },
+      MuiFormControlLabel: {
+        styleOverrides: {
+          label: {
+            color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+          }
+        }
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+          }
+        }
+      }
+    }
+  })
+, [theme.palette.mode]);
+
     return (
       <>
+      <Stack sx={{ width: "100%", alignItems: "flex-start", pt: 5, pl: "15vw", }}>
+          <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Delegaciones</Typography>
+      <Breadcrumbs aria-label="breadcrumb" >
+        <Link
+          component={RouterLink}
+          underline="hover"
+          sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}
+          color="inherit"
+          to="/dashboard/inicio"
+        >
+          <Icon icon="tabler:home-filled"/>
+          Inicio
+        </Link>
+        <Typography
+          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
+        >
+          <Icon icon="ic:round-person" />
+          Usuarios
+        </Typography>
+        <Typography
+          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
+        >
+          <Icon icon="fontisto:persons" />
+          Delegaciones
+        </Typography>
+      </Breadcrumbs>
+      </Stack>
         <Stack sx={{ 
                 width: "80vw",
                 height: "auto",
                 p: 4,
+                pt: 0,
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -172,14 +249,32 @@ const {theme} = useSettingContext()
             borderRadius: 4,
             boxShadow: '0px 4px 20px rgba(0,0,0,0.15)', 
             backgroundColor: theme.palette.mode === 'dark'? 'gray':'#f5f5f5'}}>
+              <ThemeProvider theme={dataGridTheme}>
         <DataGrid
-        sx={{borderRadius: 4, p: 2}}  
+         sx={{borderRadius: 4,p: 2,
+      '& .MuiDataGrid-scrollbar--horizontal': {
+      '&::-webkit-scrollbar': {
+        height: '6px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor:theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0,0,0,0.3)',
+        borderRadius: '3px',
+        '&:hover': {
+          backgroundColor: 'rgba(0,0,0,0.5)',
+        },
+      },
+    }, }} 
         rows={rows}
         columns={columns}
-        pageSizeOptions={[5, 10]}
-        initialState={{ pagination: { paginationModel: { pageSize: 10 } }}}
+        pageSizeOptions={[5]}
+        initialState={{ pagination: { paginationModel: { pageSize: 5 } }}}
+        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
 
         />
+        </ThemeProvider>
         </Box>
         </Stack>
         </Stack>

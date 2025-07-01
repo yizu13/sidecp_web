@@ -1,7 +1,7 @@
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { IconButton, Stack, Box, Tooltip } from '@mui/material';
+import { IconButton, Stack, Box, Tooltip, Breadcrumbs, Typography, createTheme, ThemeProvider, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getCommitties } from '../../../API/userAPI';
 import { deleteCommitte } from '../../../API/userAPI';
 import { Icon } from '@iconify/react';
@@ -10,6 +10,10 @@ import EventsModal from './eventsModal';
 import DescriptionModal from './descriptionModal';
 import { getEventsById } from '../../../API/userAPI';
 import { useNavigate } from 'react-router-dom';
+import AdministrationCommitte from './CommitteAdministration';
+import { esES } from '@mui/x-data-grid/locales';
+import { Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 type Committe = {
     committeid: string
@@ -40,13 +44,13 @@ export default function ListCommities(){
 
 const { setCommitteForEdit } = useEditCommitte()
 const navigate = useNavigate()
-const [commities, setCommities] = useState<Committe[]>([])
-const [ openModal, setModal ] = useState<boolean>(false)
-const [ eventList, setEvents ] = useState<events[]>([])
+const [commities, setCommities] = useState<Committe[]>([]);
+const [ openModal, setModal ] = useState<boolean>(false);
+const [ eventList, setEvents ] = useState<events[]>([]);
 const [ description, setDescription ] = useState<string>("");
-const [ openModalDescription, setModalDescription ] = useState<boolean>(false)
+const [ openModalDescription, setModalDescription ] = useState<boolean>(false);
 
- function formatDateTime(datetime: string) {
+ function formatDateTime(datetime: string){
   const date = new Date(datetime);
 
   const optionsDate: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" }; 
@@ -65,10 +69,27 @@ const [ openModalDescription, setModalDescription ] = useState<boolean>(false)
      setCommitteForEdit({events:  events_ ?? "", location: location_ ?? "", institutionRepresentated: relatedinstitution_ ?? "",...data})
         navigate('/dashboard/comisiones/crear')
   }
-  const handleDelete = async (data: data) =>{
-    await deleteCommitte(data.id)
-    setCommities(prev=> prev.filter((item: Committe)=> item.committeid !== data.id))
-  }
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [rowToDelete, setRowToDelete] = useState<data | null>(null);
+
+  const handleDelete = async (data: data) => {
+    setRowToDelete(data);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (rowToDelete) {
+      await deleteCommitte(rowToDelete.id);
+      setCommities(prev => prev.filter((item: Committe) => item.committeid !== rowToDelete.id));
+      setRowToDelete(null);
+      setConfirmOpen(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setRowToDelete(null);
+    setConfirmOpen(false);
+  };
 
   const handleSee = async(data: data) =>{
     const events_: string | undefined  =  commities.find((i: Committe)=> i.committeid === data.id)?.events
@@ -79,12 +100,16 @@ const [ openModalDescription, setModalDescription ] = useState<boolean>(false)
 
   const handleDescription = async (data: data)=>{
     setDescription(data.description);
-    setModalDescription(true)
+    setModalDescription(true);
   }
 
 const columns: GridColDef<(typeof rows)[number]>[] = [
-  
-  { field: 'committeId', headerName: 'Id', width: 90, maxWidth: 120 },
+  { 
+    field: 'committeId', 
+    headerName: 'Id', 
+    width: 90, 
+    maxWidth: 120 
+  },
   {
     field: 'committeName',
     headerName: 'Nombre del comité',
@@ -172,8 +197,76 @@ const rows = transformDataRow()
 
 const {theme} = useSettingContext()
 
+const dataGridTheme = useMemo(() =>
+  createTheme({
+    palette: {
+      mode: theme.palette.mode,
+      primary: {
+        main: '#1976d2',
+        contrastText: '#fff'
+      },
+      background: {
+        default: theme.palette.mode === 'dark' ? '#141a21' : '#f1f1f1',
+        paper: theme.palette.mode === 'dark' ? '#222b3a' : '#f1f1f1',
+      },
+      text: {
+        primary: theme.palette.mode === 'dark' ? '#ffffff' : '#222b3a',
+      }
+    },
+    components: {
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            '& .MuiFormControlLabel-label': {
+              color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+            },
+            '& .MuiTypography-root': {
+              color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+            }
+          }
+        }
+      },
+      MuiFormControlLabel: {
+        styleOverrides: {
+          label: {
+            color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+          }
+        }
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            color: theme.palette.mode === 'dark' ? '#fff !important' :'#222 !important',
+          }
+        }
+      }
+    }
+  })
+, [theme.palette.mode]);
+
     return(
         <>
+        <Stack sx={{ width: "100%", alignItems: "flex-start", p: 5, pl: "24vw", pb: 2, }}>
+          <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Comisiones</Typography>
+      <Breadcrumbs aria-label="breadcrumb" >
+         <Link
+          component={RouterLink}
+          underline="hover"
+          sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}
+          color="inherit"
+          to="/dashboard/inicio"
+        >
+          <Icon icon="tabler:home-filled"/>
+          Inicio
+        </Link>
+        <Typography
+          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
+        >
+          <Icon icon="dashicons:admin-site-alt" />
+          Comisiones
+        </Typography>
+      </Breadcrumbs>
+      </Stack>
         <Stack sx={{ 
                 width: "80vw",
                 height: "auto",
@@ -183,23 +276,60 @@ const {theme} = useSettingContext()
                 alignItems: "center",
                 overflow: "auto",
                 }}>
+                  
         <Box sx={{
             maxWidth: "65vw",
             borderRadius: 4,
+            mb: 2,
             boxShadow: '0px 4px 20px rgba(0,0,0,0.15)', 
             backgroundColor: theme.palette.mode === 'dark'? 'gray':'#f5f5f5'}}>
+              <ThemeProvider theme={dataGridTheme}>
         <DataGrid
-        sx={{borderRadius: 4, p: 2}}  
+        sx={{borderRadius: 4,p: 2,
+      '& .MuiDataGrid-scrollbar--horizontal': {
+      '&::-webkit-scrollbar': {
+        height: '6px',
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor:theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0,0,0,0.3)',
+        borderRadius: '3px',
+        '&:hover': {
+          backgroundColor: 'rgba(0,0,0,0.5)',
+        },
+      },
+    }, }}
         rows={rows}
         columns={columns}
-        pageSizeOptions={[5, 10]}
-        initialState={{ pagination: { paginationModel: { pageSize: 10 } }}}
+        pageSizeOptions={[5]}
+        initialState={{ pagination: { paginationModel: { pageSize: 5 } }}}
+        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
 
         />
+        </ThemeProvider>
         </Box>
+        <AdministrationCommitte/>
         </Stack>
         <EventsModal open={openModal} eventList={eventList} modalFunc={setModal} eventsFunc={setEvents}/>
         <DescriptionModal open={openModalDescription} description={description} modalFunc={setModalDescription} descriptionFunc={setDescription}/>
+
+
+        <Dialog open={confirmOpen} onClose={cancelDelete} slotProps={{paper: {sx: {borderRadius: 6}}}}>
+        <DialogTitle>Eliminar comisión</DialogTitle>
+        <DialogContent>
+          ¿Estás seguro que deseas eliminar esta comisión? Esta acción no se puede deshacer.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} color="primary" variant='outlined' sx={{borderRadius: 4}}>
+            Cancelar
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained" sx={{borderRadius:4}}>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
         </>
         
     )

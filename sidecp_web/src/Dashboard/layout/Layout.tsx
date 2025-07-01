@@ -1,5 +1,5 @@
 import { type ReactNode, useRef, useState } from 'react';
-import { Stack, Box, Typography } from '@mui/material';
+import { Stack, Box, Typography, IconButton } from '@mui/material';
 import { Icon } from '@iconify/react'
 import {TextPage} from './pages_layout'
 import {IconPage} from './pages_layout'
@@ -21,8 +21,16 @@ export default function MainLayout({ setPage, children }: props){
     const pageSelected = useRef(setPage) 
     const [changeSoft, setSoft] = useState(false)
     const navigation = useNavigate()
-    const { theme } = useSettingContext()
-    
+    const { theme, themefunc } = useSettingContext()
+
+    const handleChangeTheme = ()=>{
+        if(theme.palette.mode === "dark"){
+            themefunc("light")
+        } else{
+            themefunc("dark")
+        }
+    }
+
         return (
             <Stack
                 display="flex"
@@ -38,11 +46,28 @@ export default function MainLayout({ setPage, children }: props){
                     left: 0
                 }}
             >
+                <IconButton
+                onClick={handleChangeTheme}
+                sx={{
+                    position: 'fixed',
+                    top: 16,
+                    right: 16,
+                    zIndex: 2000,
+                    background: theme.palette.mode === "dark" ? "#222" : "#fff",
+                    color: theme.palette.mode === "dark" ? "#fff" : "#222",
+                    boxShadow: 2,
+                    '&:hover': {
+                        background: theme.palette.mode === "dark" ? "#333" : "#eee",
+                    }
+                }}
+            >
+                {theme.palette.mode === "dark" ? <Icon icon="line-md:moon-filled-to-sunny-filled-loop-transition"/>: <Icon icon="line-md:sunny-filled-loop-to-moon-filled-loop-transition"/>}
+            </IconButton>
                 
                 {!changeSoft && <Stack
                     display="flex"
                     sx={{
-                        backgroundColor: 'rgb(65, 131, 255, 0.8)',
+                        backgroundColor: theme.palette.mode === "dark" ?'#141a21':"#f1f1f1",
                         width: 'auto', 
                         height: '100%',
                         justifyContent: 'start',
@@ -54,9 +79,10 @@ export default function MainLayout({ setPage, children }: props){
                     }}
                     spacing={4}
                 >
+                    <Box>
                     <Box
                     component="img"
-                    src="/Cedil_logo.png"
+                    src= {theme.palette.mode === "dark" ? "/Cedil_logo_white.png" :"/Cedil_logo.png"}
                     sx={{
                     position: 'relative',
                     width: '8vw',
@@ -68,10 +94,11 @@ export default function MainLayout({ setPage, children }: props){
                     pb: 3,
                     }}
                 />
+                </Box>
 
                 <TextPage pageObject={pageSelected.current}/>
 
-                <Icon icon='line-md:chevron-small-left' color="white" onClick={()=>{setSoft(true)}} style={{
+                <Icon icon='line-md:chevron-small-left' color={theme.palette.mode === "dark" ?"#ffffff" : "#141a21"} onClick={()=>{setSoft(true)}} style={{
                     width: '2vw',
                     height: '4vh',
                     alignSelf: 'flex-end',
@@ -90,8 +117,10 @@ export default function MainLayout({ setPage, children }: props){
                             pb: 0.5,
                             borderRadius: 10,
                             transition: 'all 0.3s ease',
+                            color: theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f",
                             '&:hover':{
-                                backgroundColor: 'rgb(45, 119, 255)',
+                             backgroundColor: theme.palette.mode === "dark" ?'#10151b': "#eeeeee",
+                             boxShadow: '0px 4px 16px rgba(28, 66, 136, 0.2)',
                             },
                              bottom: 30,
                             typography: {
@@ -149,9 +178,9 @@ export default function MainLayout({ setPage, children }: props){
                 <Stack
                     display="flex"
                     sx={{
-                       backgroundColor: theme.palette.mode === "dark"? 'black': 'white',
-                        width: 'auto', // Half of the parent width
-                        height: '100%', // Full height of the parent
+                       backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white',
+                        width: 'auto', 
+                        height: '100%', 
                         opacity: 1,
                         justifyContent: 'start',
                         alignItems: 'center',

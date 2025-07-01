@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import { Stack, Box, Button, Typography, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider } from "@mui/material";
+import { Stack, Box, Button, Typography, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, IconButton } from "@mui/material";
 import { useSettingContext } from "../../../settingsComponent/contextSettings";
 import FormManaged from "../../../manageForm/FormProvider";
 import FieldTForm from "../../../manageForm/FieldTxtForm";
@@ -10,6 +10,8 @@ import { useForm, type Resolver } from 'react-hook-form';
 import DialogCreate from './dialogComponent';
 import { getEventsById } from '../../../API/userAPI';
 import { useEditCommitte } from '../../../router/committeEditContext/committeContextEdit';
+import { Icon } from '@iconify/react/dist/iconify.js';
+import { useNavigate } from 'react-router-dom';
 
 type currentDataObject = {
      committeName: string ,
@@ -31,6 +33,7 @@ export default function CreateCommitte(){
     const { committeForEdit, setCommitteForEdit } = useEditCommitte()
     const [ eventList, setList ] = useState<events[]>([])
     const [ boolOpenCreate, setOpenCreate ] = useState(false);
+    const navigate = useNavigate()
 
     useEffect(()=>{
         const callEvents = async ()=>{
@@ -94,11 +97,35 @@ export default function CreateCommitte(){
 
     return(
         <>
+        <Stack mt={-4}>
         <FormManaged onSubmit={onSubmit} methods={methods}>
+            <Box
+                            sx={{
+                                position: "inherit", 
+                                transform: "translate(100%, 50%)",
+                                zIndex: 2000,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            >
+                                    <IconButton
+                                            onClick={() => navigate('/dashboard/comisiones/cerrar')}
+                                            sx={{
+                                                color: theme.palette.mode === 'dark' ? '#fff' : '#222',
+                                                background: theme.palette.mode === 'dark' ? '#222' : '#fff',
+                                                boxShadow: 2,
+                                                '&:hover': {
+                                                    background: theme.palette.mode === 'dark' ? '#333' : '#eee',
+                                                }
+                                            }}
+                                        >
+                                        <Icon icon="ic:round-close"/>
+                                    </IconButton>
+                                    </Box>
        <Stack spacing={4} sx={{
                 width: '60vw', 
                 height: '30vh', 
-                backgroundColor: theme.palette.mode === 'dark'? 'gray':'#f5f5f5',
+                backgroundColor: theme.palette.mode === 'dark'? '#141a21':'#f5f5f5',
                 ml: '8vw', 
                 mb: '8vh',
                 borderRadius: 10,
@@ -120,7 +147,7 @@ export default function CreateCommitte(){
             <Stack sx={{
                 width: '60vw', 
                 height: '50vh', 
-                backgroundColor: theme.palette.mode === 'dark'? 'gray':'#f5f5f5',
+                backgroundColor: theme.palette.mode === 'dark'? '#141a21':'#f5f5f5',
                 ml: '8vw', 
                 mb: '8vh',
                 boxShadow: '0px 4px 20px rgba(0,0,0,0.15)',
@@ -211,6 +238,7 @@ export default function CreateCommitte(){
                     </Stack>
              </FormManaged>
              <DialogCreate boolOpenCreate={boolOpenCreate} setOpenCreate={setOpenCreate} setList={setList}/>
+             </Stack>
              </>
     )
 }

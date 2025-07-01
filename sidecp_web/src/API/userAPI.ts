@@ -79,3 +79,32 @@ export const deleteStudent = async (id: string)=>{
     const response = await axiosIntercep.delete(`/student/${id}`);
     return response
 }
+
+type scores = {
+    scoreId: string | undefined,
+    knowledgeSkills: number,
+    negotiationSkills: number,
+    communicationSkills: number,
+    interpersonalSkills: number,
+    analyticalSkills: number
+}
+
+export const scoresUpdate = async (payload: scores) => {
+    const response = await axiosIntercep.post(`/scores`, payload);
+    return response
+}
+
+export const getScores = async ()=>{
+    const response = await axiosIntercep.get("/getScores");
+    return response;
+}
+
+export const openCommitte = async (id: string)=>{
+    const response = await axiosIntercep.post(`/openCommitte/${id}`)
+    return response
+}
+
+export const closeCommitte = async (id: string)=>{
+    const response = await axiosIntercep.post(`/closeCommitte/${id}`)
+    return response
+}

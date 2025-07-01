@@ -2,6 +2,7 @@ import { Typography } from "@mui/material"
 import { Icon } from "@iconify/react"
 import { useNavigate } from "react-router-dom"
 import OptionsNavigation from "./someOptions"
+import { useSettingContext } from "../../settingsComponent/contextSettings"
 
 type PageObject = {
     page: number,
@@ -13,6 +14,7 @@ type Props = {
 }
 
 export function TextPage({ pageObject }: Props){
+    const { theme } = useSettingContext()
     const navigation = useNavigate()
     const role = sessionStorage.getItem("role")
     const committePage = [
@@ -23,11 +25,10 @@ export function TextPage({ pageObject }: Props){
         {label: "Delegaciones", navigation: "/Dashboard/usuarios/delegaciones"}, 
         {label:  "Evaluadores", navigation: "/Dashboard/usuarios/evaluadores"}
     ];
-     
 
     return(
         <>
-        <Typography color='white' typography='h5' sx={{
+        <Typography color='white' variant="h5" sx={{
             position: 'sticky', 
             cursor: pageObject.page === 0 ? 'default' : 'pointer',
             pl: 8,
@@ -37,10 +38,12 @@ export function TextPage({ pageObject }: Props){
             userSelect: "none",
             borderRadius: 10,
             transition: 'all 0.3s ease',
-            backgroundColor: pageObject.page === 0 ? 'rgb(45, 119, 255)' : '',
+            backgroundColor: pageObject.page === 0 ? theme.palette.mode === "dark" ?'#10151b': "#eeeeee" : '',
+            boxShadow: pageObject.page === 0 ? '0px 4px 16px rgba(27, 47, 83, 0.2)': "",
+            color: pageObject.page === 0 ? theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f": theme.palette.mode === "dark" ?'#cccccc': "#8a8a8a",
             '&:hover':{
-                backgroundColor: 'rgb(45, 119, 255)',
-
+                backgroundColor: theme.palette.mode === "dark" ?'#10151b': "#eeeeee",
+                boxShadow: '0px 4px 16px rgba(28, 66, 136, 0.2)',
             },
             typography: {
                 xs: 'subtitle2', 
@@ -63,10 +66,12 @@ export function TextPage({ pageObject }: Props){
             userSelect: "none",
             borderRadius: 10,
             transition: 'all 0.3s ease',
-            backgroundColor: pageObject.page === 3 ? 'rgb(45, 119, 255)' : '',
+           backgroundColor: pageObject.page === 3 ? theme.palette.mode === "dark" ?'#10151b': "#eeeeee" : '',
+            boxShadow: pageObject.page === 3 ? '0px 4px 16px rgba(30, 52, 94, 0.2)': "",
+            color: pageObject.page === 3 ? theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f": theme.palette.mode === "dark" ?'#cccccc': "#8a8a8a",
             '&:hover':{
-                backgroundColor: 'rgb(45, 119, 255)',
-
+                backgroundColor: theme.palette.mode === "dark" ?'#10151b': "#eeeeee",
+                  boxShadow: '0px 4px 16px rgba(28, 66, 136, 0.2)',
             },
             typography: {
                 xs: 'subtitle2', 

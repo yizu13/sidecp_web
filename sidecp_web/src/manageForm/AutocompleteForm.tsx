@@ -10,6 +10,7 @@ type Props = {
   sx?: object;
   options: any[] | undefined; 
   getOptionLabel?: (option: any) => string; 
+   fullWidth?: boolean;
 
 };
 

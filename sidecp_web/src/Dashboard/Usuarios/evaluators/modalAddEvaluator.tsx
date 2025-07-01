@@ -130,11 +130,11 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
 
      return(
     <>
-    <Dialog open={open} slotProps={{paper: {sx: {borderRadius: 6}}}}>
+    <Dialog open={open} slotProps={{paper: {sx: {borderRadius: 6, width: "40vw"}}}}>
                 <FormManaged methods={methods} onSubmit={onSubmit}>
                 <DialogTitle sx={{p: 2, ml: 1, mt: 1}}>{Object.keys(currentData || {}).length > 0 ? "Editar evaluador" : "Crear evaluador"}</DialogTitle>
                 <DialogContent>
-                    <Box display="flex" flexDirection="row" columnGap={2} sx={{p: 2}}>
+                    <Box display="flex" flexDirection="column" rowGap={2} sx={{p: 2}}>
                     {!currentData && <AutocompleteForm
                         name="userId"
                         label="Usuario"

@@ -56,7 +56,7 @@ export default function Router(){
                      <Stack sx={{
                         width: "100%", 
                         height: "100%", 
-                        backgroundColor: theme.palette.mode === "dark"? "black": "white", 
+                        backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white', 
                         position: "absolute",
                         top: 0,
                         left: 0,
