@@ -2,7 +2,7 @@ import { Outlet, useLocation, useRoutes } from "react-router"
 import Login from '../login/login'
 import { lazy, Suspense, useEffect } from "react"
 import { useNavigate } from "react-router";
-import { Typography, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import Logout from "../logout/logout";
 import { useSettingContext } from "../settingsComponent/contextSettings";
 import ProtectedRoute from "./protectedRoutes";
@@ -108,7 +108,40 @@ export default function Router(){
 }
 
 function Charging(){
-    return(
-        <Typography typography='h4'> Cargando... </Typography>
-    )
+      const { theme } = useSettingContext();
+
+  return (
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0, bottom: 0,
+        left: 0, right: 0,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        bgcolor: theme.palette.background.default,
+        zIndex: 1300,
+      }}
+    >
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        {[0, 1, 2].map(i => (
+          <Box
+            key={i}
+            sx={{
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              bgcolor: theme.palette.primary.main,
+              animation: 'bounce 0.6s infinite',
+              animationDelay: `${i * 0.2}s`,
+              '@keyframes bounce': {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-12px)' },
+              },
+            }}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
 }
