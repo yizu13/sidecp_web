@@ -68,12 +68,20 @@ export default function DelegationEval(){
     const { theme } = useSettingContext();
     const [search, setSearch] = useState('');
 
-    const filteredStudents = studentsFiltered.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.lastname.toLowerCase().includes(search.toLowerCase()) ||
-      item.delegation.toLowerCase().includes(search.toLowerCase())
+   const filteredStudents = studentsFiltered.filter((item) => {
+  const searchNormalized = search.trim().toLowerCase();
+  const nameNormalized = item.name.trim().toLowerCase();
+  const lastnameNormalized = item.lastname.trim().toLowerCase();
+  const fullNameNormalized = (item.name + " " + item.lastname).trim().toLowerCase();
+  const delegationNormalized = item.delegation.trim().toLowerCase();
+
+  return (
+    nameNormalized.includes(searchNormalized) ||
+    lastnameNormalized.includes(searchNormalized) ||
+    fullNameNormalized.includes(searchNormalized) ||
+    delegationNormalized.includes(searchNormalized)
   );
+});
 
       const handleChange = (event: { target: { value: SetStateAction<string>; }; }) => {
         setSelected(event.target.value);

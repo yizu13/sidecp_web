@@ -219,7 +219,11 @@ useEffect(() => {
         <Dialog open={closeDialogOpen} onClose={cancelClose} slotProps={{ paper: { sx: { borderRadius: 6 } } }}>
         <DialogTitle>Cerrar comisión</DialogTitle>
         <DialogContent>
-            ¿Estás seguro que deseas cerrar esta comisión? Todas las calificaciones se borraran y no se podrán deshacer los cambios.
+            <span>
+            ¿Estás seguro que deseas cerrar esta comisión? 
+            <br />
+            <b style={{color: "red"}}>Todas las calificaciones de la comisión se borrarán y no se podrán deshacer los cambios.</b>
+            </span>
         </DialogContent>
         <DialogActions>
             <Button onClick={cancelClose} color="primary" variant='outlined' sx={{ borderRadius: 4 }}>

@@ -9,6 +9,7 @@ import {
 } from "framer-motion"
 import { useCallback, useRef } from "react"
 import { userData } from "../../API/userAPI";
+import { useSettingContext } from "../../settingsComponent/contextSettings";
 
 
 
@@ -16,6 +17,7 @@ export default function InicioPage(){
     const ref = useRef(null)
     const { scrollYProgress } = useScroll({ container: ref })
     const maskImage = useScrollOverflowMask(scrollYProgress)
+    const { theme } = useSettingContext()
 
     const callBack = useCallback(async()=>{
         try{
@@ -41,7 +43,7 @@ export default function InicioPage(){
             <Stack sx={{
                 width: '60vw', 
                 height: '600px', 
-                backgroundColor: 'gray',
+                backgroundColor:  theme.palette.mode === "dark"? "#141a21": "#f1f1f1",
                 ml: '6vw', 
                 mb: '8vh',
                 borderRadius: 20,
@@ -51,7 +53,7 @@ export default function InicioPage(){
             <Stack sx={{
                 width: '60vw', 
                 height: '600px', 
-                backgroundColor: 'gray',
+                backgroundColor:  theme.palette.mode === "dark"? "#141a21": "#f1f1f1",
                 ml: '6vw', 
                 mb: '8vh',
                 borderRadius: 20,
@@ -79,19 +81,22 @@ function useScrollOverflowMask(scrollYProgress: MotionValue<number>) {
                 maskImage,
                 `linear-gradient(180deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
             )
-        } else if (value === 1) {
+        } else if (value >= 0.95) {
             animate(
                 maskImage,
                 `linear-gradient(180deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${right}, ${opaque})`
             )
-        } else if (
-            scrollYProgress.getPrevious() === 0 ||
-            scrollYProgress.getPrevious() === 1
-        ) {
-            animate(
-                maskImage,
-                `linear-gradient(180deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${rightInset}, ${transparent})`
-            )
+        } else {
+            const prev = scrollYProgress.getPrevious();
+            if (
+                (prev !== undefined && prev === 0) ||
+                (prev !== undefined && prev >= 0.95)
+            ) {
+                animate(
+                    maskImage,
+                    `linear-gradient(180deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${rightInset}, ${transparent})`
+                )
+            }
         }
     })
 

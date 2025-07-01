@@ -8,7 +8,7 @@ import { Icon } from '@iconify/react';
 import { useEditCommitte } from '../../../router/committeEditContext/committeContextEdit';
 import EventsModal from './eventsModal';
 import DescriptionModal from './descriptionModal';
-import { getEventsById } from '../../../API/userAPI';
+import { getEventsById, getStudents } from '../../../API/userAPI';
 import { useNavigate } from 'react-router-dom';
 import AdministrationCommitte from './CommitteAdministration';
 import { esES } from '@mui/x-data-grid/locales';
@@ -38,6 +38,15 @@ topic: string
 type events = {
      title: string
     eventDescription: string
+}
+
+type student = {
+  committeid: string
+  studentid: string
+  name: string
+  lastname: string
+  delegation: string
+  scoreid: string
 }
 
 export default function ListCommities(){
@@ -71,23 +80,42 @@ const [ openModalDescription, setModalDescription ] = useState<boolean>(false);
   }
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<data | null>(null);
+  const [deleteError, setDeleteError] = useState<string>("");
+  
 
   const handleDelete = async (data: data) => {
+    setDeleteError(""); // Limpiar error previo
     setRowToDelete(data);
     setConfirmOpen(true);
   };
 
   const confirmDelete = async () => {
     if (rowToDelete) {
-      await deleteCommitte(rowToDelete.id);
-      setCommities(prev => prev.filter((item: Committe) => item.committeid !== rowToDelete.id));
-      setRowToDelete(null);
-      setConfirmOpen(false);
+      // Validar si hay estudiantes en la comisión antes de borrar
+      try {
+        const response = await getStudents();
+        const students = response.data.students || [];
+        const hasStudents = students.some((s: student) => s.committeid === rowToDelete.id);
+
+        if (hasStudents) {
+          setDeleteError("No se puede eliminar la comisión porque tiene estudiantes asignados.");
+          return;
+        }
+
+        await deleteCommitte(rowToDelete.id);
+        setCommities(prev => prev.filter((item: Committe) => item.committeid !== rowToDelete.id));
+        setRowToDelete(null);
+        setConfirmOpen(false);
+      } catch (err) {
+        setDeleteError("Ocurrió un error al validar los estudiantes.");
+        console.error(err);
+      }
     }
   };
 
   const cancelDelete = () => {
     setRowToDelete(null);
+    setDeleteError("");
     setConfirmOpen(false);
   };
 
@@ -316,20 +344,33 @@ const dataGridTheme = useMemo(() =>
         <DescriptionModal open={openModalDescription} description={description} modalFunc={setModalDescription} descriptionFunc={setDescription}/>
 
 
-        <Dialog open={confirmOpen} onClose={cancelDelete} slotProps={{paper: {sx: {borderRadius: 6}}}}>
+       <Dialog open={confirmOpen} onClose={cancelDelete} slotProps={{paper: {sx: {borderRadius: 6}}}}>
         <DialogTitle>Eliminar comisión</DialogTitle>
         <DialogContent>
           ¿Estás seguro que deseas eliminar esta comisión? Esta acción no se puede deshacer.
+          {deleteError && (
+            <Typography sx={{ color: "red", mt: 2 }}>
+              {deleteError}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={cancelDelete} color="primary" variant='outlined' sx={{borderRadius: 4}}>
             Cancelar
           </Button>
-          <Button onClick={confirmDelete} color="error" variant="contained" sx={{borderRadius:4}}>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            sx={{borderRadius:4}}
+            disabled={!!deleteError}
+          >
             Eliminar
           </Button>
         </DialogActions>
       </Dialog>
+
+      
         </>
         
     )
