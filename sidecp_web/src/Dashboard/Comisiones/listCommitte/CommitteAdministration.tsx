@@ -151,7 +151,7 @@ useEffect(() => {
                     sx={{
                         position: "absolute",
                         top: "50%",
-                        left: 0,
+                        left: 30,
                         zIndex: 2,
                         minWidth: 0,
                         width: 36,
@@ -168,11 +168,11 @@ useEffect(() => {
                 </IconButton>}
             
              
-               {scroll < 0.95 && committies.length > 3 && <IconButton
+               {scroll < 0.95 && committies.length > 5 && <IconButton
                     sx={{
                         position: "absolute",
                         top: "50%",
-                        right: 0,
+                        right: 50,
                         zIndex: 2,
                         minWidth: 0,
                         width: 36,
@@ -190,7 +190,7 @@ useEffect(() => {
             
             <motion.ul
                 ref={ref}
-                style={committies.length > 3 ? { maskImage } : {}}
+                style={committies.length > 5 ? { maskImage } : {}}
             >
                 {committies.map((item: Committe) => (
                     <li key={item.id} style={{ color: theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f", background: theme.palette.mode === "dark"? "#141a21" :"#f1f1f1", rowGap: 4 }}>
@@ -243,7 +243,7 @@ function StyleSheet() {
         <style>{`
             #example {
               width: 100vw;
-              max-width: 50vw;
+              max-width: 65vw;
               position: relative;
             }
 

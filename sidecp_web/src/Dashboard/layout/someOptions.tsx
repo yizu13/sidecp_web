@@ -68,7 +68,7 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
         {title}
         {open
             ? <Icon icon="line-md:chevron-small-down"  style={{ marginLeft: 8 }} />
-            : <Icon icon="line-md:chevron-small-right" style={{ marginLeft: 8 }} />
+            : <Icon icon="iconamoon:arrow-right-2" style={{ marginLeft: 8 }} />
         }
         </Box>
     </Typography>

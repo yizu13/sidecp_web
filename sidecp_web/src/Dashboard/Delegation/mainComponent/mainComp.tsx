@@ -1,4 +1,4 @@
-import { useEffect, useState, type SetStateAction } from 'react';
+import { useEffect, useState, type SetStateAction, useRef } from 'react';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -15,6 +15,15 @@ import { getCommitties, getEvaluator, getScores } from '../../../API/userAPI';
 import ModalCalification from './modalCalification';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
 import { Icon } from '@iconify/react/dist/iconify.js';
+import {
+    animate,
+    motion,
+    MotionValue,
+    useMotionValue,
+    useMotionValueEvent,
+    useScroll,
+} from "framer-motion"
+import './scrollConfiguration.css';
 
 
 type flags = {
@@ -66,7 +75,10 @@ export default function DelegationEval(){
     const [ currentStudent, setCurrent ] = useState<student | null>();
     const [ scores, setScores ] = useState<scoresCalifications[]>([])
     const { theme } = useSettingContext();
-    const [search, setSearch] = useState('');
+    const [ search, setSearch ] = useState('');
+    const ref = useRef<HTMLUListElement>(null);
+      const { scrollYProgress } = useScroll({ container: ref })
+    const maskImage = useScrollOverflowMask(scrollYProgress)
 
    const filteredStudents = studentsFiltered.filter((item) => {
   const searchNormalized = search.trim().toLowerCase();
@@ -146,28 +158,22 @@ export default function DelegationEval(){
                             }}}/>
             </Box>
         </Stack>
-        <Stack sx={{
-            display: "flex",
-            flexDirection: "row",
-            flexWrap: "wrap",
-            width: '75vw', 
-            overflowY: "auto",
-            ml: '4vw', 
-            mb: '8vh',
-            '&::-webkit-scrollbar': {
-            width: '8px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#888',
-            borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: '#555',
-            },
-            '&::-webkit-scrollbar-track': {
-            backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white',
-            },
-        }} columnGap={3} rowGap={3}>
+        <motion.ul 
+  className='scrollConfiguration' 
+  ref={ref}
+  style={{
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    width: '75vw',
+    height: "100vh",
+    overflowY: "auto",
+    marginLeft: '4vw',
+    columnGap: 3,
+    rowGap: 3,
+    maskImage: students.filter((i: student)=> i.committeid === selected).length > 3 ? maskImage : undefined
+  }}
+>
     {filteredStudents.map((item: student, i: number) => 
     <Stack key={i} sx={{p: 2, flex: '1 1 30%', maxWidth: '33.33%', boxSizing: 'border-box' }}>
     <Card sx={{ width: 350, height: "auto", borderRadius: 4, backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white', boxShadow: '0px 4px 16px rgba(22, 22, 22, 0.15)', }}>
@@ -196,8 +202,47 @@ export default function DelegationEval(){
       </CardActions>
     </Card>
     </Stack>)}
-    </Stack>
+    </motion.ul>
     <ModalCalification open={open} setOpen={setOpen} student={currentStudent} setStudent_={setCurrent} scores={scores} setStudents={setStudents}/>
     </>
   );
+}
+
+const left = `0%`
+const right = `80%`
+const leftInset = `20%`
+const rightInset = `80%`
+const transparent = `#0000`
+const opaque = `#000`
+function useScrollOverflowMask(scrollYProgress: MotionValue<number>) {
+    const maskImage = useMotionValue(
+        `linear-gradient(180deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
+    )
+
+    useMotionValueEvent(scrollYProgress, "change", (value) => {
+        if (value === 0) {
+            animate(
+                maskImage,
+                `linear-gradient(180deg, ${opaque}, ${opaque} ${left}, ${opaque} ${rightInset}, ${transparent})`
+            )
+        } else if (value >= 0.95) {
+            animate(
+                maskImage,
+                `linear-gradient(180deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${right}, ${opaque})`
+            )
+        } else {
+            const prev = scrollYProgress.getPrevious();
+            if (
+                (prev !== undefined && prev === 0) ||
+                (prev !== undefined && prev >= 0.95)
+            ) {
+                animate(
+                    maskImage,
+                    `linear-gradient(180deg, ${transparent}, ${opaque} ${leftInset}, ${opaque} ${rightInset}, ${transparent})`
+                )
+            }
+        }
+    })
+
+    return maskImage
 }

@@ -98,7 +98,7 @@ export default function MainLayout({ setPage, children }: props){
 
                 <TextPage pageObject={pageSelected.current}/>
 
-                <Icon icon='line-md:chevron-small-left' color={theme.palette.mode === "dark" ?"#ffffff" : "#141a21"} onClick={()=>{setSoft(true)}} style={{
+                <Icon icon='iconamoon:arrow-left-2-light' color={theme.palette.mode === "dark" ?"#ffffff" : "#141a21"} onClick={()=>{setSoft(true)}} style={{
                     width: '2vw',
                     height: '4vh',
                     alignSelf: 'flex-end',
