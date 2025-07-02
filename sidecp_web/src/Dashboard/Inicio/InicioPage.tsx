@@ -103,7 +103,7 @@ function ChartPieDonutText() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          123
                         </tspan>
                         <tspan
                           x={viewBox.cx}
