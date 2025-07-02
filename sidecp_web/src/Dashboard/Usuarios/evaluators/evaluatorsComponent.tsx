@@ -205,7 +205,17 @@ const dataGridTheme = useMemo(() =>
 
     return (
       <>
-      <Stack sx={{ width: "100%", alignItems: "flex-start", pt: 5, pl: "15vw", }}>
+        <Stack sx={{ 
+                width: "80vw",
+                height: "auto",
+                p: 4,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                overflow: "auto",
+                }}>
+                <Stack>
+                 <Box sx={{ display: "flex", width: "100%", alignItems: "flex-start" , p: 5, pl: 0, pb: 2, flexDirection: "column" }}>
           <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Evaluadores</Typography>
       <Breadcrumbs aria-label="breadcrumb" >
         <Link
@@ -231,17 +241,7 @@ const dataGridTheme = useMemo(() =>
           Evaluadores
         </Typography>
       </Breadcrumbs>
-      </Stack>
-        <Stack sx={{ 
-                width: "80vw",
-                height: "auto",
-                p: 4,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                overflow: "auto",
-                }}>
-                <Stack>
+      </Box>
       <Button onClick={()=>{setOpen(true)}}sx={{m: 2, alignSelf: "end", borderRadius: 2}} color="primary" variant='contained' >Agregar evaluador</Button>
         <Box sx={{
             maxWidth: "65vw",

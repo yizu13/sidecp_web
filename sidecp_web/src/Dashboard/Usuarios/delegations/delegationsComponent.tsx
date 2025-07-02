@@ -445,8 +445,19 @@ const dataGridTheme = useMemo(() =>
 
     return (
       <>
-      <Stack sx={{ width: "100%", alignItems: "flex-start", pt: 5, pl: "15vw", }}>
-          <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Delegaciones</Typography>
+        <Stack sx={{ 
+                width: "80vw",
+                height: "auto",
+                p: 4,
+                pt: 0,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                overflow: "auto",
+                }}>
+                <Stack>
+      <Box sx={{ display: "flex", width: "100%", alignItems: "flex-start" , p: 5, pl: 0, pb: 4, flexDirection: "column" }}>
+        <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Delegaciones</Typography>
       <Breadcrumbs aria-label="breadcrumb" >
         <Link
           component={RouterLink}
@@ -471,18 +482,7 @@ const dataGridTheme = useMemo(() =>
           Delegaciones
         </Typography>
       </Breadcrumbs>
-      </Stack>
-        <Stack sx={{ 
-                width: "80vw",
-                height: "auto",
-                p: 4,
-                pt: 0,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                overflow: "auto",
-                }}>
-                <Stack>
+      </Box>
         <Stack display="flex" flexDirection="row" alignSelf="end">
           <Button
         variant="contained"
@@ -614,7 +614,7 @@ const dataGridTheme = useMemo(() =>
       {"\n"}
       <b>1. Nombre de estudiante</b>, <b>2. Apellidos, </b> <b>3. Delegación</b>
       {"\n\n"}
-      <b style={{color: "red"}}>Le recordamos que los países deben estar bien escritos para evitar conflictos.</b>
+      <b style={{color: theme.palette.error.main}}>Le recordamos que los países deben estar bien escritos para evitar conflictos.</b>
     </span>
   </DialogContent>
         <DialogActions>
@@ -691,7 +691,7 @@ const dataGridTheme = useMemo(() =>
               ))}
             </Select>
           </FormControl>
-          <Typography sx={{ mt: 2, color: "red" }}>
+          <Typography sx={{ mt: 2, color: theme.palette.error.main }}>
             Esta acción eliminará <b>todos</b> los estudiantes de la comisión seleccionada. No se puede deshacer.
           </Typography>
         </DialogContent>

@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -44,8 +45,6 @@
   color: rgb(136, 136, 136);
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -67,13 +66,24 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    
+    /* Custom browser-themed chart colors (HSL format) */
+    --chart-1: 217 89% 61%; /* Chrome Blue (#4285f4) */
+    --chart-2: 4 82% 57%;   /* Safari Red (#ea4335) */
+    --chart-3: 45 100% 51%; /* Firefox Yellow (#fbbc05) */
+    --chart-4: 122 61% 41%; /* Edge Green (#34a853) */
+    --chart-5: 271 48% 53%; /* Other Purple (#9b59b6) */
+    
+    /* Named color aliases */
+    --color-chrome: var(--chart-1);
+    --color-safari: var(--chart-2);
+    --color-firefox: var(--chart-3);
+    --color-edge: var(--chart-4);
+    --color-other: var(--chart-5);
+    
     --radius: 0.5rem;
   }
+  
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -94,15 +104,22 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    
+    /* Dark theme browser colors (adjusted for better contrast) */
+    --chart-1: 217 82% 66%; /* Lighter Chrome Blue (#4a90e2) */
+    --chart-2: 4 79% 58%;   /* Lighter Safari Red (#e74c3c) */
+    --chart-3: 48 88% 58%;  /* Lighter Firefox Yellow (#f1c40f) */
+    --chart-4: 145 63% 49%; /* Lighter Edge Green (#2ecc71) */
+    --chart-5: 271 48% 58%; /* Slightly lighter Purple (#9b59b6) */
+    
+    /* Named color aliases for dark theme */
+    --color-chrome: var(--chart-1);
+    --color-safari: var(--chart-2);
+    --color-firefox: var(--chart-3);
+    --color-edge: var(--chart-4);
+    --color-other: var(--chart-5);
   }
 }
-
-
 
 @layer base {
   * {

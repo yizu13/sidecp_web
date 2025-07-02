@@ -222,7 +222,7 @@ useEffect(() => {
             <span>
             ¿Estás seguro que deseas cerrar esta comisión? 
             <br />
-            <b style={{color: "red"}}>Todas las calificaciones de la comisión se borrarán y no se podrán deshacer los cambios.</b>
+            <b style={{color: theme.palette.error.main}}>Todas las calificaciones de la comisión se borrarán y no se podrán deshacer los cambios.</b>
             </span>
         </DialogContent>
         <DialogActions>
@@ -271,7 +271,7 @@ function StyleSheet() {
             #example ul {
                 display: flex;
                 list-style: none;
-                height: 80px;
+                height: 8rem;
                 overflow-x: hidden;
                 overflow-y: hidden;
                 padding: 20px 0;

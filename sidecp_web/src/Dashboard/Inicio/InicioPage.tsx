@@ -9,130 +9,179 @@ import {
 } from "framer-motion"
 import { useRef } from "react"
 import { useSettingContext } from "../../settingsComponent/contextSettings";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
-import * as React from "react"
-import { TrendingUp } from "lucide-react"
-import { Label, Pie, PieChart } from "recharts"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../../@/components/ui/card"
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "../../../@/components/ui/chart"
-export const description = "A donut chart with text"
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-]
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "var(--chart-1)",
-  },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "var(--chart-3)",
-  },
-  edge: {
-    label: "Edge",
-    color: "var(--chart-4)",
-  },
-  other: {
-    label: "Other",
-    color: "var(--chart-5)",
-  },
-} satisfies ChartConfig
+import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Card, 
+  CardContent, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText,
+  Chip,
+  Paper
+} from '@mui/material';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-function ChartPieDonutText() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0)
-  }, [])
+const data = [
+  { name: 'Chrome', value: 275, color: 'hsl(217, 89%, 61%)' },
+  { name: 'Safari', value: 200, color: 'hsl(4, 82%, 57%)' },
+  { name: 'Firefox', value: 187, color: 'hsl(45, 100%, 51%)' },
+  { name: 'Edge', value: 173, color: 'hsl(122, 61%, 41%)' },
+  { name: 'Other', value: 90, color: 'hsl(271, 48%, 53%)' }
+];
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    return (
+      <Paper 
+        elevation={8}
+        sx={{ 
+          p: 1.5, 
+          bgcolor: 'grey.900', 
+          color: 'white',
+          border: '1px solid',
+          borderColor: 'grey.700'
+        }}
+      >
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography variant="body2" color="grey.300">
+            {data.name}
+          </Typography>
+          <Typography 
+            variant="body2" 
+            fontFamily="monospace" 
+            fontWeight="medium"
+            sx={{ ml: 'auto' }}
+          >
+            {data.value.toLocaleString()}
+          </Typography>
+        </Box>
+      </Paper>
+    );
+  }
+  return null;
+};
+
+type DataItem = { name: string; value: number; color: string };
+
+function DonutChart() {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredData, setHoveredData] = useState<DataItem | null>(null);
+  const { theme } = useSettingContext()
+  
+  const totalVisitors = data.reduce((sum, item) => sum + item.value, 0);
+  
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+    setHoveredData(data[index]);
+  };
+  
+  const onPieLeave = () => {
+    setActiveIndex(null);
+    setHoveredData(null);
+  };
+
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px]"
-        >
-          <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Pie
-              data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
-              innerRadius={60}
-              strokeWidth={5}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold"
-                        >
-                          123
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground"
-                        >
-                          Visitors
-                        </tspan>
-                      </text>
-                    )
-                  }
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="text-muted-foreground leading-none">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
-    </Card>
-  )
-}
+    <Card 
+      sx={{ 
+        maxWidth: 900, 
+        background: theme.palette.mode === "dark"? "transparent": "#f1f1f1",
+        backgroundColor: theme.palette.mode === "dark"? "transparent": "#f1f1f1",
+        color: theme.palette.mode === "dark"? "#f1f1f1": "#141a21",
+        boxShadow: "none"
+      }}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Box mb={3}>
+          <Typography variant="h5" fontWeight="semibold" mb={0.5}>
+            Pie Chart - Donut with Text
+          </Typography>
+          <Typography variant="body2" color="grey.400">
+            January - June 2024
+          </Typography>
+        </Box>
 
+        <Box position="relative" height={320} mb={3}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={80}
+                outerRadius={120}
+                paddingAngle={0}
+                dataKey="value"
+                onMouseEnter={onPieEnter}
+                onMouseLeave={onPieLeave}
+              >
+                {data.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.color}
+                    stroke={index === activeIndex ? '#ffffff' : 'transparent'}
+                    strokeWidth={index === activeIndex ? 2 : 0}
+                    style={{
+                      filter: index === activeIndex ? 'brightness(1.1)' : 'none',
+                      cursor: 'pointer'
+                    }}
+                  />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+          
+          <Box
+            position="absolute"
+            top="50%"
+            left="50%"
+            sx={{
+              transform: 'translate(-50%, -50%)',
+              textAlign: 'center',
+              pointerEvents: 'none'
+            }}
+          >
+            <Typography 
+              variant="h3" 
+              component="div" 
+              fontWeight="bold"
+              sx={{
+                fontSize: hoveredData ? '2rem' : '2.5rem',
+                transition: 'font-size 0.2s ease-in-out'
+              }}
+            >
+              {hoveredData ? hoveredData.value.toLocaleString() : totalVisitors.toLocaleString()}
+            </Typography>
+            <Typography 
+              variant="body2" 
+              color="grey.400" 
+              sx={{ mt: 0.5 }}
+            >
+              {hoveredData ? hoveredData.name : 'Visitors'}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box textAlign="center" mb={3}>
+          <Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={1}>
+            <Typography variant="body1" fontWeight="medium">
+              Trending up by 5.2% this month
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="grey.400">
+            Showing total visitors for the last 6 months
+          </Typography>
+        </Box>
+
+      </CardContent>
+    </Card>
+  );
+}
 
 
 export default function InicioPage(){
@@ -160,11 +209,14 @@ export default function InicioPage(){
                 ml: '6vw', 
                 mb: '8vh',
                 borderRadius: 20,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
                 position: 'inherit',
                 flexShrink: 0
                 }}>
                 {/*<Button variant="contained" sx={{width: "20%"}} onClick={callBack}>hola</Button>*/}
-                <ChartPieDonutText/>
+                <DonutChart/>
 
                     
                     </Stack>

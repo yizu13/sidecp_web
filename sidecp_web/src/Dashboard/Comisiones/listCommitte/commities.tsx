@@ -274,7 +274,17 @@ const dataGridTheme = useMemo(() =>
 
     return(
         <>
-        <Stack sx={{ width: "100%", alignItems: "flex-start", p: 5, pl: "24vw", pb: 2, }}>
+        <Stack sx={{ 
+                width: "80vw",
+                height: "auto",
+                p: 4,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                overflow: "auto",
+                }}>
+        <Stack>
+      <Box sx={{ display: "flex", width: "100%", alignItems: "flex-start" , p: 5, pl: 0, pb: 10, flexDirection: "column" }}>
           <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Comisiones</Typography>
       <Breadcrumbs aria-label="breadcrumb" >
          <Link
@@ -294,16 +304,7 @@ const dataGridTheme = useMemo(() =>
           Comisiones
         </Typography>
       </Breadcrumbs>
-      </Stack>
-        <Stack sx={{ 
-                width: "80vw",
-                height: "auto",
-                p: 4,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                overflow: "auto",
-                }}>
+      </Box>
                   
         <Box sx={{
             maxWidth: "65vw",
@@ -339,6 +340,7 @@ const dataGridTheme = useMemo(() =>
         </ThemeProvider>
         </Box>
         <AdministrationCommitte/>
+        </Stack>
         </Stack>
         <EventsModal open={openModal} eventList={eventList} modalFunc={setModal} eventsFunc={setEvents}/>
         <DescriptionModal open={openModalDescription} description={description} modalFunc={setModalDescription} descriptionFunc={setDescription}/>
