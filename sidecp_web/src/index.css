@@ -1,4 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
+   --chart-1: #4285f4;
+  --chart-2: #ea4335;
+  --chart-3: #fbbc05;
+  --chart-4: #34a853;
+  --chart-5: #9b59b6;
+
+  --color-chrome: var(--chart-1);
+  --color-safari: var(--chart-2);
+  --color-firefox: var(--chart-3);
+  --color-edge: var(--chart-4);
+  --color-other: var(--chart-5);
+
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -10,6 +26,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme='dark'] {
+  --chart-1: #4a90e2;
+  --chart-2: #e74c3c;
+  --chart-3: #f1c40f;
+  --chart-4: #2ecc71;
+  --chart-5: #9b59b6;
 }
 
 a {
