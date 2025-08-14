@@ -1,16 +1,18 @@
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { Box, Breadcrumbs, Button, createTheme, IconButton, Stack, ThemeProvider, Typography, Link, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Breadcrumbs, Button, createTheme, IconButton, Stack, ThemeProvider, Typography, Link, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Tooltip } from '@mui/material';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import ModalDelegation from './modalAddDelegation';
 import { getCommitties } from '../../../API/userAPI';
 import { getStudents, deleteStudent, getScores } from '../../../API/userAPI';
 import { Icon } from '@iconify/react';
+import ConfirmDialog from '../../layout/ConfirmDialog';
 import { esES } from '@mui/x-data-grid/locales';
 import { Link as RouterLink } from 'react-router-dom';
 import { createStudent } from "../../../API/userAPI";
 import { countriesWithLabelId } from "../../../../public/flags"
 import * as XLSX from 'xlsx';
+import React from 'react';
 
 type data = {
   committeName: string
@@ -82,6 +84,26 @@ const [selectedExportCommitte, setSelectedExportCommitte] = useState<string>('al
 
 const [deleteByCommDialog, setDeleteByCommDialog] = useState(false);
 const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
+
+  // Refetch centralizado
+  const refetchAll = useCallback(async () => {
+    try {
+      const [committeRes, studentsRes, scoresRes] = await Promise.all([
+        getCommitties(),
+        getStudents(),
+        getScores()
+      ]);
+      setCommities(committeRes.data.committies || []);
+      setStudents(studentsRes.data.students || []);
+      setScores(scoresRes.data.scores || []);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
+  useEffect(() => {
+    refetchAll();
+  }, [refetchAll]);
 
   // Handler para eliminar todos los estudiantes de una comisión
   const handleDeleteByCommission = async () => {
@@ -190,8 +212,7 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
       }
 
       // Refresca la lista de estudiantes después de importar
-      const response2 = await getStudents();
-      setStudents(response2.data.students);
+      refetchAll();
 
       if (duplicados > 0) {
         alert(`Se omitieron ${duplicados} estudiantes porque ya existen.`);
@@ -281,7 +302,7 @@ const handleConfirmExport = () => {
   const confirmDelete = async () => {
     if (rowToDelete) {
       await deleteStudent(rowToDelete.id);
-      setStudents(prev => prev.filter((item: student) => item.studentid !== rowToDelete.id));
+      refetchAll();
       setRowToDelete(null);
       setConfirmOpen(false);
     }
@@ -299,25 +320,49 @@ const handleConfirmExport = () => {
   }
 
 const columns: GridColDef<(typeof rows)[number]>[] = [
-  
-  { field: 'evaluatorId', headerName: 'Id', width: 150 },
+  { 
+    field: 'evaluatorId', 
+    headerName: 'ID', 
+    width: 100,
+    headerAlign: 'center',
+    align: 'center'
+  },
   {
     field: 'committeName',
-    headerName: 'Nombre del comisión',
-    width: 300,
+    headerName: 'Comisión',
+    width: 250,
+    headerAlign: 'left',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:clipboard-text-bold" style={{ fontSize: 18 }} />
+        <span>Comisión</span>
+      </Box>
+    )
   },
   {
     field: 'fullName',
     headerName: 'Nombre completo',
-    description: 'This column has a value getter and is not sortable.',
     sortable: false,
-    width: 300
+    width: 250,
+    headerAlign: 'left',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:user-bold" style={{ fontSize: 18 }} />
+        <span>Nombre completo</span>
+      </Box>
+    )
   },{
     field: 'delegation',
     headerName: 'Delegación',
-    description: 'This column has a value getter and is not sortable.',
     sortable: false,
-    width: 300
+    width: 200,
+    headerAlign: 'left',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:flag-bold" style={{ fontSize: 18 }} />
+        <span>Delegación</span>
+      </Box>
+    )
   },{
     field: 'actions',
     headerName: 'Acciones',
@@ -325,21 +370,27 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
     sortable: false,
     filterable: false,
     disableExport: true,
+    headerAlign: 'center',
+    align: 'center',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:settings-bold" style={{ fontSize: 18 }} />
+        <span>Acciones</span>
+      </Box>
+    ),
     renderCell: (params) => (
-      <>
-        <IconButton
-          onClick={() => {handleEdit(params.row)}}
-          color="warning"
-        >
-          <Icon icon="ic:baseline-edit"/>
-        </IconButton>
-        <IconButton
-          onClick={() => {handleDelete(params.row)}}
-          color="error"
-        >
-          <Icon icon="weui:delete-filled"/>
-        </IconButton>
-      </>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ p: 0.5, justifyContent: "center" }}>
+        <Tooltip title="Editar" placement="top">
+          <IconButton onClick={() => handleEdit(params.row)} color="warning" size="medium" sx={{ borderRadius: 2 }}>
+            <Icon icon="solar:pen-bold" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Eliminar" placement="top">
+          <IconButton onClick={() => handleDelete(params.row)} color="error" size="medium" sx={{ borderRadius: 2 }}>
+            <Icon icon="solar:trash-bin-minimalistic-bold" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
     ),
   },
 ];
@@ -456,73 +507,184 @@ const dataGridTheme = useMemo(() =>
                 overflow: "auto",
                 }}>
                 <Stack>
-      <Box sx={{ display: "flex", width: "100%", alignItems: "flex-start" , p: 5, pl: 0, pb: 4, flexDirection: "column" }}>
-        <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Delegaciones</Typography>
-      <Breadcrumbs aria-label="breadcrumb" >
-        <Link
-          component={RouterLink}
-          underline="hover"
-          sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}
-          color="inherit"
-          to="/dashboard/inicio"
+      <Box sx={{ 
+        display: "flex", 
+        width: "100%", 
+        alignItems: "flex-start", 
+        p: 5, 
+        pl: 0, 
+        pb: 4, 
+        flexDirection: "column" 
+      }}>
+        <Typography 
+          variant="h4" 
+          sx={{
+            color: theme.palette.mode === "dark"?'white':'black', 
+            mb: 3,
+            fontFamily: '"Inter", "Roboto", sans-serif',
+            fontWeight: 600,
+            letterSpacing: '-0.02em'
+          }}
         >
-          <Icon icon="tabler:home-filled"/>
-          Inicio
-        </Link>
-        <Typography
-          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
-        >
-          <Icon icon="ic:round-person" />
-          Usuarios
-        </Typography>
-        <Typography
-          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
-        >
-          <Icon icon="fontisto:persons" />
           Delegaciones
         </Typography>
-      </Breadcrumbs>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+          <Link
+            component={RouterLink}
+            underline="hover"
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              columnGap: 1,
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+            color="inherit"
+            to="/dashboard/inicio"
+          >
+            <Icon icon="solar:home-bold"/>
+            Inicio
+          </Link>
+          <Typography
+            sx={{ 
+              color: 'text.primary', 
+              display: 'flex', 
+              alignItems: 'center', 
+              cursor: "default", 
+              columnGap: 1,
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+          >
+            <Icon icon="solar:users-group-two-rounded-bold" />
+            Usuarios
+          </Typography>
+          <Typography
+            sx={{ 
+              color: 'text.primary', 
+              display: 'flex', 
+              alignItems: 'center', 
+              cursor: "default", 
+              columnGap: 1,
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+          >
+            <Icon icon="solar:user-speak-bold" />
+            Delegaciones
+          </Typography>
+        </Breadcrumbs>
       </Box>
-        <Stack display="flex" flexDirection="row" alignSelf="end">
+        <Stack display="flex" flexDirection="row" alignSelf="end"  sx={{ mb: 3, gap: 2 }}>
           <Button
-        variant="contained"
-        color="error"
-        sx={{ m: 2, alignSelf: "end", borderRadius: 2 }}
-        onClick={() => setDeleteByCommDialog(true)}
-      >
-        Eliminar por comisión
-      </Button>
+            variant="contained"
+            color="error"
+            startIcon={<Icon icon="solar:trash-bin-minimalistic-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              boxShadow: '0px 4px 12px rgba(244, 67, 54, 0.3)',
+              '&:hover': {
+                boxShadow: '0px 6px 16px rgba(244, 67, 54, 0.4)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+            onClick={() => setDeleteByCommDialog(true)}
+          >
+            Eliminar por comisión
+          </Button>
           <Button
-              variant="contained"
-              color="success"
-              sx={{ m: 2, alignSelf: "end", borderRadius: 2 }}
-              onClick={handleExportExcel}
-            >
-              Exportar a Excel
-            </Button>
-        <Button
-          variant="contained"
-          color="warning"
-          sx={{ m: 2, alignSelf: "end", borderRadius: 2 }}
-          onClick={() => setExplanation(true)}
-        >
-          Importar de Excel
-        </Button>
-        <input
-          id="excel-file-input"
-          type="file"
-          accept=".xlsx,.xls"
-          hidden
-          style={{ display: 'none' }}
-          onChange={handleImportButtonClick}
-        />
-        <Button onClick={() => { setOpen(true) }} sx={{ m: 2, alignSelf: "end", borderRadius: 2 }} color="primary" variant='contained'>Agregar delegado</Button>
-      </Stack>
+            variant="contained"
+            color="success"
+            startIcon={<Icon icon="solar:export-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              boxShadow: '0px 4px 12px rgba(76, 175, 80, 0.3)',
+              '&:hover': {
+                boxShadow: '0px 6px 16px rgba(76, 175, 80, 0.4)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+            
+            onClick={handleExportExcel}
+          >
+            Exportar a Excel
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<Icon icon="solar:import-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              boxShadow: '0px 4px 12px rgba(255, 152, 0, 0.3)',
+              '&:hover': {
+                boxShadow: '0px 6px 16px rgba(255, 152, 0, 0.4)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+            onClick={() => setExplanation(true)}
+          >
+            Importar de Excel
+          </Button>
+          <input
+            id="excel-file-input"
+            type="file"
+            accept=".xlsx,.xls"
+            hidden
+            style={{ display: 'none' }}
+            onChange={handleImportButtonClick}
+          />
+          <Button 
+            onClick={() => { setOpen(true) }} 
+            variant='contained'
+            color="primary"
+            startIcon={<Icon icon="solar:user-plus-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              boxShadow: '0px 4px 12px rgba(25, 118, 210, 0.3)',
+              '&:hover': {
+                boxShadow: '0px 6px 16px rgba(25, 118, 210, 0.4)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            Agregar delegado
+          </Button>
+        </Stack>
 
-      <Dialog open={importDialogOpen} onClose={() => setImportDialogOpen(false)} slotProps={{ paper: { sx: { borderRadius: 6 } } }}>
-        <DialogTitle>Selecciona la comisión para los estudiantes</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth sx={{ mt: 2 }}>
+      <Dialog open={importDialogOpen} onClose={() => setImportDialogOpen(false)} slotProps={{ paper: { sx: { borderRadius: 4, maxWidth: 500 } } }}>
+        <DialogTitle sx={{ p: 3, pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Icon icon="solar:import-bold" style={{ fontSize: 24, color: theme.palette.warning.main }} />
+            <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600 }}>
+              Seleccionar Comisión
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, pt: 1 }}>
+          <Typography sx={{ fontFamily: '"Inter", "Roboto", sans-serif', color: theme.palette.mode === 'dark' ? '#cccccc' : '#666', mb: 3 }}>
+            Selecciona la comisión para los estudiantes que vas a importar.
+          </Typography>
+          <FormControl fullWidth>
             <InputLabel id="select-committe-label">Comisión</InputLabel>
             <Select
               labelId="select-committe-label"
@@ -538,18 +700,38 @@ const dataGridTheme = useMemo(() =>
             </Select>
           </FormControl>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setImportDialogOpen(false)} color="primary" variant='outlined' sx={{ borderRadius: 4 }}>
+        <DialogActions sx={{ p: 3, pt: 1, gap: 1.5 }}>
+          <Button 
+            onClick={() => setImportDialogOpen(false)} 
+            variant='outlined' 
+            startIcon={<Icon icon="solar:close-circle-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3, 
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+            color="error"
+          >
             Cerrar
           </Button>
           <Button
             onClick={handleImportExcel}
             color="warning"
             variant="contained"
-            sx={{ borderRadius: 4 }}
+            startIcon={<Icon icon="solar:check-circle-bold" />}
             disabled={!selectedCommitte || importing}
+            sx={{ 
+              borderRadius: 3, 
+              px: 4, 
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+            fullWidth
           >
-            Importar
+            {importing ? 'Importando...' : 'Importar'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -588,59 +770,139 @@ const dataGridTheme = useMemo(() =>
         </Stack>
         </Stack>
                 <ModalDelegation currentData={selectRow} setOpen={setOpen} open={open} commities={commities} setRow={setRow}/>
-        <Dialog open={confirmOpen} onClose={cancelDelete} slotProps={{paper: {sx: {borderRadius: 6}}}}>
-        <DialogTitle>Eliminar delegado</DialogTitle>
-        <DialogContent>
-          ¿Estás seguro que deseas eliminar este delegado? Esta acción no se puede deshacer.
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Eliminar delegado"
+          description="¿Estás seguro que deseas eliminar este delegado? Esta acción no se puede deshacer."
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          confirmColor="error"
+          icon="solar:trash-bin-minimalistic-bold"
+          onClose={cancelDelete}
+          onConfirm={confirmDelete}
+        />
+
+
+      <Dialog open={openExplanationDialog} slotProps={{paper: {sx: {borderRadius: 4, maxWidth: 600}}}}>
+        <DialogTitle sx={{ p: 3, pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Icon icon="solar:document-add-bold" style={{ fontSize: 24, color: theme.palette.warning.main }} />
+            <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600 }}>
+              Importar Delegados desde Excel
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, pt: 1 }}>
+          <Typography sx={{ 
+            fontFamily: '"Inter", "Roboto", sans-serif',
+            color: theme.palette.mode === 'dark' ? '#cccccc' : '#666',
+            mb: 3,
+            lineHeight: 1.6
+          }}>
+            Selecciona un archivo Excel con los datos de los delegados siguiendo estas instrucciones:
+          </Typography>
+          
+          <Box sx={{ 
+            mb: 3,
+            p: 2, 
+            borderRadius: 2, 
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(25, 118, 210, 0.1)' : 'rgba(25, 118, 210, 0.05)',
+            border: `1px solid ${theme.palette.primary.main}`
+          }}>
+            <Typography sx={{ 
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 600,
+              mb: 2,
+              color: theme.palette.primary.main
+            }}>
+              <Icon icon="solar:document-text-bold"/> Formato requerido de columnas:
+            </Typography>
+            <Box component="ol" sx={{ 
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              color: theme.palette.mode === 'dark' ? '#ffffff' : '#333',
+              pl: 2,
+              m: 0
+            }}>
+              <li><strong>Nombre del estudiante</strong></li>
+              <li><strong>Apellidos</strong></li>
+              <li><strong>Delegación (país)</strong></li>
+            </Box>
+          </Box>
+
+          <Box sx={{ 
+            p: 2, 
+            borderRadius: 2, 
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 152, 0, 0.1)' : 'rgba(255, 152, 0, 0.05)',
+            border: `1px solid ${theme.palette.warning.main}`
+          }}>
+            <Typography sx={{ 
+              color: theme.palette.warning.main,
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontSize: '0.875rem',
+              fontWeight: 500
+            }}>
+              <Icon icon="solar:danger-bold"/> <strong>Importante:</strong> Los nombres de los países deben estar escritos correctamente para evitar conflictos.
+            </Typography>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelDelete} color="primary" variant='outlined' sx={{borderRadius: 4}}>
-            Cerrar
-          </Button>
-          <Button onClick={confirmDelete} color="error" variant="contained" sx={{borderRadius: 4}}>
-            Eliminar
-          </Button>
-        </DialogActions>
-        </Dialog>
-
-
-      <Dialog open={openExplanationDialog}  slotProps={{paper: {sx: {borderRadius: 6}}}}>
-        <DialogTitle><Typography variant='h5' paddingTop={2}>Importar delegados desde Excel</Typography></DialogTitle>
-        <DialogContent sx={{ whiteSpace: 'pre-line' }}>
-    <span>
-      Selecciona un archivo Excel con los datos de los delegados.
-      {"\n\n"}
-      Antes de continuar usted debe de tener las columnas en el siguiente orden:
-      {"\n"}
-      <b>1. Nombre de estudiante</b>, <b>2. Apellidos, </b> <b>3. Delegación</b>
-      {"\n\n"}
-      <b style={{color: theme.palette.error.main}}>Le recordamos que los países deben estar bien escritos para evitar conflictos.</b>
-    </span>
-  </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setExplanation(false)} color="primary" variant='outlined' sx={{borderRadius: 4, width: "30%"}}>
+        <DialogActions sx={{ p: 3, pt: 1, gap: 1.5 }}>
+          <Button 
+            onClick={() => setExplanation(false)} 
+            variant='outlined' 
+            startIcon={<Icon icon="solar:close-circle-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+            color="error"
+          >
             Cerrar
           </Button>
           <Button
             color="warning"
             variant="contained"
-            sx={{borderRadius: 4}}
+            startIcon={<Icon icon="solar:file-smile-bold" />}
             onClick={() => {
               setExplanation(false);
               document.getElementById('excel-file-input')?.click();
             }}
+            sx={{ 
+              borderRadius: 3, 
+              px: 4,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
             fullWidth
           >
-            Seleccionar archivo
+            Seleccionar Archivo
           </Button>
         </DialogActions>
       </Dialog>
 
 
-      <Dialog open={exportDialogOpen} onClose={() => setExportDialogOpen(false)} slotProps={{ paper: { sx: { borderRadius: 6 } } }}>
-  <DialogTitle>Selecciona la comisión a exportar</DialogTitle>
-  <DialogContent>
-    <FormControl fullWidth sx={{ mt: 2 }}>
+      <Dialog open={exportDialogOpen} onClose={() => setExportDialogOpen(false)} slotProps={{ paper: { sx: { borderRadius: 4, maxWidth: 500 } } }}>
+  <DialogTitle sx={{ p: 3, pb: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Icon icon="solar:export-bold" style={{ fontSize: 24, color: theme.palette.success.main }} />
+      <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600 }}>
+        Exportar a Excel
+      </Typography>
+    </Box>
+  </DialogTitle>
+  <DialogContent sx={{ p: 3, pt: 1 }}>
+    <Typography sx={{ 
+      fontFamily: '"Inter", "Roboto", sans-serif',
+      color: theme.palette.mode === 'dark' ? '#cccccc' : '#666',
+      mb: 3,
+      lineHeight: 1.5
+    }}>
+      Selecciona qué delegados deseas exportar a un archivo Excel.
+    </Typography>
+    <FormControl fullWidth>
       <InputLabel id="select-export-committe-label">Comisión</InputLabel>
       <Select
         labelId="select-export-committe-label"
@@ -648,24 +910,51 @@ const dataGridTheme = useMemo(() =>
         label="Comisión"
         onChange={e => setSelectedExportCommitte(e.target.value)}
       >
-        <MenuItem value="all">Todas las comisiones</MenuItem>
+        <MenuItem value="all">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Icon icon="solar:users-group-two-rounded-bold" style={{ fontSize: 18 }} />
+            Todas las comisiones
+          </Box>
+        </MenuItem>
         {commities.map((committe) => (
           <MenuItem key={committe.committeid} value={committe.committeid}>
-            {committe.committename}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Icon icon="solar:clipboard-text-bold" style={{ fontSize: 18 }} />
+              {committe.committename}
+            </Box>
           </MenuItem>
         ))}
       </Select>
     </FormControl>
   </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setExportDialogOpen(false)} color="error" variant='outlined' sx={{ borderRadius: 4, width: "30%" }}>
+  <DialogActions sx={{ p: 3, pt: 1, gap: 1.5 }}>
+    <Button 
+      onClick={() => setExportDialogOpen(false)} 
+      variant='outlined' 
+      startIcon={<Icon icon="solar:close-circle-bold" />}
+      sx={{ 
+        borderRadius: 3, 
+        px: 3,
+        textTransform: 'none',
+        fontFamily: '"Inter", "Roboto", sans-serif',
+        fontWeight: 500
+      }}
+      color="error"
+    >
       Cerrar
     </Button>
     <Button
       onClick={handleConfirmExport}
       color="success"
       variant="contained"
-      sx={{ borderRadius: 4 }}
+      startIcon={<Icon icon="solar:check-circle-bold" />}
+      sx={{ 
+        borderRadius: 3, 
+        px: 4,
+        textTransform: 'none',
+        fontFamily: '"Inter", "Roboto", sans-serif',
+        fontWeight: 500
+      }}
       fullWidth
     >
       Exportar
@@ -673,10 +962,25 @@ const dataGridTheme = useMemo(() =>
   </DialogActions>
 </Dialog>
 
-<Dialog open={deleteByCommDialog} onClose={() => setDeleteByCommDialog(false)} slotProps={{ paper: { sx: { borderRadius: 6 } } }}>
-        <DialogTitle>Eliminar todos los delegados de una comisión</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth sx={{ mt: 2 }}>
+<Dialog open={deleteByCommDialog} onClose={() => setDeleteByCommDialog(false)} slotProps={{ paper: { sx: { borderRadius: 4, maxWidth: 550 } } }}>
+        <DialogTitle sx={{ p: 3, pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Icon icon="solar:danger-bold" style={{ fontSize: 24, color: theme.palette.error.main }} />
+            <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600 }}>
+              Eliminar Delegados por Comisión
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, pt: 1 }}>
+          <Typography sx={{ 
+            fontFamily: '"Inter", "Roboto", sans-serif',
+            color: theme.palette.mode === 'dark' ? '#cccccc' : '#666',
+            mb: 3,
+            lineHeight: 1.5
+          }}>
+            Selecciona la comisión de la cual deseas eliminar todos los delegados.
+          </Typography>
+          <FormControl fullWidth>
             <InputLabel id="select-delete-committe-label">Comisión</InputLabel>
             <Select
               labelId="select-delete-committe-label"
@@ -691,23 +995,55 @@ const dataGridTheme = useMemo(() =>
               ))}
             </Select>
           </FormControl>
-          <Typography sx={{ mt: 2, color: theme.palette.error.main }}>
-            Esta acción eliminará <b>todos</b> los estudiantes de la comisión seleccionada. No se puede deshacer.
-          </Typography>
+          <Box sx={{ 
+            mt: 3,
+            p: 2, 
+            borderRadius: 2, 
+            bgcolor: theme.palette.mode === 'dark' ? 'rgba(244, 67, 54, 0.1)' : 'rgba(244, 67, 54, 0.05)',
+            border: `1px solid ${theme.palette.error.main}`
+          }}>
+            <Typography sx={{ 
+              color: theme.palette.error.main,
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontSize: '0.875rem',
+              fontWeight: 500
+            }}>
+               Esta acción eliminará <strong>todos</strong> los estudiantes de la comisión seleccionada. No se puede deshacer.
+            </Typography>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteByCommDialog(false)} color="primary" variant='outlined' sx={{ borderRadius: 4, width: "30%" }}>
+        <DialogActions sx={{ p: 3, pt: 1, gap: 1.5 }}>
+          <Button 
+            onClick={() => setDeleteByCommDialog(false)} 
+            variant='outlined' 
+            startIcon={<Icon icon="solar:close-circle-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
+          >
             Cerrar
           </Button>
           <Button
             onClick={handleDeleteByCommission}
             color="error"
             variant="contained"
-            sx={{ borderRadius: 4 }}
+
+            startIcon={<Icon icon="solar:trash-bin-minimalistic-bold" />}
             disabled={!selectedDeleteComm}
+            sx={{ 
+              borderRadius: 3, 
+              px: 4,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500
+            }}
             fullWidth
           >
-            Eliminar
+            Eliminar Todos
           </Button>
         </DialogActions>
       </Dialog>

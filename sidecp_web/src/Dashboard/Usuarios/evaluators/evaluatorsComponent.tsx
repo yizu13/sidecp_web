@@ -1,16 +1,18 @@
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
-import { Box, Breadcrumbs, Button, createTheme, IconButton, Stack, ThemeProvider, Typography } from '@mui/material';
+import { Box, Breadcrumbs, Button, createTheme, IconButton, Stack, ThemeProvider, Typography, Tooltip } from '@mui/material';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import ModalEvaluator from './modalAddEvaluator';
 import { getUsers } from '../../../API/userAPI';
 import { getCommitties } from '../../../API/userAPI';
 import { getEvaluators } from '../../../API/userAPI';
 import { deleteEvaluator } from "../../../API/userAPI"
 import { Icon } from '@iconify/react';
+import ConfirmDialog from '../../layout/ConfirmDialog';
 import { esES } from '@mui/x-data-grid/locales';
 import { Link as RouterLink } from 'react-router-dom';
 import Link from '@mui/material/Link';
+import React from 'react';
 
 type data = {
   committeName: string
@@ -63,25 +65,60 @@ const [evaluators, setEvaluators] = useState([])
     setRow({ userId: users.find((i: users)=> `${i.name} ${i.lastname}` === data.fullName)?.userid, committe: commities.find((i: committe)=> i.committename === data.committeName)?.committeid, evaluatorId: data.id})
     setOpen(true)
   }
-  const handleDelete = async (data: data) =>{
-    await deleteEvaluator(data.id)
-    setEvaluators(prev=> prev.filter((item: evaluator)=> item.evaluatorid !== data.id))
-  }
+ const [confirmOpen, setConfirmOpen] = useState(false);
+ const [rowToDelete, setRowToDelete] = useState<data | null>(null);
+
+ const handleDelete = (data: data) =>{
+    setRowToDelete(data)
+    setConfirmOpen(true)
+ }
+
+ const confirmDelete = async () =>{
+   if(rowToDelete){
+     await deleteEvaluator(rowToDelete.id)
+     await refetchAll()
+     setRowToDelete(null)
+     setConfirmOpen(false)
+   }
+ }
+
+ const cancelDelete = () =>{
+   setRowToDelete(null)
+   setConfirmOpen(false)
+ }
 
 const columns: GridColDef<(typeof rows)[number]>[] = [
-  
-  { field: 'evaluatorId', headerName: 'Id', width: 150 },
+  { 
+    field: 'evaluatorId', 
+    headerName: 'ID', 
+    width: 100,
+    headerAlign: 'center',
+    align: 'center'
+  },
   {
     field: 'committeName',
-    headerName: 'Nombre del comité',
+    headerName: 'Comité',
     width: 300,
+    headerAlign: 'left',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:clipboard-text-bold" style={{ fontSize: 18 }} />
+        <span>Comité</span>
+      </Box>
+    )
   },
   {
     field: 'fullName',
     headerName: 'Nombre completo',
-    description: 'This column has a value getter and is not sortable.',
     sortable: false,
-    width: 300
+    width: 300,
+    headerAlign: 'left',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:user-bold" style={{ fontSize: 18 }} />
+        <span>Nombre completo</span>
+      </Box>
+    )
   },{
     field: 'actions',
     headerName: 'Acciones',
@@ -89,52 +126,49 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
     sortable: false,
     filterable: false,
     disableExport: true,
+    headerAlign: 'center',
+    align: 'center',
+    renderHeader: () => (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Icon icon="solar:settings-bold" style={{ fontSize: 18 }} />
+        <span>Acciones</span>
+      </Box>
+    ),
     renderCell: (params) => (
-      <>
-        <IconButton
-          onClick={() => {handleEdit(params.row)}}
-          color="warning"
-        >
-          <Icon icon="ic:baseline-edit"/>
-        </IconButton>
-        <IconButton
-          onClick={() => {handleDelete(params.row)}}
-          color="error"
-        >
-          <Icon icon="weui:delete-filled"/>
-        </IconButton>
-      </>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ p: 1, justifyContent: "center" }}>
+        <Tooltip title="Editar" placement="top">
+          <IconButton onClick={() => handleEdit(params.row)} color="warning" size="medium" sx={{ borderRadius: 2 }}>
+            <Icon icon="solar:pen-bold" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Eliminar" placement="top">
+          <IconButton onClick={() => handleDelete(params.row)} color="error" size="medium" sx={{ borderRadius: 2 }}>
+            <Icon icon="solar:trash-bin-minimalistic-bold" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
     ),
   },
 ];
 
-useEffect(()=>{
-      const callUsers = async ()=>{
-        const response = await getUsers();
-        setUsers(response.data?.users);
-      }
-      const callCommities = async ()=>{
-        try{
-          const response = await getCommitties();
-          setCommities(response.data.committies);
-        }catch(err){
-          console.log(err)
-        }
-        
-      }
-      const callEvaluators = async ()=>{
-        try{
-          const response = await getEvaluators();
-          setEvaluators(response.data.evaluators);
-        }catch(err){
-          console.log(err);
-        }
-        
-      }
-      callCommities();
-      callUsers();
-      callEvaluators();
-},[open])
+ const refetchAll = useCallback(async () => {
+   try {
+     const [usersRes, commRes, evalRes] = await Promise.all([
+       getUsers(),
+       getCommitties(),
+       getEvaluators()
+     ]);
+     setUsers(usersRes.data?.users || []);
+     setCommities(commRes.data?.committies || []);
+     setEvaluators(evalRes.data?.evaluators || []);
+   } catch (err) {
+     console.log(err);
+   }
+ }, []);
+
+ useEffect(() => {
+   refetchAll();
+ }, [refetchAll]);
 
 const transformDataRow = ()=>{
   return evaluators.map((evaluator: evaluator, i: number)=> {
@@ -215,34 +249,97 @@ const dataGridTheme = useMemo(() =>
                 overflow: "auto",
                 }}>
                 <Stack>
-                 <Box sx={{ display: "flex", width: "100%", alignItems: "flex-start" , p: 5, pl: 0, pb: 2, flexDirection: "column" }}>
-          <Typography typography="h4" sx={{color: theme.palette.mode === "dark"?'white':'black', mb: 2}}>Evaluadores</Typography>
-      <Breadcrumbs aria-label="breadcrumb" >
-        <Link
-          component={RouterLink}
-          underline="hover"
-          sx={{ display: 'flex', alignItems: 'center', columnGap: 1 }}
-          color="inherit"
-          to="/dashboard/inicio"
-        >
-          <Icon icon="tabler:home-filled"/>
-          Inicio
-        </Link>
-        <Typography
-          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
-        >
-          <Icon icon="ic:round-person" />
-          Usuarios
-        </Typography>
-        <Typography
-          sx={{ color: 'text.primary', display: 'flex', alignItems: 'center', cursor: "default", columnGap: 1 }}
-        >
-          <Icon icon="mdi:typewriter" />
-          Evaluadores
-        </Typography>
-      </Breadcrumbs>
-      </Box>
-      <Button onClick={()=>{setOpen(true)}}sx={{m: 2, alignSelf: "end", borderRadius: 2}} color="primary" variant='contained' >Agregar evaluador</Button>
+                 <Box sx={{ 
+                   display: "flex", 
+                   width: "100%", 
+                   alignItems: "flex-start", 
+                   p: 5, 
+                   pl: 0, 
+                   pb: 4, 
+                   flexDirection: "column" 
+                 }}>
+          <Typography 
+            variant="h4" 
+            sx={{
+              color: theme.palette.mode === "dark"?'white':'black', 
+              mb: 3,
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 600,
+              letterSpacing: '-0.02em'
+            }}
+          >
+            Evaluadores
+          </Typography>
+          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+            <Link
+              component={RouterLink}
+              underline="hover"
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                columnGap: 1,
+                fontFamily: '"Inter", "Roboto", sans-serif',
+                fontWeight: 500
+              }}
+              color="inherit"
+              to="/dashboard/inicio"
+            >
+              <Icon icon="solar:home-bold"/>
+              Inicio
+            </Link>
+            <Typography
+              sx={{ 
+                color: 'text.primary', 
+                display: 'flex', 
+                alignItems: 'center', 
+                cursor: "default", 
+                columnGap: 1,
+                fontFamily: '"Inter", "Roboto", sans-serif',
+                fontWeight: 500
+              }}
+            >
+              <Icon icon="solar:users-group-two-rounded-bold" />
+              Usuarios
+            </Typography>
+            <Typography
+              sx={{ 
+                color: 'text.primary', 
+                display: 'flex', 
+                alignItems: 'center', 
+                cursor: "default", 
+                columnGap: 1,
+                fontFamily: '"Inter", "Roboto", sans-serif',
+                fontWeight: 500
+              }}
+            >
+              <Icon icon="solar:user-check-bold" />
+              Evaluadores
+            </Typography>
+          </Breadcrumbs>
+        </Box>
+        <Box sx={{ alignSelf: "end", mb: 3 }}>
+          <Button 
+            onClick={()=>{setOpen(true)}}
+            variant='contained' 
+            color="primary"
+            startIcon={<Icon icon="solar:user-plus-bold" />}
+            sx={{ 
+              borderRadius: 3, 
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              boxShadow: '0px 4px 12px rgba(25, 118, 210, 0.3)',
+              '&:hover': {
+                boxShadow: '0px 6px 16px rgba(25, 118, 210, 0.4)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            Agregar evaluador
+          </Button>
+        </Box>
         <Box sx={{
             maxWidth: "65vw",
             borderRadius: 4,
@@ -278,6 +375,17 @@ const dataGridTheme = useMemo(() =>
         </Stack>
         </Stack>
                 <ModalEvaluator currentData={selectRow} setOpen={setOpen} open={open} usersData={users} commities={commities} setRow={setRow}/>
+        <ConfirmDialog
+          open={confirmOpen}
+          title="Eliminar evaluador"
+          description="¿Estás seguro que deseas eliminar este evaluador? Esta acción no se puede deshacer."
+          confirmText="Eliminar"
+          cancelText="Cancelar"
+          confirmColor="error"
+          icon="solar:trash-bin-minimalistic-bold"
+          onClose={cancelDelete}
+          onConfirm={confirmDelete}
+        />
         </>
     )
 }

@@ -24,6 +24,7 @@ import {
     useScroll,
 } from "framer-motion"
 import './scrollConfiguration.css';
+import React from 'react';
 
 
 type flags = {
@@ -162,46 +163,97 @@ export default function DelegationEval(){
   className='scrollConfiguration' 
   ref={ref}
   style={{
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "24px",
     width: '75vw',
     height: "100vh",
     overflowY: "auto",
     marginLeft: '4vw',
-    columnGap: 3,
-    rowGap: 3,
-    maskImage: students.filter((i: student)=> i.committeid === selected).length > 3 ? maskImage : undefined
+    padding: "16px",
+    maskImage: students.filter((i: student)=> i.committeid === selected).length > 3 || selected === '' ? maskImage : undefined
   }}
 >
     {filteredStudents.map((item: student, i: number) => 
-    <Stack key={i} sx={{p: 2, flex: '1 1 30%', maxWidth: '33.33%', boxSizing: 'border-box' }}>
-    <Card sx={{ width: 350, height: "auto", borderRadius: 4, backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white', boxShadow: '0px 4px 16px rgba(22, 22, 22, 0.15)', }}>
+    <Box key={i} sx={{ display: 'flex', justifyContent: 'center' }}>
+    <Card sx={{ 
+      width: '100%', 
+      maxWidth: 350,
+      minWidth: 320,
+      height: "auto", 
+      borderRadius: 4, 
+      backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white', 
+      boxShadow: '0px 4px 16px rgba(22, 22, 22, 0.15)',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       <CardMedia
         component="img"
         alt={`Bandera de ${item.delegation}`}
         height={200}
         image={countriesWithFlags.find((i: flags)=> i.title === item.delegation)?.cdn}
+        sx={{ objectFit: 'cover' }}
       />
-      <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
+      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Typography gutterBottom variant="h5" component="div" sx={{
+          fontFamily: '"Inter", "Roboto", sans-serif',
+          fontWeight: 600,
+          letterSpacing: '-0.01em'
+        }}>
           {item.delegation}
         </Typography>
-        <Typography gutterBottom variant="body1" sx={{fontWeight: "bold"}}>
+        <Typography gutterBottom variant="body1" sx={{
+          fontWeight: 500,
+          fontFamily: '"Inter", "Roboto", sans-serif'
+        }}>
           {`${item.name} ${item.lastname}`}
         </Typography>
         <EditableTypography/>
       </CardContent>
-      <CardActions sx={{padding: 2}}>
+      <CardActions sx={{ padding: 2, mt: 'auto' }}>
         <Tooltip title={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen?"La comisión está cerrada": ""} placement='top'>
           <Box width="100%">
-        {scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified &&<Button disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} variant='contained' color='primary' onClick={()=> {setOpen(true); setCurrent(item)}} fullWidth>Modificar</Button>}
-        {!scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified && <Button disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} variant='contained' color='primary' onClick={()=> {setOpen(true); setCurrent(item)}} fullWidth>Calificar</Button>}
+        {scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified && (
+          <Button 
+            disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} 
+            variant='contained' 
+            color='primary' 
+            onClick={()=> {setOpen(true); setCurrent(item)}} 
+            fullWidth
+            startIcon={<Icon icon="solar:pen-bold" />}
+            sx={{
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              borderRadius: 2
+            }}
+          >
+            Modificar
+          </Button>
+        )}
+        {!scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified && (
+          <Button 
+            disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} 
+            variant='contained' 
+            color='primary' 
+            onClick={()=> {setOpen(true); setCurrent(item)}} 
+            fullWidth
+            startIcon={<Icon icon="solar:clipboard-check-bold" />}
+            sx={{
+              textTransform: 'none',
+              fontFamily: '"Inter", "Roboto", sans-serif',
+              fontWeight: 500,
+              borderRadius: 2
+            }}
+          >
+            Calificar
+          </Button>
+        )}
         </Box>
         </Tooltip>
       </CardActions>
     </Card>
-    </Stack>)}
+    </Box>)}
     </motion.ul>
     <ModalCalification open={open} setOpen={setOpen} student={currentStudent} setStudent_={setCurrent} scores={scores} setStudents={setStudents}/>
     </>

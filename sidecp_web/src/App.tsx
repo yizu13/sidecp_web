@@ -4,20 +4,23 @@ import SettingsComponent from './settingsComponent/settingsComp';
 import ThemeComponent from './ThemeManage/ThemeComp';
 import Authsystem from './API/authProvider'
 import CommitteEdit from './router/committeEditContext/committeEdit';
+import SidebarProvider from './settingsComponent/SidebarProvider';
 
 function App() {
 
   return (
     <>
     <SettingsComponent>
-      <Authsystem>
-    <ThemeComponent>
-      <CommitteEdit>
-      <Router/>
-      </CommitteEdit>
-      </ThemeComponent>
-      </Authsystem>
-      </SettingsComponent>
+      <SidebarProvider>
+        <Authsystem>
+          <ThemeComponent>
+            <CommitteEdit>
+              <Router/>
+            </CommitteEdit>
+          </ThemeComponent>
+        </Authsystem>
+      </SidebarProvider>
+    </SettingsComponent>
     </>
   )
 }

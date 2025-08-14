@@ -8,6 +8,9 @@ import { useEffect, useState, type SetStateAction } from "react";
 import { red, yellow, grey, green } from "@mui/material/colors";
 import { alpha } from '@mui/material';
 import { scoresUpdate, getStudents } from "../../../API/userAPI";
+import { Icon } from '@iconify/react';
+import { useSettingContext } from '../../../settingsComponent/contextSettings';
+import React from 'react';
 
 type student = {
   committeid: string
@@ -46,6 +49,7 @@ type generalCal = {
 }
 
 export default function ModalCalification({open, setOpen, student, setStudent_, scores, setStudents}: props){
+    const { theme } = useSettingContext();
     const [ bad, setBad ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false});
     const [ regular, setRegular ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false});
     const [ good, setGood ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false})
@@ -231,12 +235,25 @@ export default function ModalCalification({open, setOpen, student, setStudent_, 
 
 
     return (
-        <Dialog open={open} maxWidth="md" slotProps={{paper: {sx: {borderRadius: 6}}}}>
+        <Dialog open={open} maxWidth="md" slotProps={{paper: {sx: {borderRadius: 4}}}}>
             <FormManaged methods={methods} onSubmit={onSubmit}>
-            <DialogTitle sx={{ alignItems: "center" ,justifyContent: "center", display: "flex", flexDirection: "column"}}>
-                    Calificaciones
-                <Typography color={grey[500]} typography="caption">Si cierra la pestaña sin confirmar no se guardaran los cambios.</Typography>
-                </DialogTitle>
+            <DialogTitle sx={{ p: 3, pb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                <Icon icon="solar:clipboard-check-bold" style={{ fontSize: 24, color: theme.palette.primary.main }} />
+                <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600 }}>
+                  Calificaciones del Delegado
+                </Typography>
+              </Box>
+              <Typography 
+                sx={{ 
+                  fontFamily: '"Inter", "Roboto", sans-serif',
+                  color: theme.palette.mode === 'dark' ? '#cccccc' : '#666',
+                  fontSize: '0.875rem'
+                }}
+              >
+                Si cierra la pestaña sin confirmar no se guardarán los cambios.
+              </Typography>
+            </DialogTitle>
             <DialogContent>
                 <Stack sx={{p: 2}} display="flex" flexDirection="row" columnGap={2}>
                     <Stack display="flex" flexDirection="column" rowGap={2}>
@@ -363,9 +380,36 @@ export default function ModalCalification({open, setOpen, student, setStudent_, 
                 </Stack>
                 </Stack>
             </DialogContent>
-            <DialogActions>
-                <Button variant='outlined' color='error' onClick={()=> {setOpen(false); reset()}}  sx={{width: "20%", borderRadius: 6}}>Cerrar</Button>
-                <Button variant='contained' color='primary'  type="submit" sx={{borderRadius: 6}} fullWidth>Confirmar</Button>
+            <DialogActions sx={{ p: 3, pt: 1, gap: 1.5 }}>
+                <Button 
+                  variant='outlined' 
+                  startIcon={<Icon icon="solar:close-circle-bold" />}
+                  onClick={()=> {setOpen(false); reset()}}  
+                  sx={{
+                    borderRadius: 3,
+                    px: 3,
+                    textTransform: 'none',
+                    fontFamily: '"Inter", "Roboto", sans-serif',
+                    fontWeight: 500
+                  }}
+                >
+                  Cerrar
+                </Button>
+                <Button 
+                  variant='contained' 
+                  startIcon={<Icon icon="solar:check-circle-bold" />}
+                  type="submit" 
+                  sx={{
+                    borderRadius: 3,
+                    px: 4,
+                    textTransform: 'none',
+                    fontFamily: '"Inter", "Roboto", sans-serif',
+                    fontWeight: 500
+                  }} 
+                  fullWidth
+                >
+                  Confirmar Calificaciones
+                </Button>
             </DialogActions>
             </FormManaged>
         </Dialog>

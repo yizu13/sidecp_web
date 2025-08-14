@@ -1,11 +1,14 @@
 import { type ReactNode, useRef, useState } from 'react';
-import { Stack, Box, Typography, IconButton } from '@mui/material';
+import { Stack, Box, Typography, IconButton, Tooltip } from '@mui/material';
 import { Icon } from '@iconify/react'
 import {TextPage} from './pages_layout'
 import {IconPage} from './pages_layout'
 import {motion} from 'framer-motion'
 import { useNavigate } from 'react-router-dom';
 import { useSettingContext } from '../../settingsComponent/contextSettings';
+import { useSidebar } from '../../settingsComponent/sidebarContext';
+import LogoutConfirmDialog from './LogoutConfirmDialog';
+import React from 'react';
 
 type PageObject ={
     page: number,
@@ -19,9 +22,10 @@ type props = {
 
 export default function MainLayout({ setPage, children }: props){
     const pageSelected = useRef(setPage) 
-    const [changeSoft, setSoft] = useState(false)
+    const { isCollapsed, setIsCollapsed } = useSidebar()
     const navigation = useNavigate()
     const { theme, themefunc } = useSettingContext()
+    const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
 
     const handleChangeTheme = ()=>{
         if(theme.palette.mode === "dark"){
@@ -29,6 +33,19 @@ export default function MainLayout({ setPage, children }: props){
         } else{
             themefunc("dark")
         }
+    }
+
+    const handleLogoutClick = () => {
+        setLogoutDialogOpen(true)
+    }
+
+    const handleLogoutConfirm = () => {
+        setLogoutDialogOpen(false)
+        navigation('/logout')
+    }
+
+    const handleLogoutCancel = () => {
+        setLogoutDialogOpen(false)
     }
 
         return (
@@ -64,130 +81,272 @@ export default function MainLayout({ setPage, children }: props){
                 {theme.palette.mode === "dark" ? <Icon icon="line-md:moon-filled-to-sunny-filled-loop-transition"/>: <Icon icon="line-md:sunny-filled-loop-to-moon-filled-loop-transition"/>}
             </IconButton>
                 
-                {!changeSoft && <Stack
-                    display="flex"
-                    sx={{
-                        backgroundColor: theme.palette.mode === "dark" ?'#141a21':"#f1f1f1",
-                        width: 'auto', 
-                        height: '100%',
-                        justifyContent: 'start',
-                        alignItems: 'center',
-                        transition: 'all 0.3s ease',
-                        paddingRight: 2,
-                        paddingLeft: 2,
-                        boxShadow: '0px 4px 20px rgba(0,0,0,0.15)'
+                {/* Sidebar */}
+                <motion.div
+                    animate={{ 
+                        width: isCollapsed ? '80px' : 'auto',
+                        transition: { duration: 0.3, ease: "easeInOut" }
                     }}
-                    spacing={4}
+                    style={{
+                        height: '100vh',
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        zIndex: 1000
+                    }}
                 >
-                    <Box>
-                    <Box
-                    component="img"
-                    src= {theme.palette.mode === "dark" ? "/Cedil_logo_white.png" :"/Cedil_logo.png"}
-                    sx={{
-                    position: 'relative',
-                    width: '8vw',
-                    height: 'auto',
-                    top: 0,
-                    left: 0,
-                    p: 3,
-                    pt: 6,
-                    pb: 3,
-                    }}
-                />
-                </Box>
-
-                <TextPage pageObject={pageSelected.current}/>
-
-                <Icon icon='iconamoon:arrow-left-2-light' color={theme.palette.mode === "dark" ?"#ffffff" : "#141a21"} onClick={()=>{setSoft(true)}} style={{
-                    width: '2vw',
-                    height: '4vh',
-                    alignSelf: 'flex-end',
-                    justifySelf: 'flex-end',
-                    position:'fixed',
-                    bottom: 100,
-                    cursor: 'pointer'
-                }}/>
-
-                <Typography color='white' typography='h5' sx={{
-                            position: 'fixed',
-                            cursor:'pointer',
-                            pl: 8,
-                            pr: 8,
-                            pt: 0.5,
-                            pb: 0.5,
-                            borderRadius: 10,
-                            transition: 'all 0.3s ease',
-                            color: theme.palette.mode === "dark" ?'#ffffff': "#1f1f1f",
-                            '&:hover':{
-                             backgroundColor: theme.palette.mode === "dark" ?'#10151b': "#eeeeee",
-                             boxShadow: '0px 4px 16px rgba(28, 66, 136, 0.2)',
-                            },
-                             bottom: 30,
-                            typography: {
-                               xs: 'subtitle2', 
-                                sm: 'subtitle1', 
-                                md: 'h6', 
-                              }
-                            
+                    <Stack
+                        display="flex"
+                        sx={{
+                            backgroundColor: theme.palette.mode === "dark" ?'#141a21':"#f1f1f1",
+                            width: isCollapsed ? '80px' : { xs: '280px', md: '320px' },
+                            height: '100vh',
+                            justifyContent: 'flex-start',
+                            alignItems: 'center',
+                            paddingRight: isCollapsed ? 1 : 2,
+                            paddingLeft: isCollapsed ? 1 : 2,
+                            paddingTop: 3,
+                            paddingBottom: 3,
+                            boxShadow: '0px 4px 20px rgba(0,0,0,0.15)',
+                            overflow: 'hidden',
+                            transition: 'all 0.3s ease-in-out',
+                            position: 'relative'
                         }}
-                        onClick={()=>{
-                            navigation('/logout')}}
-                        >Salir</Typography>
+                    >
+                        {/* Logo */}
+                        <Box sx={{ 
+                            cursor: 'pointer', 
+                            borderRadius: 2, 
+                            transition: 'all 0.2s ease', 
+                            '&:hover': { transform: 'scale(1.05)' },
+                            pt: isCollapsed ? 2 : 3,
+                            pb: isCollapsed ? 3 : 4,
+                            px: isCollapsed ? 1 : 2,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                            <Box
+                                component="img"
+                                src= {theme.palette.mode === "dark" ? "/Cedil_logo_white.png" :"/Cedil_logo.png"}
+                                onClick={() => navigation('/dashboard/inicio')}
+                                sx={{
+                                    width: isCollapsed ? '48px' : { xs: '120px', sm: '140px', md: '160px', lg: '180px' },
+                                    height: 'auto',
+                                    maxWidth: isCollapsed ? '48px' : '200px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease-in-out'
+                                }}
+                            />
+                        </Box>
 
-                </Stack>}
+                        {/* Toggle Button - Top Right */}
+                        {!isCollapsed && (
+                            <Tooltip title="Contraer sidebar" placement="bottom">
+                                <IconButton
+                                    onClick={() => setIsCollapsed(!isCollapsed)}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 16,
+                                        right: 12,
+                                        color: theme.palette.mode === "dark" ? "#ffffff" : "#141a21",
+                                        backgroundColor: theme.palette.mode === "dark" ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                        width: 32,
+                                        height: 32,
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.mode === "dark" ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                                            transform: 'scale(1.05)'
+                                        }
+                                    }}
+                                >
+                                    <Icon icon='solar:double-alt-arrow-left-bold' style={{ fontSize: '16px' }} />
+                                </IconButton>
+                            </Tooltip>
+                        )}
 
-                {changeSoft && 
-                <Stack
-                    display="flex"
-                    sx={{
-                        backgroundColor: '#3b70d3',
-                        width: 'auto', 
-                        height: '100%',
-                        justifyContent: 'start',
-                        alignItems: 'center',
-                        mr: '5vw',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0px 4px 20px rgba(0,0,0,0.15)'
-                    }}
-                    spacing={4}
-                >
+                        {/* Navigation Content */}
+                        <Box sx={{ 
+    flex: 1, 
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'auto', // ← permite scroll
+    '&::-webkit-scrollbar': {
+        width: '4px',
+        height: '4px',
+    },
+    '&::-webkit-scrollbar-track': {
+        backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+        backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
+        borderRadius: 6,
+        border: `2px solid ${theme.palette.mode === 'dark' ? '#0e1217' : '#ffffff'}`,
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+        backgroundColor: theme.palette.mode === 'dark' ? '#777' : '#999',
+    },
+    '&::-webkit-scrollbar-corner': {
+        backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-button': {
+        display: 'none',
+    },
+    scrollbarWidth: 'thin', // para Firefox
+    scrollbarColor: `${theme.palette.mode === 'dark' ? '#555' : '#ccc'} transparent`,
+}}>
 
-                <IconPage pageObject={pageSelected.current}/>
+                            {isCollapsed ? (
+                                <>
+                                    {/* Toggle Button - Collapsed Mode */}
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'center', 
+                                        mb: 3,
+                                        mt: 1
+                                    }}>
+                                        <Tooltip title="Expandir sidebar" placement="right">
+                                            <IconButton
+                                                onClick={() => setIsCollapsed(!isCollapsed)}
+                                                sx={{
+                                                    color: theme.palette.mode === "dark" ? "#ffffff" : "#141a21",
+                                                    backgroundColor: theme.palette.mode === "dark" ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                                                    width: 44,
+                                                    height: 44,
+                                                    border: `1px solid ${theme.palette.mode === "dark" ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
+                                                    '&:hover': {
+                                                        backgroundColor: theme.palette.mode === "dark" ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                                                        transform: 'scale(1.05)',
+                                                        borderColor: theme.palette.mode === "dark" ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'
+                                                    }
+                                                }}
+                                            >
+                                                <Icon icon='solar:double-alt-arrow-right-bold' style={{ fontSize: '20px' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+                                    <IconPage pageObject={pageSelected.current}/>
+                                </>
+                            ) : (
+                                <TextPage pageObject={pageSelected.current}/>
+                            )}
+                        </Box>
 
-                    <Box sx={{display: 'flex', alignItems: 'end'}}>
-                        <motion.div style={{
-                    width: '5vw',
-                    height: '4vh',
-                    position:'fixed',
-                    bottom: 100,
-                    marginLeft: -30,
-                    borderRadius: 30,
-                    cursor: 'pointer',
-                    backgroundColor: "#679cff",
-                    zIndex: -1
-                }} whileHover={{marginLeft: 5, transition: { duration: 0.2 }}} onClick={()=>{setSoft(false)}}>
-                <Icon icon='line-md:chevron-small-right' color="white" onClick={()=>{setSoft(false)}} style={{
-                    width: '4vw',
-                    height: '4vh',
-                    marginLeft: 35,
-                }}/>
+                        {/* Bottom Logout Section */}
+                        <Box sx={{
+                            width: '100%',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            px: isCollapsed ? 1 : 2,
+                            pt: 2,
+                            pb: 2
+                        }}>
+                            {isCollapsed ? (
+                                <Tooltip title="Salir" placement="right">
+                                    <IconButton
+                                        onClick={handleLogoutClick}
+                                        sx={{
+                                            color: theme.palette.mode === "dark" ? "#ffffff" : "#141a21",
+                                            backgroundColor: 'transparent',
+                                            border: `1px solid ${theme.palette.mode === "dark" ? '#333' : '#ddd'}`,
+                                            width: 44,
+                                            height: 44,
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.mode === "dark" ? '#10151b' : "#eeeeee",
+                                                transform: 'scale(1.05)'
+                                            }
+                                        }}
+                                    >
+                                        <Icon icon="solar:logout-bold" style={{ fontSize: '18px' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            ) : (
+                                <Box
+                                    sx={{
+                                        cursor: 'pointer',
+                                        px: 3,
+                                        py: 1.5,
+                                        borderRadius: 3,
+                                        transition: 'all 0.3s ease',
+                                        backgroundColor: 'transparent',
+                                        border: `1px solid ${theme.palette.mode === "dark" ? '#333' : '#ddd'}`,
+                                        color: theme.palette.mode === "dark" ? '#ffffff' : "#1f1f1f",
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.mode === "dark" ? '#10151b' : "#eeeeee",
+                                            boxShadow: '0px 4px 16px rgba(28, 66, 136, 0.2)',
+                                            transform: 'translateY(-1px)'
+                                        },
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1.5,
+                                        justifyContent: 'center',
+                                        width: '100%'
+                                    }}
+                                    onClick={handleLogoutClick}
+                                >
+                                    <Icon icon="solar:logout-bold" style={{ fontSize: '18px' }} />
+                                    <Typography 
+                                        sx={{
+                                            fontFamily: '"Inter", "Roboto", sans-serif',
+                                            fontWeight: 500,
+                                            fontSize: { xs: '0.875rem', sm: '1rem' }
+                                        }}
+                                    >
+                                        Salir
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
+                    </Stack>
                 </motion.div>
-                </Box>
-                </Stack>}
 
-                <Stack
-                    display="flex"
+                {/* Main Content Area */}
+                <Box
                     sx={{
-                       backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white',
-                        width: 'auto', 
-                        height: '100%', 
-                        opacity: 1,
-                        justifyContent: 'start',
-                        alignItems: 'center',
-                        p: '3%'
+                        backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white',
+                        width: '100%', 
+                        height: '100vh',
+                        marginLeft: isCollapsed ? '80px' : { xs: '280px', md: '320px' },
+                        transition: 'margin-left 0.3s ease-in-out',
+                        position: 'relative',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        '&::-webkit-scrollbar': {
+                            width: 12,
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
+                            borderRadius: 6,
+                            border: `2px solid ${theme.palette.mode === 'dark' ? '#0e1217' : '#ffffff'}`,
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                            backgroundColor: theme.palette.mode === 'dark' ? '#777' : '#999',
+                        },
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: `${theme.palette.mode === 'dark' ? '#555' : '#ccc'} transparent`,
                     }}
-                >{children}
-                </Stack>
+                >
+                    <Stack
+                        sx={{
+                            minHeight: '100vh',
+                            justifyContent: 'start',
+                            alignItems: 'center',
+                            p: '3%',
+                        }}
+                    >
+                        {children}
+                    </Stack>
+                </Box>
+
+                {/* Logout Confirmation Dialog */}
+                <LogoutConfirmDialog
+                    open={logoutDialogOpen}
+                    onClose={handleLogoutCancel}
+                    onConfirm={handleLogoutConfirm}
+                />
             </Stack>
         );
     }

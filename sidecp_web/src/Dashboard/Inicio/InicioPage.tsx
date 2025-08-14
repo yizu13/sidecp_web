@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { getStudents, getCommitties, getScores } from "../../API/userAPI";
+import React from "react";
 
 const getDateIntervalSpanish = (format = 'long') => {
   const today = new Date();
@@ -80,14 +81,13 @@ type scores = {
     analyticalskills: number
 }
 
- function DonutChart() {
+function DonutChart() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [hoveredData, setHoveredData] = useState<DataItem | null>(null);
   const [totalStudents, setStudents] = useState([]);
   const [data, setData] = useState<DataItem[]>([]); 
   const [loading, setLoading] = useState(true);
   const { theme } = useSettingContext();
-
 
   const generateBlueColorPalette = (committees: Committe[]) => {
     return committees.map((_, index) => {
@@ -96,7 +96,6 @@ type scores = {
       const hue = baseHue + ((index * hueVariation) / committees.length) - (hueVariation / 2);
       
       const saturation = 65 + (index * 15) % 25; 
-
       const lightness = 45 + (index * 10) % 25; 
       
       return `hsl(${Math.round(hue)}, ${saturation}%, ${lightness}%)`;
@@ -183,14 +182,15 @@ type scores = {
         ))}
       </Box>
     </Box>
-  );
+    );
   }
 
   if (data.length === 0) {
     return (
       <Card sx={{ 
-        width: 788,
-        height: 600,
+        width: '100%',
+        maxWidth: 1100,
+        height: 700,
         background: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
         backgroundColor: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
         boxShadow: "none",
@@ -206,7 +206,8 @@ type scores = {
   return (
     <Card 
       sx={{ 
-        width: 788,
+        width: '100%',
+        maxWidth: 900,
         height: 600,
         background: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
         backgroundColor: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
@@ -225,29 +226,43 @@ type scores = {
         </Box>
 
         <Box display="flex" flex={1} alignItems="center" gap={3}>
-          <Box position="relative" flex={1} height="100%">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+          {/* Contenedor del gráfico con más espacio */}
+          <Box 
+            position="relative" 
+            flex={1} 
+            height="100%" 
+            minHeight="500px"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ 
+              minWidth: '500px', // Ancho mínimo para evitar cortes
+              overflow: 'visible' // Permite que el gráfico se muestre completamente
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%" minHeight={500}>
+              <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
                 <Pie
                   data={data}
                   cx="50%"
                   cy="50%"
-                  innerRadius={100}
-                  outerRadius={180}
-                  paddingAngle={0}
+                  innerRadius="45%" // Radio interno más grande para menor grosor
+                  outerRadius="80%" // Radio externo mucho más grande
+                  paddingAngle={1} // Pequeño espacio entre segmentos
                   dataKey="value"
                   onMouseEnter={onPieEnter}
                   onMouseLeave={onPieLeave}
                 >
                   {data.map((entry, index) => (
                     <Cell 
-                      key={`cell-${entry.committeid || index}`} // Usar ID único
+                      key={`cell-${entry.committeid || index}`}
                       fill={entry.color}
                       stroke={index === activeIndex ? '#ffffff' : 'transparent'}
-                      strokeWidth={index === activeIndex ? 2 : 0}
+                      strokeWidth={index === activeIndex ? 3 : 0}
                       style={{
                         filter: index === activeIndex ? 'brightness(1.1)' : 'none',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease-in-out'
                       }}
                     />
                   ))}
@@ -255,6 +270,7 @@ type scores = {
               </PieChart>
             </ResponsiveContainer>
             
+            {/* Texto central del donut */}
             <Box
               position="absolute"
               top="50%"
@@ -270,7 +286,7 @@ type scores = {
                 component="div" 
                 fontWeight="bold"
                 sx={{
-                  fontSize: hoveredData ? '2.5rem' : '3rem',
+                  fontSize: hoveredData ? '3rem' : '3.5rem',
                   transition: 'font-size 0.2s ease-in-out'
                 }}
               >
@@ -286,12 +302,17 @@ type scores = {
             </Box>
           </Box>
 
+          {/* Panel de información lateral */}
           <Box 
             display="flex" 
             flexDirection="column" 
             justifyContent="center" 
             alignItems="center"
-            sx={{ width: "20vw", textAlign: 'center' }}
+            sx={{ 
+              width: { xs: '100%', md: '300px' }, // Responsive width
+              minWidth: '280px',
+              textAlign: 'center' 
+            }}
           >
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={2}>
               <Typography variant="body1" fontWeight="medium">
@@ -411,14 +432,13 @@ function RadarScoresChart() {
 
         setTotalScores(scores);
 
-        // Calcular modas por rango para cada habilidad
+
         const knowledgeMode = calculateModeByRange(scores.map(s => s.knowledgeskills));
         const negotiationMode = calculateModeByRange(scores.map(s => s.negotiationskills));
         const communicationMode = calculateModeByRange(scores.map(s => s.communicationskills));
         const interpersonalMode = calculateModeByRange(scores.map(s => s.interpersonalskills));
         const analyticalMode = calculateModeByRange(scores.map(s => s.analyticalskills));
 
-        // Preparar datos para el radar chart
         const radarData: RadarDataItem[] = [
           {
             skill: 'Conocimiento',
@@ -518,12 +538,13 @@ function RadarScoresChart() {
   return (
     <Card 
       sx={{ 
-        width: 788,
+        width: 940,
         height: 600,
         background: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
         backgroundColor: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
         color: theme.palette.mode === "dark" ? "#f1f1f1" : "#141a21",
         boxShadow: "none"
+      
       }}
     >
       <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -537,9 +558,17 @@ function RadarScoresChart() {
         </Box>
 
         <Box display="flex" flex={1} alignItems="center" gap={3}>
-          <Box position="relative" flex={1} height="100%">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={data} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+          <Box position="relative" flex={1} height="100%" minHeight="350px">
+            <ResponsiveContainer width="100%" height="100%" minHeight={350}>
+              <RadarChart 
+                data={data} 
+                margin={{ 
+                  top: 40, 
+                  right: 80, 
+                  bottom: 40, 
+                  left: 80 
+                }}
+              >
                 <PolarGrid 
                   stroke={theme.palette.mode === "dark" ? "#374151" : "#d1d5db"}
                 />
@@ -547,7 +576,8 @@ function RadarScoresChart() {
                   dataKey="skill" 
                   tick={{ 
                     fill: theme.palette.mode === "dark" ? "#f1f1f1" : "#141a21",
-                    fontSize: 12
+                    fontSize: 12,
+                    fontFamily: '"Inter", "Roboto", sans-serif'
                   }}
                 />
                 <PolarRadiusAxis 
@@ -555,7 +585,8 @@ function RadarScoresChart() {
                   domain={[0, 100]}
                   tick={{ 
                     fill: theme.palette.mode === "dark" ? "#9ca3af" : "#6b7280",
-                    fontSize: 10
+                    fontSize: 10,
+                    fontFamily: '"Inter", "Roboto", sans-serif'
                   }}
                 />
                 <Radar
@@ -573,7 +604,8 @@ function RadarScoresChart() {
                 />
                 <Legend 
                   wrapperStyle={{
-                    color: theme.palette.mode === "dark" ? "#f1f1f1" : "#141a21"
+                    color: theme.palette.mode === "dark" ? "#f1f1f1" : "#141a21",
+                    fontFamily: '"Inter", "Roboto", sans-serif'
                   }}
                 />
               </RadarChart>
@@ -622,7 +654,7 @@ function RadarScoresChart() {
             flexDirection="column" 
             justifyContent="center" 
             alignItems="center"
-            sx={{ width: "20vw", textAlign: 'center' }}
+            sx={{ width: "20vw", textAlign: 'center', mr: 0 }}
           >
             <Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={2}>
               <Typography variant="body1" fontWeight="medium">
@@ -634,7 +666,6 @@ function RadarScoresChart() {
               Total de evaluaciones: {totalScores.length}
             </Typography>
             
-            {/* Desglose de promedios */}
             <Box sx={{ mt: 2, width: '100%' }}>
               {data.map((item, index) => (
                 <Box 
@@ -674,45 +705,49 @@ export default function InicioPage(){
     return(
 
         <motion.ul className='scrollConfiguration' ref={ref} style={{
-            width: '80vw', 
+            width: '100%', 
+            maxWidth: '1200px',
             height: '90vh', 
             overflowY: 'auto',
             scrollbarWidth: 'none',
-           // backgroundColor: 'lightgray', 
             paddingTop: 2,
             paddingBottom: 2,
+            paddingLeft: 16,
+            paddingRight: 16,
             maskImage
         }}>
             <Stack sx={{
-                width: '60vw', 
-                height: '600px', 
-                backgroundColor:  theme.palette.mode === "dark"? "#141a21": "#f1f1f1",
-                ml: '6vw', 
-                mb: '8vh',
-                borderRadius: 20,
+                width: '100%', 
+                minHeight: { xs: '400px', sm: '500px', md: '600px' },
+                height: 'auto',
+                backgroundColor: theme.palette.mode === "dark"? "#141a21": "#f1f1f1",
+                mb: 4,
+                borderRadius: 4,
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 position: 'inherit',
-                flexShrink: 0
+                flexShrink: 0,
+                p: { xs: 2, sm: 3, md: 4 }
                 }}>
                 <DonutChart/>
-
-                    
                     </Stack>
             <Stack sx={{
-                 width: '60vw', 
-                height: '600px', 
-                backgroundColor:  theme.palette.mode === "dark"? "#141a21": "#f1f1f1",
-                ml: '6vw', 
-                mb: '8vh',
-                borderRadius: 20,
+                width: '100%', 
+                minHeight: { xs: '400px', sm: '500px', md: '600px' },
+                height: 'auto',
+                backgroundColor: theme.palette.mode === "dark"? "#141a21": "#f1f1f1",
+                mb: 4,
+                borderRadius: 4,
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 position: 'inherit',
-                flexShrink: 0
-                }}> <RadarScoresChart/></Stack>
+                flexShrink: 0,
+                p: { xs: 2, sm: 3, md: 4 }
+                }}> 
+                <RadarScoresChart/>
+            </Stack>
             </motion.ul>
                 
     )
