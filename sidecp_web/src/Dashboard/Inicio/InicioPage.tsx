@@ -341,7 +341,22 @@ function RadarScoresChart() {
   const [loading, setLoading] = useState(true);
   const [totalScores, setTotalScores] = useState<scores[]>([]);
   const [popularScore, setPopularScore] = useState(0);
+  const [validScoresCount, setValidScoresCount] = useState(0);
   const { theme } = useSettingContext();
+
+  // Función para validar y convertir puntuación
+  const parseScore = (score: string | null | number): number | null => {
+    if (score === null || score === undefined) return null;
+    const numScore = typeof score === 'string' ? Number(score) : score;
+    // Solo consideramos válidos los números que no sean NaN y estén en rango válido
+    if (isNaN(numScore)) return null;
+    return numScore;
+  };
+
+  // Función para filtrar solo valores válidos (no null, no undefined)
+  const getValidScores = (scores: number[]): number[] => {
+    return scores.filter(score => score !== null && score !== undefined && !isNaN(score));
+  };
 
   // Función para determinar el rango de una puntuación
   const getScoreRange = (score: number): string => {
@@ -353,8 +368,10 @@ function RadarScoresChart() {
   };
 
   const calculateModeByRange = (numbers: number[]): number => {
-    if (numbers.length === 0) return 0;
+    // Filtrar solo valores válidos
+    const validNumbers = getValidScores(numbers);
     
+    if (validNumbers.length === 0) return 0;
     
     const rangeGroups: { [key: string]: number[] } = {
       '0-50': [],
@@ -363,12 +380,13 @@ function RadarScoresChart() {
       '90-100': []
     };
     
-
-    numbers.forEach(num => {
+    // Agrupar números por rango
+    validNumbers.forEach(num => {
       const range = getScoreRange(num);
       rangeGroups[range].push(num);
     });
     
+    console.log('Valid numbers:', validNumbers);
     console.log('Range groups:', rangeGroups);
     
     // Encontrar el rango con más elementos (moda)
@@ -402,13 +420,18 @@ function RadarScoresChart() {
     
     const allValues: number[] = [];
     scores.forEach(score => {
-      allValues.push(
-        score.knowledgeskills,
-        score.negotiationskills,
-        score.communicationskills,
-        score.interpersonalskills,
-        score.analyticalskills
-      );
+      // Solo agregar valores que no sean null/undefined/NaN
+      const knowledge = parseScore(score.knowledgeskills);
+      const negotiation = parseScore(score.negotiationskills);
+      const communication = parseScore(score.communicationskills);
+      const interpersonal = parseScore(score.interpersonalskills);
+      const analytical = parseScore(score.analyticalskills);
+      
+      if (knowledge !== null) allValues.push(knowledge);
+      if (negotiation !== null) allValues.push(negotiation);
+      if (communication !== null) allValues.push(communication);
+      if (interpersonal !== null) allValues.push(interpersonal);
+      if (analytical !== null) allValues.push(analytical);
     });
     
     return calculateModeByRange(allValues);
@@ -419,25 +442,63 @@ function RadarScoresChart() {
       try {
         setLoading(true);
         
-        // Reemplaza con tu función para obtener las puntuaciones
-        const scoresResponse = await getScores(); // Asume que tienes esta función
-        const scores: scores[] = scoresResponse.data.scores.map((item: scores)=>({
-          scoresid: item.scoreid,
-          knowledgeskills: Number(item.knowledgeskills),
-          negotiationskills: Number(item.negotiationskills),
-          communicationskills: Number(item.communicationskills),
-          interpersonalskills: Number(item.interpersonalskills),
-          analyticalskills: Number(item.analyticalskills)
-        }));
+        const scoresResponse = await getScores();
+        console.log('scoresResponse', scoresResponse);
+        
+        // Filtrar y procesar los scores, manteniendo solo los que tienen al menos una puntuación válida
+        const validScores: scores[] = scoresResponse.data.scores
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((item: any) => ({
+            scoreid: item.scoreid,
+            knowledgeskills: parseScore(item.knowledgeskills),
+            negotiationskills: parseScore(item.negotiationskills),
+            communicationskills: parseScore(item.communicationskills),
+            interpersonalskills: parseScore(item.interpersonalskills),
+            analyticalskills: parseScore(item.analyticalskills)
+          }))
+          .filter((score: scores) => {
+            // Solo mantener scores que tengan al menos una habilidad con valor válido
+            return score.knowledgeskills !== null || 
+                   score.negotiationskills !== null || 
+                   score.communicationskills !== null || 
+                   score.interpersonalskills !== null || 
+                   score.analyticalskills !== null;
+          });
 
-        setTotalScores(scores);
+        console.log('Valid scores:', validScores);
+        console.log('Total valid scores count:', validScores.length);
+        
+        setTotalScores(validScores);
+        setValidScoresCount(validScores.length);
 
+        // Extraer valores válidos para cada habilidad
+        const knowledgeScores = validScores.map(s => s.knowledgeskills).filter(s => s !== null);
+        const negotiationScores = validScores.map(s => s.negotiationskills).filter(s => s !== null);
+        const communicationScores = validScores.map(s => s.communicationskills).filter(s => s !== null);
+        const interpersonalScores = validScores.map(s => s.interpersonalskills).filter(s => s !== null);
+        const analyticalScores = validScores.map(s => s.analyticalskills).filter(s => s !== null);
 
-        const knowledgeMode = calculateModeByRange(scores.map(s => s.knowledgeskills));
-        const negotiationMode = calculateModeByRange(scores.map(s => s.negotiationskills));
-        const communicationMode = calculateModeByRange(scores.map(s => s.communicationskills));
-        const interpersonalMode = calculateModeByRange(scores.map(s => s.interpersonalskills));
-        const analyticalMode = calculateModeByRange(scores.map(s => s.analyticalskills));
+        const knowledgeMode = calculateModeByRange(knowledgeScores);
+        const negotiationMode = calculateModeByRange(negotiationScores);
+        const communicationMode = calculateModeByRange(communicationScores);
+        const interpersonalMode = calculateModeByRange(interpersonalScores);
+        const analyticalMode = calculateModeByRange(analyticalScores);
+
+        console.log('Skill counts:', {
+          knowledge: knowledgeScores.length,
+          negotiation: negotiationScores.length,
+          communication: communicationScores.length,
+          interpersonal: interpersonalScores.length,
+          analytical: analyticalScores.length
+        });
+
+        console.log('Modes:', {
+          knowledgeMode, 
+          negotiationMode, 
+          communicationMode, 
+          interpersonalMode, 
+          analyticalMode
+        });
 
         const radarData: RadarDataItem[] = [
           {
@@ -468,7 +529,7 @@ function RadarScoresChart() {
         ];
 
         setData(radarData);
-        setPopularScore(calculateOverallModeByRange(scores));
+        setPopularScore(calculateOverallModeByRange(validScores));
         
       } catch (error) {
         console.error('Error fetching scores data:', error);
@@ -518,7 +579,7 @@ function RadarScoresChart() {
     );
   }
 
-  if (data.length === 0) {
+  if (data.length === 0 || validScoresCount === 0) {
     return (
       <Card sx={{ 
         width: 788,
@@ -530,7 +591,7 @@ function RadarScoresChart() {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <Typography>No hay datos de puntuaciones disponibles</Typography>
+        <Typography>No hay datos de puntuaciones válidos disponibles</Typography>
       </Card>
     );
   }
@@ -544,7 +605,6 @@ function RadarScoresChart() {
         backgroundColor: theme.palette.mode === "dark" ? "transparent" : "#f1f1f1",
         color: theme.palette.mode === "dark" ? "#f1f1f1" : "#141a21",
         boxShadow: "none"
-      
       }}
     >
       <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -590,7 +650,7 @@ function RadarScoresChart() {
                   }}
                 />
                 <Radar
-                  name="Puntuación Promedio"
+                  name="Puntuación Popular"
                   dataKey="value"
                   stroke={theme.palette.primary.main}
                   fill={theme.palette.primary.main}
@@ -663,7 +723,10 @@ function RadarScoresChart() {
               </Typography>
             </Box>
             <Typography variant="body2" color="grey.400" mb={2}>
-              Total de evaluaciones: {totalScores.length}
+              Evaluaciones válidas: {validScoresCount}
+            </Typography>
+            <Typography variant="body2" color="grey.400" mb={2}>
+              Total de registros: {totalScores.length}
             </Typography>
             
             <Box sx={{ mt: 2, width: '100%' }}>

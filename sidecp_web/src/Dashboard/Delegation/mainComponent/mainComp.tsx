@@ -16,12 +16,12 @@ import ModalCalification from './modalCalification';
 import { useSettingContext } from '../../../settingsComponent/contextSettings';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import {
-    animate,
+    //animate,
     motion,
-    MotionValue,
-    useMotionValue,
-    useMotionValueEvent,
-    useScroll,
+    //MotionValue,
+    //useMotionValue,
+    //useMotionValueEvent,
+    //useScroll,
 } from "framer-motion"
 import './scrollConfiguration.css';
 import React from 'react';
@@ -78,8 +78,8 @@ export default function DelegationEval(){
     const { theme } = useSettingContext();
     const [ search, setSearch ] = useState('');
     const ref = useRef<HTMLUListElement>(null);
-      const { scrollYProgress } = useScroll({ container: ref })
-    const maskImage = useScrollOverflowMask(scrollYProgress)
+    // const { scrollYProgress } = useScroll({ container: ref })
+    // const maskImage = useScrollOverflowMask(scrollYProgress)
 
    const filteredStudents = studentsFiltered.filter((item) => {
   const searchNormalized = search.trim().toLowerCase();
@@ -167,20 +167,21 @@ export default function DelegationEval(){
     gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
     gap: "24px",
     width: '75vw',
-    height: "100vh",
+    height: "auto",
     overflowY: "auto",
     marginLeft: '4vw',
     padding: "16px",
-    maskImage: students.filter((i: student)=> i.committeid === selected).length > 3 || selected === '' ? maskImage : undefined
+    maskImage: undefined
   }}
 >
-    {filteredStudents.map((item: student, i: number) => 
+    {filteredStudents.map((item: student, i: number, filteredStudents: student[]) => 
     <Box key={i} sx={{ display: 'flex', justifyContent: 'center' }}>
     <Card sx={{ 
       width: '100%', 
       maxWidth: 350,
       minWidth: 320,
       height: "auto", 
+      maxHeight: filteredStudents.length <= 3 ? 470 : 'auto',
       borderRadius: 4, 
       backgroundColor: theme.palette.mode === "dark"? '#0e1217': 'white', 
       boxShadow: '0px 4px 16px rgba(22, 22, 22, 0.15)',
@@ -260,7 +261,7 @@ export default function DelegationEval(){
   );
 }
 
-const left = `0%`
+/* const left = `0%`
 const right = `80%`
 const leftInset = `20%`
 const rightInset = `80%`
@@ -297,4 +298,4 @@ function useScrollOverflowMask(scrollYProgress: MotionValue<number>) {
     })
 
     return maskImage
-}
+}*/

@@ -392,6 +392,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_, 
                     fontFamily: '"Inter", "Roboto", sans-serif',
                     fontWeight: 500
                   }}
+                  color="error"
                 >
                   Cerrar
                 </Button>

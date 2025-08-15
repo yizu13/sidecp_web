@@ -7,6 +7,8 @@ import Logout from "../logout/logout";
 import { useSettingContext } from "../settingsComponent/contextSettings";
 import ProtectedRoute from "./protectedRoutes";
 import { AdminRoute, EvaluatorRoute } from "./RoutesBlocked";
+import React from "react";
+
 
 
 const InicioDash = lazy(()=> import('../Dashboard/Inicio/dashboard_inicio'))
@@ -32,7 +34,7 @@ export default function Router(){
             path: '/',
             element:( 
                 <Suspense fallback={<Charging/>}>
-                    <Outlet/>
+                    <Outlet/> 
                 </Suspense>
                 ),
             children: [

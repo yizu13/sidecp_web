@@ -1,6 +1,7 @@
 import { Box, Stack } from '@mui/material';
 import { type ReactNode, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'
+import React from 'react';
 
 type componentsReact = {
     children: ReactNode
