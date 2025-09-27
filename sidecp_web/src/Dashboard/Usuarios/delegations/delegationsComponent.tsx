@@ -85,6 +85,8 @@ const [selectedExportCommitte, setSelectedExportCommitte] = useState<string>('al
 const [deleteByCommDialog, setDeleteByCommDialog] = useState(false);
 const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
 
+  const [loading, setLoading] = useState(false);
+
   // Refetch centralizado
   const refetchAll = useCallback(async () => {
     try {
@@ -107,6 +109,7 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
 
   // Handler para eliminar todos los estudiantes de una comisión
   const handleDeleteByCommission = async () => {
+    setLoading(true);
     if (!selectedDeleteComm) return;
     try {
       // Elimina en el backend si tienes un endpoint, si no, elimina uno por uno:
@@ -120,6 +123,7 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
     } catch (err) {
       console.error("Error eliminando estudiantes por comisión", err);
     }
+    setLoading(false);
   };
 
   // Nuevo handler para abrir el diálogo antes de importar
@@ -1033,7 +1037,7 @@ const dataGridTheme = useMemo(() =>
             variant="contained"
 
             startIcon={<Icon icon="solar:trash-bin-minimalistic-bold" />}
-            disabled={!selectedDeleteComm}
+            disabled={!selectedDeleteComm || loading}
             sx={{ 
               borderRadius: 3, 
               px: 4,
