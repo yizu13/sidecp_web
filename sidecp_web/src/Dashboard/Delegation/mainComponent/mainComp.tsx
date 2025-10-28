@@ -23,7 +23,7 @@ import {
     //useMotionValueEvent,
     //useScroll,
 } from "framer-motion"
-import './scrollConfiguration.css';
+import './scrollconfiguration.css';
 import React from 'react';
 
 
