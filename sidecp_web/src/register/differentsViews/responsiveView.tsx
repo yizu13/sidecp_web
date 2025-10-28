@@ -1,4 +1,4 @@
-import { Box, Stack, Typography, Link, Chip, Fade } from '@mui/material';
+import { Box, Stack, Typography, Link, Chip, Fade, CircularProgress, InputAdornment } from '@mui/material';
 import Button from '@mui/material/Button';
 import FieldTForm from '../../manageForm/FieldTxtForm';
 import { Icon } from '@iconify/react';
@@ -10,9 +10,19 @@ type props = {
     serverError: boolean;
     emailExists: boolean;
     registrationSuccess: boolean;
+    tokenValid: boolean;
+    tokenError: string;
+    isValidatingToken: boolean;
 }
 
-export default function ResponsiveView({ serverError, emailExists, registrationSuccess }: props) {
+export default function ResponsiveView({ 
+    serverError, 
+    emailExists, 
+    registrationSuccess,
+    tokenValid,
+    tokenError,
+    isValidatingToken 
+}: props) {
     return (
         <>
             <Typography 
@@ -94,36 +104,108 @@ export default function ResponsiveView({ serverError, emailExists, registrationS
                                 />
                             </Fade>
                         )}
+
+                        {tokenError && !tokenValid && (
+                            <Fade in timeout={500}>
+                                <Chip
+                                    label={tokenError}
+                                    sx={{ 
+                                        typography: "body2", 
+                                        color: red[50], 
+                                        backgroundColor: alpha(red[900], 0.9), 
+                                        fontWeight: "bold", 
+                                        borderRadius: 2, 
+                                        padding: "0 8px", 
+                                        height: 36,
+                                        width: '100%'
+                                    }}
+                                />
+                            </Fade>
+                        )}
                     </Box>
                 </Stack>
 
+                {/* Campo de token de registro */}
+                <Box>
+                    <FieldTForm 
+                        name="registrationToken" 
+                        label="Código de registro" 
+                        variant="outlined"
+                        placeholder="Código de 8 caracteres"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    {isValidatingToken ? (
+                                        <CircularProgress size={20} />
+                                    ) : tokenValid ? (
+                                        <Icon icon="mdi:check-circle" color={green[500]} width={24} />
+                                    ) : null}
+                                </InputAdornment>
+                            ),
+                        }}
+                        helperText="Solicita el código al administrador"
+                    />
+                </Box>
+
                 {/* Campos del formulario */}
                 <Box>
-                    <FieldTForm name="firstName" label="Nombre" variant="outlined" />
+                    <FieldTForm 
+                        name="firstName" 
+                        label="Nombre" 
+                        variant="outlined"
+                        disabled={!tokenValid}
+                    />
                 </Box>
 
                 <Box>
-                    <FieldTForm name="lastName" label="Apellido" variant="outlined" />
+                    <FieldTForm 
+                        name="lastName" 
+                        label="Apellido" 
+                        variant="outlined"
+                        disabled={!tokenValid}
+                    />
                 </Box>
 
                 <Box>
-                    <FieldTForm name="email" label="Correo electrónico" variant="outlined" />
+                    <FieldTForm 
+                        name="email" 
+                        label="Correo electrónico" 
+                        variant="outlined"
+                        disabled={!tokenValid}
+                    />
                 </Box>
 
                 <Box>
-                    <FieldTForm name="institution" label="Institución" variant="outlined" />
+                    <FieldTForm 
+                        name="password" 
+                        label="Contraseña" 
+                        variant="outlined" 
+                        type="password"
+                        disabled={!tokenValid}
+                    />
                 </Box>
 
                 <Box>
-                    <FieldTForm name="position" label="Cargo" variant="outlined" />
+                    <FieldTForm 
+                        name="confirmPassword" 
+                        label="Confirmar contraseña" 
+                        variant="outlined" 
+                        type="password"
+                        disabled={!tokenValid}
+                    />
                 </Box>
 
                 <Box>
-                    <FieldTForm name="password" label="Contraseña" variant="outlined" type="password" />
-                </Box>
-
-                <Box>
-                    <FieldTForm name="confirmPassword" label="Confirmar contraseña" variant="outlined" type="password" />
+                    <FieldTForm 
+                        name="description" 
+                        label="Motivo de registro" 
+                        variant="outlined"
+                        multiline
+                        rows={3}
+                        disabled={!tokenValid}
+                        placeholder="Opcional: Explica por qué solicitas acceso"
+                        helperText="Máximo 500 caracteres"
+                    />
                 </Box>
 
                 <Box flexDirection="column">
@@ -146,7 +228,7 @@ export default function ResponsiveView({ serverError, emailExists, registrationS
                         }} 
                         type='submit'
                         startIcon={<Icon icon='mdi:account-plus' width={20}/>}
-                        disabled={registrationSuccess}
+                        disabled={registrationSuccess || !tokenValid}
                     >
                         Registrarse
                     </Button>

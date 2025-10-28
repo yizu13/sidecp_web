@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     Drawer,
     Box,
@@ -13,7 +13,6 @@ import {
     CircularProgress,
     Alert,
     Avatar,
-    Tooltip,
     Snackbar,
     Dialog,
     DialogTitle,
@@ -24,6 +23,7 @@ import {
     RadioGroup,
     FormControlLabel,
     Radio,
+    Paper,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useSettingContext } from '../../settingsComponent/contextSettings';
@@ -32,6 +32,8 @@ import {
     approveRegistrationRequest,
     rejectRegistrationRequest,
     RegistrationRequest,
+    getRegistrationToken,
+    regenerateRegistrationToken,
 } from '../../API/registrationRequestsAPI';
 
 interface RegistrationRequestsSidebarProps {
@@ -48,6 +50,9 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
     const [approveDialogOpen, setApproveDialogOpen] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState<RegistrationRequest | null>(null);
     const [selectedRole, setSelectedRole] = useState<'admin' | 'evaluator'>('evaluator');
+    const [registrationToken, setRegistrationToken] = useState<string>('');
+    const [tokenTimeRemaining, setTokenTimeRemaining] = useState<number>(0);
+    const [loadingToken, setLoadingToken] = useState(false);
     const [snackbar, setSnackbar] = useState<{
         open: boolean;
         message: string;
@@ -57,6 +62,49 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
         message: '',
         severity: 'success',
     });
+
+    const loadToken = useCallback(async () => {
+        try {
+            setLoadingToken(true);
+            const tokenData = await getRegistrationToken();
+            setRegistrationToken(tokenData.token);
+            setTokenTimeRemaining(tokenData.timeRemaining);
+        } catch (err: any) {
+            console.error('Error loading token:', err);
+            setSnackbar({
+                open: true,
+                message: 'Error al cargar el token',
+                severity: 'error',
+            });
+        } finally {
+            setLoadingToken(false);
+        }
+    }, []);
+
+    const handleRegenerateToken = async () => {
+        try {
+            setLoadingToken(true);
+            const newTokenData = await regenerateRegistrationToken();
+            setRegistrationToken(newTokenData.token);
+            // Obtener el timeRemaining real del servidor
+            const tokenData = await getRegistrationToken();
+            setTokenTimeRemaining(tokenData.timeRemaining);
+            setSnackbar({
+                open: true,
+                message: 'Token regenerado exitosamente',
+                severity: 'success',
+            });
+        } catch (err: any) {
+            console.error('Error regenerating token:', err);
+            setSnackbar({
+                open: true,
+                message: 'Error al regenerar el token',
+                severity: 'error',
+            });
+        } finally {
+            setLoadingToken(false);
+        }
+    };
 
     const loadRequests = async () => {
         setLoading(true);
@@ -72,15 +120,75 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
         }
     };
 
+    // Cargar datos iniciales cuando se abre el drawer
     useEffect(() => {
         if (open) {
             loadRequests();
+            loadToken();
         }
-    }, [open]);
+    }, [open, loadToken]);
+
+    // Actualizar token cada 5 minutos
+    useEffect(() => {
+        if (!open) return;
+
+        const interval = setInterval(() => {
+            loadToken();
+        }, 5 * 60 * 1000); // 5 minutos
+
+        return () => clearInterval(interval);
+    }, [open, loadToken]);
+
+    // Contador regresivo - optimizado para evitar re-renders innecesarios
+    useEffect(() => {
+        if (!open) return;
+        if (tokenTimeRemaining <= 0) {
+            // Si el token expira, recargar automáticamente
+            loadToken();
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setTokenTimeRemaining((prev) => {
+                const newValue = Math.max(0, prev - 1);
+                // Si llega a 0, refrescar el token
+                if (newValue === 0) {
+                    setTimeout(() => loadToken(), 1000);
+                }
+                return newValue;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [open, tokenTimeRemaining > 0, loadToken]); // Cambiado a comparación booleana
+
+    const formatTimeRemaining = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const handleCopyToken = () => {
+        if (!registrationToken) {
+            setSnackbar({
+                open: true,
+                message: 'No hay token disponible para copiar',
+                severity: 'error',
+            });
+            return;
+        }
+        
+        navigator.clipboard.writeText(registrationToken);
+        setSnackbar({
+            open: true,
+            message: 'Token copiado al portapapeles',
+            severity: 'success',
+        });
+    };
 
     const handleOpenApproveDialog = (request: RegistrationRequest) => {
         setSelectedRequest(request);
-        setSelectedRole('evaluator'); // Default role
+        setSelectedRole('evaluator');
         setApproveDialogOpen(true);
     };
 
@@ -103,7 +211,6 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
                 message: `Solicitud aprobada exitosamente como ${selectedRole === 'admin' ? 'Administrador' : 'Evaluador'}`,
                 severity: 'success',
             });
-            // Remover de la lista
             setRequests(requests.filter((r) => r.id !== selectedRequest.id));
         } catch (err: any) {
             console.error('Error approving request:', err);
@@ -126,7 +233,6 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
                 message: 'Solicitud rechazada',
                 severity: 'success',
             });
-            // Remover de la lista
             setRequests(requests.filter((r) => r.id !== requestId));
         } catch (err: any) {
             console.error('Error rejecting request:', err);
@@ -178,31 +284,108 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
                             p: 2.5,
                             borderBottom: `1px solid ${theme.palette.mode === 'dark' ? '#2a2a2a' : '#e0e0e0'}`,
                             backgroundColor: theme.palette.mode === 'dark' ? '#0e1217' : '#ffffff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
                         }}
                     >
-                        <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <Icon
-                                icon="mdi:account-multiple-plus"
-                                style={{
-                                    fontSize: '28px',
-                                    color: theme.palette.primary.main,
-                                }}
-                            />
-                            <Box>
-                                <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                                    Solicitudes de Registro
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                    {requests.length} {requests.length === 1 ? 'pendiente' : 'pendientes'}
-                                </Typography>
-                            </Box>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                            <Stack direction="row" alignItems="center" spacing={1.5}>
+                                <Icon
+                                    icon="mdi:account-multiple-plus"
+                                    style={{
+                                        fontSize: '28px',
+                                        color: theme.palette.primary.main,
+                                    }}
+                                />
+                                <Box>
+                                    <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                                        Solicitudes de Registro
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                        {requests.length} {requests.length === 1 ? 'pendiente' : 'pendientes'}
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                            <IconButton onClick={onClose} size="small">
+                                <Icon icon="mdi:close" style={{ fontSize: '24px' }} />
+                            </IconButton>
                         </Stack>
-                        <IconButton onClick={onClose} size="small">
-                            <Icon icon="mdi:close" style={{ fontSize: '24px' }} />
-                        </IconButton>
+
+                        {/* Token Card */}
+                        <Paper
+                            elevation={3}
+                            sx={{
+                                p: 2,
+                                backgroundColor: theme.palette.mode === 'dark' ? '#1a2027' : '#ffffff',
+                                borderRadius: 2,
+                            }}
+                        >
+                            <Stack spacing={1.5}>
+                                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                        Token de Registro
+                                    </Typography>
+                                    <Chip
+                                        label={tokenTimeRemaining > 0 ? formatTimeRemaining(tokenTimeRemaining) : 'Expirado'}
+                                        size="small"
+                                        color={tokenTimeRemaining > 60 ? 'success' : tokenTimeRemaining > 0 ? 'warning' : 'error'}
+                                        sx={{ fontWeight: 600 }}
+                                    />
+                                </Stack>
+
+                                {loadingToken ? (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 1 }}>
+                                        <CircularProgress size={24} />
+                                    </Box>
+                                ) : (
+                                    <>
+                                        <Box
+                                            sx={{
+                                                p: 1.5,
+                                                backgroundColor: theme.palette.mode === 'dark' ? '#0e1217' : '#f5f5f5',
+                                                borderRadius: 1,
+                                                textAlign: 'center',
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="h4"
+                                                sx={{
+                                                    fontFamily: 'monospace',
+                                                    fontWeight: 700,
+                                                    letterSpacing: 4,
+                                                    color: theme.palette.primary.main,
+                                                }}
+                                            >
+                                                {registrationToken || '--------'}
+                                            </Typography>
+                                        </Box>
+
+                                        <Stack direction="row" spacing={1}>
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                startIcon={<Icon icon="mdi:content-copy" />}
+                                                onClick={handleCopyToken}
+                                                fullWidth
+                                                disabled={!registrationToken}
+                                                sx={{ textTransform: 'none' }}
+                                            >
+                                                Copiar
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                startIcon={<Icon icon="mdi:refresh" />}
+                                                onClick={handleRegenerateToken}
+                                                fullWidth
+                                                disabled={loadingToken}
+                                                sx={{ textTransform: 'none' }}
+                                            >
+                                                Regenerar
+                                            </Button>
+                                        </Stack>
+                                    </>
+                                )}
+                            </Stack>
+                        </Paper>
                     </Box>
 
                     {/* Content */}
@@ -318,29 +501,43 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
                                                     </Box>
                                                 </Stack>
 
+                                                {/* Description */}
+                                                {request.description && (
+                                                    <>
+                                                        <Divider />
+                                                        <Box
+                                                            sx={{
+                                                                p: 1.5,
+                                                                backgroundColor: theme.palette.mode === 'dark' ? '#0e1217' : '#f5f5f5',
+                                                                borderRadius: 1,
+                                                            }}
+                                                        >
+                                                            <Stack direction="row" spacing={1} alignItems="flex-start">
+                                                                <Icon icon="mdi:message-text" style={{ fontSize: '18px', marginTop: '2px' }} />
+                                                                <Box>
+                                                                    <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                                                        Razón de admisión:
+                                                                    </Typography>
+                                                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                                                        {request.description}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Stack>
+                                                        </Box>
+                                                    </>
+                                                )}
+
                                                 <Divider />
 
                                                 {/* Details */}
-                                                <Stack spacing={1.5}>
-                                                    <Box>
-                                                        <Stack
-                                                            direction="row"
-                                                            spacing={1}
-                                                            alignItems="center"
-                                                        >
-                                                            <Icon
-                                                                icon="mdi:clock-outline"
-                                                                style={{ fontSize: '18px' }}
-                                                            />
-                                                            <Typography
-                                                                variant="caption"
-                                                                sx={{ color: 'text.secondary' }}
-                                                            >
-                                                                {formatDate(request.createdAt)}
-                                                            </Typography>
-                                                        </Stack>
-                                                    </Box>
-                                                </Stack>
+                                                <Box>
+                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                        <Icon icon="mdi:clock-outline" style={{ fontSize: '18px' }} />
+                                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                                            {formatDate(request.createdAt)}
+                                                        </Typography>
+                                                    </Stack>
+                                                </Box>
 
                                                 <Divider />
 
@@ -403,17 +600,17 @@ export default function RegistrationRequestsSidebar({ open, onClose }: Registrat
 
             {/* Dialog for Role Selection */}
             <Dialog
-                open={approveDialogOpen}
-                onClose={handleCloseApproveDialog}
-                maxWidth="xs"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        backgroundColor: theme.palette.mode === 'dark' ? '#1a2027' : '#ffffff',
-                        borderRadius: 2,
-                    },
-                }}
-            >
+    open={approveDialogOpen}
+    onClose={handleCloseApproveDialog}
+    maxWidth="xs"
+    fullWidth
+    PaperProps={{
+        sx: {
+            bgcolor: theme.palette.mode === 'dark' ? '#1a2027' : 'background.paper',
+            borderRadius: 2,
+        },
+    }}
+>
                 <DialogTitle sx={{ pb: 1 }}>
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                         <Icon

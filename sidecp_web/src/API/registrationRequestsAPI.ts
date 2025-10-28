@@ -6,6 +6,8 @@ export interface RegistrationRequest {
     lastName: string;
     email: string;
     status: 'pending' | 'approved' | 'rejected';
+    description?: string;
+    registrationToken?: string;
     createdAt: string;
 }
 
@@ -14,6 +16,8 @@ export interface RegistrationRequestData {
     lastName: string;
     email: string;
     password: string;
+    description?: string;
+    registrationToken: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -70,4 +74,37 @@ export const rejectRegistrationRequest = async (requestId: string, reason?: stri
 export const getPendingRequestsCount = async () => {
     const response = await axiosIntercep.get<{ count: number }>('/api/auth/registration-requests/count');
     return response.data.count;
+};
+
+/**
+ * Obtener el token de registro actual
+ */
+export const getRegistrationToken = async () => {
+    const response = await axiosIntercep.get<{
+        token: string;
+        expiresAt: string;
+        timeRemaining: number;
+        generatedAt: string;
+    }>('/api/auth/registration-token');
+    return response.data;
+};
+
+/**
+ * Validar un token de registro
+ */
+export const validateRegistrationToken = async (token: string) => {
+    const response = await axiosIntercep.post<{
+        valid: boolean;
+        message: string;
+        timeRemaining?: number;
+    }>('/api/auth/registration-token/validate', { token });
+    return response.data;
+};
+
+/**
+ * Regenerar el token de registro
+ */
+export const regenerateRegistrationToken = async () => {
+    const response = await axiosIntercep.post('/api/auth/registration-token/regenerate');
+    return response.data;
 };
