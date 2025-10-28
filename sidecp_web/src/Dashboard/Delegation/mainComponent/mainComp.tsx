@@ -70,7 +70,7 @@ export default function DelegationEval(){
     const userString = sessionStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
     const [ committeDefined, setCommitteDef ] = useState<string | undefined>(undefined);
-    const [ commities, setCommities ] = useState<Committe[]>([]);
+    const [ committe, setcommitte ] = useState<Committe[]>([]);
     const [ committeId, setCommitteId ] = useState('');
     const [ open, setOpen ] = useState(false);
     const [ currentStudent, setCurrent ] = useState<student | null>();
@@ -103,7 +103,8 @@ export default function DelegationEval(){
   useEffect(()=>{
     const studentData = async ()=>{
       const response = await getStudents()
-      setStudents(response.data.students)
+      
+      setStudents(response.data.students_)
     }
     studentData()
   },[selected, open])
@@ -122,20 +123,23 @@ export default function DelegationEval(){
    useEffect(()=>{
         const userCommitte = async()=>{
           const data = await getEvaluator(user.id)
-          setCommitteDef(commities.find(i=> i.committeid === data.data.evaluator.committeid)?.committename)
-          setCommitteId(commities.find(i=> i.committeid === data.data.evaluator.committeid)?.committeid ?? '')
+          
+          setCommitteDef(committe.find(i=> i.committeid === data.data.evaluator.committeid)?.committename)
+          setCommitteId(committe.find(i=> i.committeid === data.data.evaluator.committeid)?.committeid ?? '')
         }
         userCommitte()
-      },[commities, user])
+      },[committe, user])
 
      useEffect(()=>{
             const data = async ()=>{
                const response = await getCommitties()
-               setCommities(response.data.committies)
+               
+               setcommitte(response.data.committes)
             }
             const scores = async ()=>{
               const response = await getScores();
-              setScores(response.data.scores);
+              
+              setScores(response.data.scores_);
             }
             scores()
             data()
@@ -145,7 +149,7 @@ export default function DelegationEval(){
         <>
         <Stack display="flex" flexDirection="row" justifyContent="center" alignContent="end" sx={{width: "100%"}}>
             <Box width="40vw" sx={{mb: 2}} flexDirection="row" display="flex" columnGap={6}>
-            <SimpleSelect handleChange={handleChange} selected={selected} committeDefined={committeDefined} commities={commities} user={user}/>
+            <SimpleSelect handleChange={handleChange} selected={selected} committeDefined={committeDefined} commities={committe} user={user}/>
             <TextField fullWidth placeholder='Buscar delegaciones...' 
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -212,11 +216,11 @@ export default function DelegationEval(){
         <EditableTypography/>
       </CardContent>
       <CardActions sx={{ padding: 2, mt: 'auto' }}>
-        <Tooltip title={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen?"La comisión está cerrada": ""} placement='top'>
+        <Tooltip title={!committe.find((i: Committe)=> i.committeid === item.committeid)?.committeopen?"La comisión está cerrada": ""} placement='top'>
           <Box width="100%">
         {scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified && (
           <Button 
-            disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} 
+            disabled={!committe.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} 
             variant='contained' 
             color='primary' 
             onClick={()=> {setOpen(true); setCurrent(item)}} 
@@ -234,7 +238,7 @@ export default function DelegationEval(){
         )}
         {!scores?.find((ite: scoresCalifications)=> ite.scoreid === item.scoreid)?.modified && (
           <Button 
-            disabled={!commities.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} 
+            disabled={!committe.find((i: Committe)=> i.committeid === item.committeid)?.committeopen} 
             variant='contained' 
             color='primary' 
             onClick={()=> {setOpen(true); setCurrent(item)}} 

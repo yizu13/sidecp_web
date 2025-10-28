@@ -223,7 +223,7 @@ export default function ModalCalification({open, setOpen, student, setStudent_, 
             try{
                 await scoresUpdate({scoreId: student?.scoreid , ...data})
                 const response = await getStudents()
-                setStudents(response.data.students)
+                setStudents(response.data.students_)
                 setOpen(false);
                 reset();
                 setStudent_(null);

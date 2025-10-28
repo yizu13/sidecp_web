@@ -73,7 +73,8 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
     useEffect(()=>{
         const fetchEvaluators = async()=>{
             const response = await getEvaluators();
-            setEvaluators(response.data.evaluators);
+            debugger
+            setEvaluators(response.data.Evaluator_);
         }
         fetchEvaluators();
     },[])
@@ -97,7 +98,7 @@ export default function ModalEvaluator({currentData, setOpen, open, usersData, c
         try{
             await createEvaluator({evaluatorId: currentData?.evaluatorId , ...data});
             const response = await getEvaluators();
-            setEvaluators(response.data.evaluators);
+            setEvaluators(response.data.Evaluator_);
             reset();
             setOpen(false)
             setRow(undefined)

@@ -47,8 +47,8 @@ export default function FieldTForm({ name, label, variant, type, inputProps = {}
         ...props,
     };
 
-    // Password input adornments
-    if (name.toLowerCase() === 'password') {
+    // Password input adornments (incluye confirmPassword)
+    if (name.toLowerCase() === 'password' || name.toLowerCase() === 'confirmpassword') {
         baseInputProps["InputProps"] = {
             endAdornment: (
                 <InputAdornment position="end">
@@ -90,7 +90,7 @@ export default function FieldTForm({ name, label, variant, type, inputProps = {}
                     variant={variant}
                     error={!!error}
                     helperText={error?.message}
-                    type={name.toLowerCase() === 'password' && !show ? "password" : type}
+                    type={(name.toLowerCase() === 'password' || name.toLowerCase() === 'confirmpassword') && !show ? "password" : type}
                     fullWidth
                     placeholder={placeHolderFunc(name.toLowerCase())}
                     {...baseInputProps}

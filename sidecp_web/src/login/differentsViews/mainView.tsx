@@ -64,8 +64,10 @@ export default function MainView({serverError, userNotFound} : props){
                     >
                         Entrar
                     </Button>
-                    <Link variant='body2' underline="hover" href="#" color='inherit' sx={{mt: 1, ml: 2, mb: -2,
-                        display: "flex", justifySelf: "start", alignSelf: "start"}} >¿Olvidaste tu contraseña?</Link>
+                    <Stack spacing={0.5} sx={{ mt: 1, ml: 2, mb: -2 }}>
+                        <Link variant='body2' underline="hover" href="#" color='inherit' sx={{display: "flex", justifySelf: "start", alignSelf: "start"}} >¿Olvidaste tu contraseña?</Link>
+                        <Link variant='body2' underline="hover" href="/register" color='inherit' sx={{display: "flex", justifySelf: "start", alignSelf: "start", fontWeight: 600}} >¿No tienes cuenta? Regístrate</Link>
+                    </Stack>
                 </Box>
             </Stack>
             </>

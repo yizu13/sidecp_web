@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useRoutes } from "react-router"
 import Login from '../login/login'
+import Register from '../register/register'
 import { lazy, Suspense, useEffect } from "react"
 import { useNavigate } from "react-router";
 import { Box, Stack } from "@mui/material";
@@ -47,6 +48,9 @@ export default function Router(){
                     element: (
                         <Logout/>
                     )
+                },{
+                    path: "register",
+                    element: <Register/>
                 }
             ]
             

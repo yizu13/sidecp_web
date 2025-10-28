@@ -1,5 +1,5 @@
-import { type ReactNode, useRef, useState } from 'react';
-import { Stack, Box, Typography, IconButton, Tooltip } from '@mui/material';
+import { type ReactNode, useRef, useState, useEffect } from 'react';
+import { Stack, Box, Typography, IconButton, Tooltip, Badge } from '@mui/material';
 import { Icon } from '@iconify/react'
 import {TextPage} from './pages_layout'
 import {IconPage} from './pages_layout'
@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSettingContext } from '../../settingsComponent/contextSettings';
 import { useSidebar } from '../../settingsComponent/sidebarContext';
 import LogoutConfirmDialog from './LogoutConfirmDialog';
+import RegistrationRequestsSidebar from '../RegistrationRequests/RegistrationRequestsSidebar';
+import { getPendingRequestsCount } from '../../API/registrationRequestsAPI';
 import React from 'react';
 
 type PageObject ={
@@ -26,6 +28,8 @@ export default function MainLayout({ setPage, children }: props){
     const navigation = useNavigate()
     const { theme, themefunc } = useSettingContext()
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+    const [requestsSidebarOpen, setRequestsSidebarOpen] = useState(false)
+    const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
 
     const handleChangeTheme = ()=>{
         if(theme.palette.mode === "dark"){
@@ -48,6 +52,27 @@ export default function MainLayout({ setPage, children }: props){
         setLogoutDialogOpen(false)
     }
 
+    const loadPendingRequestsCount = async () => {
+        try {
+            const count = await getPendingRequestsCount();
+            setPendingRequestsCount(count);
+        } catch (err) {
+            console.error('Error loading pending requests count:', err);
+        }
+    };
+
+    useEffect(() => {
+        loadPendingRequestsCount();
+        // Actualizar cada 30 segundos
+        const interval = setInterval(loadPendingRequestsCount, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleRequestsSidebarClose = () => {
+        setRequestsSidebarOpen(false);
+        loadPendingRequestsCount(); // Recargar el contador al cerrar
+    };
+
         return (
             <Stack
                 display="flex"
@@ -63,23 +88,55 @@ export default function MainLayout({ setPage, children }: props){
                     left: 0
                 }}
             >
-                <IconButton
-                onClick={handleChangeTheme}
-                sx={{
-                    position: 'fixed',
-                    top: 16,
-                    right: 16,
-                    zIndex: 2000,
-                    background: theme.palette.mode === "dark" ? "#222" : "#fff",
-                    color: theme.palette.mode === "dark" ? "#fff" : "#222",
-                    boxShadow: 2,
-                    '&:hover': {
-                        background: theme.palette.mode === "dark" ? "#333" : "#eee",
-                    }
-                }}
-            >
-                {theme.palette.mode === "dark" ? <Icon icon="line-md:moon-filled-to-sunny-filled-loop-transition"/>: <Icon icon="line-md:sunny-filled-loop-to-moon-filled-loop-transition"/>}
-            </IconButton>
+                {/* Botones superiores derechos */}
+                <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                        position: 'fixed',
+                        top: 16,
+                        right: 16,
+                        zIndex: 2000,
+                    }}
+                >
+                    {/* Botón de solicitudes de registro */}
+                    <Tooltip title="Solicitudes de registro" placement="bottom">
+                        <IconButton
+                            onClick={() => setRequestsSidebarOpen(true)}
+                            sx={{
+                                background: theme.palette.mode === "dark" ? "#222" : "#fff",
+                                color: theme.palette.mode === "dark" ? "#fff" : "#222",
+                                boxShadow: 2,
+                                '&:hover': {
+                                    background: theme.palette.mode === "dark" ? "#333" : "#eee",
+                                }
+                            }}
+                        >
+                            <Badge 
+                                badgeContent={pendingRequestsCount} 
+                                color="error"
+                                max={99}
+                            >
+                                <Icon icon="mdi:account-multiple-plus" style={{ fontSize: '22px' }} />
+                            </Badge>
+                        </IconButton>
+                    </Tooltip>
+
+                    {/* Botón de cambio de tema */}
+                    <IconButton
+                        onClick={handleChangeTheme}
+                        sx={{
+                            background: theme.palette.mode === "dark" ? "#222" : "#fff",
+                            color: theme.palette.mode === "dark" ? "#fff" : "#222",
+                            boxShadow: 2,
+                            '&:hover': {
+                                background: theme.palette.mode === "dark" ? "#333" : "#eee",
+                            }
+                        }}
+                    >
+                        {theme.palette.mode === "dark" ? <Icon icon="line-md:moon-filled-to-sunny-filled-loop-transition"/>: <Icon icon="line-md:sunny-filled-loop-to-moon-filled-loop-transition"/>}
+                    </IconButton>
+                </Stack>
                 
                 {/* Sidebar */}
                 <motion.div
@@ -346,6 +403,12 @@ export default function MainLayout({ setPage, children }: props){
                     open={logoutDialogOpen}
                     onClose={handleLogoutCancel}
                     onConfirm={handleLogoutConfirm}
+                />
+
+                {/* Registration Requests Sidebar */}
+                <RegistrationRequestsSidebar
+                    open={requestsSidebarOpen}
+                    onClose={handleRequestsSidebarClose}
                 />
             </Stack>
         );

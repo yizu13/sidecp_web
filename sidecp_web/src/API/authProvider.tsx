@@ -72,7 +72,7 @@ export default function Authsystem({ children }: props){
                         if(refreshToken === 'refresh'){
                             setrefreshToken(sessionToken);
                         }
-                        const newAccess = await axiosLog.post('/token', { token: refreshToken === 'refresh'? sessionToken : refreshToken });
+                        const newAccess = await axiosLog.post('/auth/token', { token: refreshToken === 'refresh'? sessionToken : refreshToken });
                         const newAccessToken = newAccess.data.accessToken;
                         setAccesToken(newAccessToken);
 
@@ -94,7 +94,7 @@ export default function Authsystem({ children }: props){
                         }
                         
                         // send to login
-                        await axiosLog.delete('/logout', { data: { token: refreshToken } });
+                        await axiosLog.delete('/auth/logout', { data: { token: refreshToken } });
                         navigation('/login');
                         return Promise.reject(errorRefresh);
                     }
@@ -110,7 +110,7 @@ export default function Authsystem({ children }: props){
 
     const login = useCallback(async (credentials: object) => {
         try {
-            const response = await axiosLog.post("/login", credentials);
+            const response = await axiosLog.post("/auth/login", credentials);
             setAccesToken(response.data.accessToken);
             setrefreshToken(response.data.refreshToken);
             setRole(response.data.user.role);

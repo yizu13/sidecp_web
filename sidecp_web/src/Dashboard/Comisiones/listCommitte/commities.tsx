@@ -95,9 +95,8 @@ const [ openModalDescription, setModalDescription ] = useState<boolean>(false);
       // Validar si hay estudiantes en la comisión antes de borrar
       try {
         const response = await getStudents();
-        const students = response.data.students || [];
+        const students = response.data.students_ || [];
         const hasStudents = students.some((s: student) => s.committeid === rowToDelete.id);
-
         if (hasStudents) {
           setDeleteError("No se puede eliminar la comisión porque tiene estudiantes asignados.");
           return;
@@ -272,7 +271,7 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
 const refetchAll = useCallback(async () => {
   try {
     const response = await getCommitties();
-    setCommities(response.data.committies || []);
+    setCommities(response.data.committes || []);
   } catch (err) {
     console.log(err)
   }

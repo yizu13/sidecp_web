@@ -111,9 +111,9 @@ function DonutChart() {
           getStudents(),
           getCommitties()
         ]);
-
-        const students = studentsResponse.data.students;
-        const committees = committeesResponse.data.committies;
+        
+        const students = studentsResponse.data.students_;
+        const committees = committeesResponse.data.committes;
 
         setStudents(students);
 
@@ -444,9 +444,9 @@ function RadarScoresChart() {
         
         const scoresResponse = await getScores();
         console.log('scoresResponse', scoresResponse);
-        
+        debugger
         // Filtrar y procesar los scores, manteniendo solo los que tienen al menos una puntuación válida
-        const validScores: scores[] = scoresResponse.data.scores
+        const validScores: scores[] = scoresResponse.data.scores_
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((item: any) => ({
             scoreid: item.scoreid,

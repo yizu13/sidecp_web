@@ -38,8 +38,12 @@ export default function CreateCommitte(){
     useEffect(()=>{
         const callEvents = async ()=>{
             if(committeForEdit?.events){
-            const response = await getEventsById(committeForEdit?.events ?? "")
+            try{
+                const response = await getEventsById(committeForEdit?.events ?? "")
             setList([...(response.data || [])])
+            }catch(error){
+                console.error(error)
+            }
         }
     }
         callEvents()

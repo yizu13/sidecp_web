@@ -65,9 +65,10 @@ export default function AdministrationCommittee() {
 
     const confirmClose = async () => {
         if (committeToClose) {
+            
             await closeCommitte(committeToClose.committeid);
             const response = await getCommitties();
-            setCommitties(response.data.committies);
+            setCommitties(response.data.committes);
             setCommitteToClose(null);
             setCloseDialogOpen(false);
         }
@@ -124,8 +125,9 @@ useEffect(() => {
         const fetchCommitties = async () => {
             try {
                 const response = await getCommitties();
-                console.log(response.data.committies);
-                setCommitties(response.data.committies);
+                console.log(response.data.committes);
+                
+                setCommitties(response.data.committes);
             } catch (error) {
                 console.error('Error fetching committies:', error);
             }
@@ -140,7 +142,7 @@ useEffect(() => {
             await closeCommitte(id);
         }
         const response = await getCommitties();
-        setCommitties(response.data.committies)
+        setCommitties(response.data.committes)
     }
 
 
@@ -228,10 +230,10 @@ useEffect(() => {
                     padding: '24px 40px',
                     scrollSnapType: 'x mandatory',
                     minHeight: '280px',
-                    ...(committies.length > 3 ? { maskImage } : {})
+                    ...(committies?.length > 3 ? { maskImage } : {})
                 }}
             >
-                {committies.map((item: Committe) => (
+                {committies?.map((item: Committe) => (
                     <Card 
                         key={item.id} 
                         sx={{
@@ -317,6 +319,7 @@ useEffect(() => {
                                     fullWidth
                                     startIcon={<Icon icon={item.committeopen ? "solar:stop-bold" : "solar:play-bold"} />}
                                     onClick={() => {
+                                        
                                         if (item.committeopen) {
                                             handleCloseRequest(item);
                                         } else {

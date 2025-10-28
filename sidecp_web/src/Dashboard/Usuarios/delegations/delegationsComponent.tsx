@@ -95,9 +95,9 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
         getStudents(),
         getScores()
       ]);
-      setCommities(committeRes.data.committies || []);
-      setStudents(studentsRes.data.students || []);
-      setScores(scoresRes.data.scores || []);
+      setCommities(committeRes.data.committes || []);
+      setStudents(studentsRes.data.students_ || []);
+      setScores(scoresRes.data.scores_ || []);
     } catch (err) {
       console.log(err);
     }
@@ -138,6 +138,7 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
 
   // Handler para importar después de seleccionar comisión
   const handleImportExcel = async () => {
+    debugger
   if (!pendingFile || !selectedCommitte) return;
   setImporting(true);
 
@@ -171,7 +172,7 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
       const [, ...rows] = filteredData;
 
       const response = await getStudents();
-      const dbStudents = response.data.students || [];
+      const dbStudents = response.data.students_ || [];
 
       const existingNames = new Set(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -403,7 +404,7 @@ useEffect(()=>{
       const callCommities = async ()=>{
         try{
           const response = await getCommitties();
-          setCommities(response.data.committies);
+          setCommities(response.data.committes);
         }catch(err){
           console.log(err)
         }
@@ -412,7 +413,7 @@ useEffect(()=>{
       const callStudents = async ()=>{
         try{
          const response = await getStudents();
-          setStudents(response.data.students); 
+          setStudents(response.data.students_); 
         }catch(err){
           console.log(err);
         }
@@ -421,7 +422,7 @@ useEffect(()=>{
       const callScores = async () => {
     try {
       const response = await getScores();
-      setScores(response.data.scores);
+      setScores(response.data.scores_);
     } catch (err) {
       console.log(err);
     }

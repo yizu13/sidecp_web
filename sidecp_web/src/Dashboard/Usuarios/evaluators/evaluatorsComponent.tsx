@@ -159,8 +159,9 @@ const columns: GridColDef<(typeof rows)[number]>[] = [
        getEvaluators()
      ]);
      setUsers(usersRes.data?.users || []);
-     setCommities(commRes.data?.committies || []);
-     setEvaluators(evalRes.data?.evaluators || []);
+     setCommities(commRes.data?.committes || []);
+     setEvaluators(evalRes.data?.Evaluator_ || []);
+     
    } catch (err) {
      console.log(err);
    }

@@ -29,7 +29,7 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api1': {
-        target: 'http://localhost:3000',  // Primera API
+        target: 'http://localhost:4000',  // Primera API
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api1/, '')
       },

@@ -170,24 +170,44 @@ export default function ResponsiveView({serverError, userNotFound} : props){
                     >
                         Entrar
                     </Button>
-                    <Link 
-                        variant='body2' 
-                        underline="hover" 
-                        href="#" 
-                        color='inherit' 
-                        sx={{
-                            display: "flex", 
-                            justifyContent: "center",
-                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                            fontWeight: 500,
-                            color: '#1E3A8A',
-                            '&:hover': {
-                                color: '#416dc4'
-                            }
-                        }}
-                    >
-                        ¿Olvidaste tu contraseña?
-                    </Link>
+                    <Stack spacing={1} alignItems="center">
+                        <Link 
+                            variant='body2' 
+                            underline="hover" 
+                            href="#" 
+                            color='inherit' 
+                            sx={{
+                                display: "flex", 
+                                justifyContent: "center",
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                fontWeight: 500,
+                                color: '#1E3A8A',
+                                '&:hover': {
+                                    color: '#416dc4'
+                                }
+                            }}
+                        >
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                        <Link 
+                            variant='body2' 
+                            underline="hover" 
+                            href="/register" 
+                            color='inherit' 
+                            sx={{
+                                display: "flex", 
+                                justifyContent: "center",
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                fontWeight: 600,
+                                color: '#2c2c2c',
+                                '&:hover': {
+                                    color: '#1a1a1a'
+                                }
+                            }}
+                        >
+                            ¿No tienes cuenta? Regístrate
+                        </Link>
+                    </Stack>
                 </Stack>
             </Stack>
         </Box>
