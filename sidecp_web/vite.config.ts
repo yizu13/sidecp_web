@@ -29,12 +29,12 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api1': {
-        target: 'http://localhost:4000',  // Primera API
+        target: 'http://localhost:3000',  // Primera API
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api1/, '')
       },
       '/api2': {
-        target: 'http://localhost:4000',  // Segunda API
+        target: 'http://localhost:3000',  // Segunda API
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api2/, '')
       }
