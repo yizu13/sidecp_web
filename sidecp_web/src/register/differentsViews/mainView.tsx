@@ -32,13 +32,32 @@ export default function MainView({
                 rowGap={3} 
                 sx={{
                     backgroundColor: "#ffffff", 
-                    width: "32vw", 
-                    height: 'auto', 
+                    width: "32vw",
+                    minWidth: "400px",
+                    maxWidth: "600px",
+                    height: 'auto',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
                     borderRadius: 5, 
                     ml: 15, 
-                    mt: 5, 
+                    mt: 5,
+                    mb: 5,
                     p: 6, 
-                    boxShadow: '7px 10px 15px rgba(0, 0, 0, 0.5)'
+                    boxShadow: '7px 10px 15px rgba(0, 0, 0, 0.5)',
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'transparent',
+                        borderRadius: 5,
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'rgba(0,0,0,0.2)',
+                        borderRadius: 4,
+                        '&:hover': {
+                            backgroundColor: 'rgba(0,0,0,0.3)',
+                        },
+                    },
                 }}
             >
                 <Stack m={-2} display="flex" justifyContent="center" alignContent="center">

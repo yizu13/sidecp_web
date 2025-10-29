@@ -82,15 +82,32 @@ export const deleteStudent = async (id: string)=>{
 
 type scores = {
     scoreId: string | undefined,
-    knowledgeSkills: number,
-    negotiationSkills: number,
-    communicationSkills: number,
-    interpersonalSkills: number,
-    analyticalSkills: number
+    investigacionAnalisis: number,
+    pensamientoCritico: number,
+    oratoria: number,
+    argumentacion: number,
+    redaccion: number,
+    negociacion: number,
+    resolucionConflictos: number,
+    liderazgo: number,
+    colaboracion: number
 }
 
 export const scoresUpdate = async (payload: scores) => {
-    const response = await axiosIntercep.post(`/scores`, payload);
+    // Transformar los nombres de camelCase a snake_case para el backend
+    const backendPayload = {
+        scoreId: payload.scoreId,
+        investigacion_analisis: payload.investigacionAnalisis,
+        pensamiento_critico: payload.pensamientoCritico,
+        oratoria: payload.oratoria,
+        argumentacion: payload.argumentacion,
+        redaccion: payload.redaccion,
+        negociacion: payload.negociacion,
+        resolucion_conflictos: payload.resolucionConflictos,
+        liderazgo: payload.liderazgo,
+        colaboracion: payload.colaboracion
+    };
+    const response = await axiosIntercep.post(`/scores`, backendPayload);
     return response
 }
 

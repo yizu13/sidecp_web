@@ -1,5 +1,5 @@
 import * as yup from "yup";
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography, Divider } from "@mui/material";
 import FieldTForm from "../../../manageForm/FieldTxtForm";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -23,11 +23,15 @@ type student = {
 
 type scoresCalifications = {
     scoreid: string
-    knowledgeskills: string
-    negotiationskills : string
-    communicationskills: string
-    interpersonalskills: string
-    analyticalskills: string
+    investigacion_analisis: number
+    pensamiento_critico: number
+    oratoria: number
+    argumentacion: number
+    redaccion: number
+    negociacion: number
+    resolucion_conflictos: number
+    liderazgo: number
+    colaboracion: number
     modified: boolean
 }
 
@@ -41,42 +45,100 @@ type props = {
 }
 
 type generalCal = {
-    knowledge: boolean
-    negotiation : boolean
-    communication: boolean
-    interpersonal: boolean
-    analytical: boolean
+    investigacion: boolean
+    pensamiento: boolean
+    oratoria: boolean
+    argumentacion: boolean
+    redaccion: boolean
+    negociacion: boolean
+    resolucion: boolean
+    liderazgo: boolean
+    colaboracion: boolean
 }
 
 export default function ModalCalification({open, setOpen, student, setStudent_, scores, setStudents}: props){
     const { theme } = useSettingContext();
-    const [ bad, setBad ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false});
-    const [ regular, setRegular ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false});
-    const [ good, setGood ] = useState<generalCal>({knowledge: false, negotiation: false, communication: false, interpersonal: false, analytical: false})
-    const [ defaultCal, setDefaultCal ] = useState<generalCal>({knowledge: true, negotiation: true, communication: true, interpersonal: true, analytical: true})
+    const [ bad, setBad ] = useState<generalCal>({
+        investigacion: false, 
+        pensamiento: false, 
+        oratoria: false, 
+        argumentacion: false,
+        redaccion: false, 
+        negociacion: false, 
+        resolucion: false, 
+        liderazgo: false, 
+        colaboracion: false
+    });
+    const [ regular, setRegular ] = useState<generalCal>({
+        investigacion: false, 
+        pensamiento: false, 
+        oratoria: false,
+        argumentacion: false, 
+        redaccion: false, 
+        negociacion: false, 
+        resolucion: false, 
+        liderazgo: false, 
+        colaboracion: false
+    });
+    const [ good, setGood ] = useState<generalCal>({
+        investigacion: false, 
+        pensamiento: false, 
+        oratoria: false,
+        argumentacion: false, 
+        redaccion: false, 
+        negociacion: false, 
+        resolucion: false, 
+        liderazgo: false, 
+        colaboracion: false
+    });
+    const [ defaultCal, setDefaultCal ] = useState<generalCal>({
+        investigacion: true, 
+        pensamiento: true, 
+        oratoria: true,
+        argumentacion: true, 
+        redaccion: true, 
+        negociacion: true, 
+        resolucion: true, 
+        liderazgo: true, 
+        colaboracion: true
+    });
+    
     const currentScore = scores?.find((ite: scoresCalifications)=> ite.scoreid === student?.scoreid)
 
     const yupSchema = yup.object().shape({
-        knowledgeSkills: yup.number().required().max(100, "Máximo 100"),
-        negotiationSkills: yup.number().required().max(100, "Máximo 100"),
-        communicationSkills: yup.number().required().max(100, "Máximo 100"),
-        interpersonalSkills: yup.number().required().max(100, "Máximo 100"),
-        analyticalSkills: yup.number().required().max(100, "Máximo 100")
+        investigacionAnalisis: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(15, "Máximo 15"),
+        pensamientoCritico: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(15, "Máximo 15"),
+        oratoria: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10"),
+        argumentacion: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10"),
+        redaccion: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10"),
+        negociacion: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10"),
+        resolucionConflictos: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10"),
+        liderazgo: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10"),
+        colaboracion: yup.number().required("Campo requerido").min(0, "Mínimo 0").max(10, "Máximo 10")
     });
+
     const defaultValues = {
-        knowledgeSkills: Number(currentScore?.knowledgeskills) || 0,
-        negotiationSkills: Number(currentScore?.negotiationskills) || 0,
-        communicationSkills: Number(currentScore?.communicationskills) || 0,
-        interpersonalSkills: Number(currentScore?.interpersonalskills) || 0,
-        analyticalSkills: Number(currentScore?.analyticalskills) || 0
+        investigacionAnalisis: Number(currentScore?.investigacion_analisis) || 0,
+        pensamientoCritico: Number(currentScore?.pensamiento_critico) || 0,
+        oratoria: Number(currentScore?.oratoria) || 0,
+        argumentacion: Number(currentScore?.argumentacion) || 0,
+        redaccion: Number(currentScore?.redaccion) || 0,
+        negociacion: Number(currentScore?.negociacion) || 0,
+        resolucionConflictos: Number(currentScore?.resolucion_conflictos) || 0,
+        liderazgo: Number(currentScore?.liderazgo) || 0,
+        colaboracion: Number(currentScore?.colaboracion) || 0
     }
 
     const methods = useForm<{
-        knowledgeSkills: number;
-        negotiationSkills: number;
-        communicationSkills: number;
-        interpersonalSkills: number;
-        analyticalSkills: number;
+        investigacionAnalisis: number;
+        pensamientoCritico: number;
+        oratoria: number;
+        argumentacion: number;
+        redaccion: number;
+        negociacion: number;
+        resolucionConflictos: number;
+        liderazgo: number;
+        colaboracion: number;
     }>({
         defaultValues,
         resolver: yupResolver(yupSchema)
@@ -85,139 +147,103 @@ export default function ModalCalification({open, setOpen, student, setStudent_, 
     const {handleSubmit, reset, getValues, watch, setValue} = methods
 
     useEffect(()=>{
-        setValue("knowledgeSkills", Number(currentScore?.knowledgeskills))
-        setValue("negotiationSkills", Number(currentScore?.negotiationskills))
-        setValue("communicationSkills", Number(currentScore?.communicationskills))
-        setValue("interpersonalSkills", Number(currentScore?.interpersonalskills))
-        setValue("analyticalSkills", Number(currentScore?.analyticalskills))
+        setValue("investigacionAnalisis", Number(currentScore?.investigacion_analisis))
+        setValue("pensamientoCritico", Number(currentScore?.pensamiento_critico))
+        setValue("oratoria", Number(currentScore?.oratoria))
+        setValue("argumentacion", Number(currentScore?.argumentacion))
+        setValue("redaccion", Number(currentScore?.redaccion))
+        setValue("negociacion", Number(currentScore?.negociacion))
+        setValue("resolucionConflictos", Number(currentScore?.resolucion_conflictos))
+        setValue("liderazgo", Number(currentScore?.liderazgo))
+        setValue("colaboracion", Number(currentScore?.colaboracion))
     },[currentScore, setValue])
 
-    const knowledgeSkills = watch("knowledgeSkills");
-    const negotiationSkills = watch("negotiationSkills");
-    const communicationSkills = watch("communicationSkills");
-    const interpersonalSkills = watch("interpersonalSkills");
-    const analyticalSkills = watch("analyticalSkills");
+    const investigacionAnalisis = watch("investigacionAnalisis");
+    const pensamientoCritico = watch("pensamientoCritico");
+    const oratoria = watch("oratoria");
+    const argumentacion = watch("argumentacion");
+    const redaccion = watch("redaccion");
+    const negociacion = watch("negociacion");
+    const resolucionConflictos = watch("resolucionConflictos");
+    const liderazgo = watch("liderazgo");
+    const colaboracion = watch("colaboracion");
 
-    useEffect(()=>{
-        const valueKnowledge = Number(getValues("knowledgeSkills"));
-        const valueNegotiation = Number(getValues("negotiationSkills"));
-        const valueCommunication = Number(getValues("communicationSkills"));
-        const valueInterpersonal = Number(getValues("interpersonalSkills"));
-        const valueAnalytical = Number(getValues("analyticalSkills"));
-        if(valueKnowledge === 0){
-            setDefaultCal(prev=> ({...prev, knowledge: true}));
-            setRegular(prev=> ({...prev, knowledge: false}));
-            setGood(prev=> ({...prev, knowledge: false}));
-            setBad(prev=> ({...prev, knowledge: false}));
-        } else if (valueKnowledge > 0 && valueKnowledge < 70){
-            setDefaultCal(prev=> ({...prev, knowledge: false}));
-            setGood(prev=> ({...prev, knowledge: false}));
-            setRegular(prev=> ({...prev, knowledge: false}));
-            setBad(prev=> ({...prev, knowledge: true}));
-        }else if (valueKnowledge >= 70 && valueKnowledge <= 85){
-            setDefaultCal(prev=> ({...prev, knowledge: false}));
-            setRegular(prev=> ({...prev, knowledge: true}));
-            setGood(prev=> ({...prev, knowledge: false}));
-            setBad(prev=> ({...prev, knowledge: false}));
-        }else if (valueKnowledge > 85){
-            setDefaultCal(prev=> ({...prev, knowledge: false}));
-            setRegular(prev=> ({...prev, knowledge: false}));
-            setGood(prev=> ({...prev, knowledge: true}));
-            setBad(prev=> ({...prev, knowledge: false}));
+    // Función para corregir valores que excedan el máximo
+    const correctValue = (fieldName: string, value: number, maxValue: number) => {
+        if (value > maxValue) {
+            setValue(fieldName as any, maxValue);
+            return maxValue;
         }
+        if (value < 0) {
+            setValue(fieldName as any, 0);
+            return 0;
+        }
+        return value;
+    };
 
-        // Para negotiationSkills
-        if (valueNegotiation === 0) {
-            setDefaultCal(prev => ({ ...prev, negotiation: true }));
-            setRegular(prev => ({ ...prev, negotiation: false }));
-            setGood(prev => ({ ...prev, negotiation: false }));
-            setBad(prev => ({ ...prev, negotiation: false }));
-        } else if (valueNegotiation > 0 && valueNegotiation < 70) {
-            setDefaultCal(prev => ({ ...prev, negotiation: false }));
-            setGood(prev => ({ ...prev, negotiation: false }));
-            setRegular(prev => ({ ...prev, negotiation: false }));
-            setBad(prev => ({ ...prev, negotiation: true }));
-        } else if (valueNegotiation >= 70 && valueNegotiation <= 85) {
-            setDefaultCal(prev => ({ ...prev, negotiation: false }));
-            setRegular(prev => ({ ...prev, negotiation: true }));
-            setGood(prev => ({ ...prev, negotiation: false }));
-            setBad(prev => ({ ...prev, negotiation: false }));
-        } else if (valueNegotiation > 85) {
-            setDefaultCal(prev => ({ ...prev, negotiation: false }));
-            setRegular(prev => ({ ...prev, negotiation: false }));
-            setGood(prev => ({ ...prev, negotiation: true }));
-            setBad(prev => ({ ...prev, negotiation: false }));
+    // Función helper para actualizar estados de validación
+    const updateValidationState = (
+        field: keyof generalCal,
+        value: number,
+        maxValue: number
+    ) => {
+        const percentage = (value / maxValue) * 100;
+        
+        if (value === 0) {
+            setDefaultCal(prev => ({ ...prev, [field]: true }));
+            setRegular(prev => ({ ...prev, [field]: false }));
+            setGood(prev => ({ ...prev, [field]: false }));
+            setBad(prev => ({ ...prev, [field]: false }));
+        } else if (percentage < 70) {
+            setDefaultCal(prev => ({ ...prev, [field]: false }));
+            setGood(prev => ({ ...prev, [field]: false }));
+            setRegular(prev => ({ ...prev, [field]: false }));
+            setBad(prev => ({ ...prev, [field]: true }));
+        } else if (percentage >= 70 && percentage <= 85) {
+            setDefaultCal(prev => ({ ...prev, [field]: false }));
+            setRegular(prev => ({ ...prev, [field]: true }));
+            setGood(prev => ({ ...prev, [field]: false }));
+            setBad(prev => ({ ...prev, [field]: false }));
+        } else if (percentage > 85) {
+            setDefaultCal(prev => ({ ...prev, [field]: false }));
+            setRegular(prev => ({ ...prev, [field]: false }));
+            setGood(prev => ({ ...prev, [field]: true }));
+            setBad(prev => ({ ...prev, [field]: false }));
         }
+    };
 
-        // Para communicationSkills
-        if (valueCommunication === 0) {
-            setDefaultCal(prev => ({ ...prev, communication: true }));
-            setRegular(prev => ({ ...prev, communication: false }));
-            setGood(prev => ({ ...prev, communication: false }));
-            setBad(prev => ({ ...prev, communication: false }));
-        } else if (valueCommunication > 0 && valueCommunication < 70) {
-            setDefaultCal(prev => ({ ...prev, communication: false }));
-            setGood(prev => ({ ...prev, communication: false }));
-            setRegular(prev => ({ ...prev, communication: false }));
-            setBad(prev => ({ ...prev, communication: true }));
-        } else if (valueCommunication >= 70 && valueCommunication <= 85) {
-            setDefaultCal(prev => ({ ...prev, communication: false }));
-            setRegular(prev => ({ ...prev, communication: true }));
-            setGood(prev => ({ ...prev, communication: false }));
-            setBad(prev => ({ ...prev, communication: false }));
-        } else if (valueCommunication > 85) {
-            setDefaultCal(prev => ({ ...prev, communication: false }));
-            setRegular(prev => ({ ...prev, communication: false }));
-            setGood(prev => ({ ...prev, communication: true }));
-            setBad(prev => ({ ...prev, communication: false }));
-        }
+    useEffect(() => {
+        const correctedInv = correctValue('investigacionAnalisis', Number(getValues("investigacionAnalisis")), 15);
+        const correctedPens = correctValue('pensamientoCritico', Number(getValues("pensamientoCritico")), 15);
+        const correctedOrat = correctValue('oratoria', Number(getValues("oratoria")), 10);
+        const correctedArg = correctValue('argumentacion', Number(getValues("argumentacion")), 10);
+        const correctedRed = correctValue('redaccion', Number(getValues("redaccion")), 10);
+        const correctedNeg = correctValue('negociacion', Number(getValues("negociacion")), 10);
+        const correctedRes = correctValue('resolucionConflictos', Number(getValues("resolucionConflictos")), 10);
+        const correctedLid = correctValue('liderazgo', Number(getValues("liderazgo")), 10);
+        const correctedCol = correctValue('colaboracion', Number(getValues("colaboracion")), 10);
 
-        // Para interpersonalSkills
-        if (valueInterpersonal === 0) {
-            setDefaultCal(prev => ({ ...prev, interpersonal: true }));
-            setRegular(prev => ({ ...prev, interpersonal: false }));
-            setGood(prev => ({ ...prev, interpersonal: false }));
-            setBad(prev => ({ ...prev, interpersonal: false }));
-        } else if (valueInterpersonal > 0 && valueInterpersonal < 70) {
-            setDefaultCal(prev => ({ ...prev, interpersonal: false }));
-            setGood(prev => ({ ...prev, interpersonal: false }));
-            setRegular(prev => ({ ...prev, interpersonal: false }));
-            setBad(prev => ({ ...prev, interpersonal: true }));
-        } else if (valueInterpersonal >= 70 && valueInterpersonal <= 85) {
-            setDefaultCal(prev => ({ ...prev, interpersonal: false }));
-            setRegular(prev => ({ ...prev, interpersonal: true }));
-            setGood(prev => ({ ...prev, interpersonal: false }));
-            setBad(prev => ({ ...prev, interpersonal: false }));
-        } else if (valueInterpersonal > 85) {
-            setDefaultCal(prev => ({ ...prev, interpersonal: false }));
-            setRegular(prev => ({ ...prev, interpersonal: false }));
-            setGood(prev => ({ ...prev, interpersonal: true }));
-            setBad(prev => ({ ...prev, interpersonal: false }));
-        }
-
-        // Para analyticalSkills
-        if (valueAnalytical === 0) {
-            setDefaultCal(prev => ({ ...prev, analytical: true }));
-            setRegular(prev => ({ ...prev, analytical: false }));
-            setGood(prev => ({ ...prev, analytical: false }));
-            setBad(prev => ({ ...prev, analytical: false }));
-        } else if (valueAnalytical > 0 && valueAnalytical < 70) {
-            setDefaultCal(prev => ({ ...prev, analytical: false }));
-            setGood(prev => ({ ...prev, analytical: false }));
-            setRegular(prev => ({ ...prev, analytical: false }));
-            setBad(prev => ({ ...prev, analytical: true }));
-        } else if (valueAnalytical >= 70 && valueAnalytical <= 85) {
-            setDefaultCal(prev => ({ ...prev, analytical: false }));
-            setRegular(prev => ({ ...prev, analytical: true }));
-            setGood(prev => ({ ...prev, analytical: false }));
-            setBad(prev => ({ ...prev, analytical: false }));
-        } else if (valueAnalytical > 85) {
-            setDefaultCal(prev => ({ ...prev, analytical: false }));
-            setRegular(prev => ({ ...prev, analytical: false }));
-            setGood(prev => ({ ...prev, analytical: true }));
-            setBad(prev => ({ ...prev, analytical: false }));
-        }
-    },[knowledgeSkills, negotiationSkills, communicationSkills, interpersonalSkills, analyticalSkills, getValues])
+        updateValidationState('investigacion', correctedInv, 15);
+        updateValidationState('pensamiento', correctedPens, 15);
+        updateValidationState('oratoria', correctedOrat, 10);
+        updateValidationState('argumentacion', correctedArg, 10);
+        updateValidationState('redaccion', correctedRed, 10);
+        updateValidationState('negociacion', correctedNeg, 10);
+        updateValidationState('resolucion', correctedRes, 10);
+        updateValidationState('liderazgo', correctedLid, 10);
+        updateValidationState('colaboracion', correctedCol, 10);
+    }, [
+        investigacionAnalisis, 
+        pensamientoCritico, 
+        oratoria, 
+        argumentacion,
+        redaccion, 
+        negociacion, 
+        resolucionConflictos, 
+        liderazgo, 
+        colaboracion, 
+        getValues
+    ])
 
     const onSubmit = handleSubmit(async (data)=>{
             try{
@@ -233,183 +259,243 @@ export default function ModalCalification({open, setOpen, student, setStudent_, 
             } 
         })
 
-
-    return (
-        <Dialog open={open} maxWidth="md" slotProps={{paper: {sx: {borderRadius: 4}}}}>
-            <FormManaged methods={methods} onSubmit={onSubmit}>
-            <DialogTitle sx={{ p: 3, pb: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                <Icon icon="solar:clipboard-check-bold" style={{ fontSize: 24, color: theme.palette.primary.main }} />
-                <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600 }}>
-                  Calificaciones del Delegado
-                </Typography>
-              </Box>
-              <Typography 
+    const renderFieldBox = (
+        name: string,
+        label: string,
+        field: keyof generalCal,
+        maxValue: number
+    ) => (
+        <Box display="flex" flexDirection="column" sx={{ width: '100%' }}>
+            <Chip
+                label={`${label} (${maxValue} pts)`}
+                size="small"
                 sx={{ 
-                  fontFamily: '"Inter", "Roboto", sans-serif',
-                  color: theme.palette.mode === 'dark' ? '#cccccc' : '#666',
-                  fontSize: '0.875rem'
+                    typography: "caption", 
+                    color: defaultCal[field] ? grey[50] : bad[field] ? red[50] : regular[field] ? yellow[900] : good[field] ? green[50] : grey[50], 
+                    backgroundColor: alpha(
+                        defaultCal[field] ? grey[700] : bad[field] ? red[700] : regular[field] ? yellow[600] : good[field] ? green[700] : grey[700], 
+                        0.95
+                    ), 
+                    fontWeight: 600, 
+                    borderRadius: 2, 
+                    mb: 1.5,
+                    height: 28,
+                    fontSize: '0.75rem'
                 }}
-              >
-                Si cierra la pestaña sin confirmar no se guardarán los cambios.
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-                <Stack sx={{p: 2}} display="flex" flexDirection="row" columnGap={2}>
-                    <Stack display="flex" flexDirection="column" rowGap={2}>
-                        <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <Chip
-                label="Habilidades del conocimiento"
-                sx={{ typography: "caption", color: defaultCal.knowledge? grey[50]: bad.knowledge? red[50]: regular.knowledge? yellow[50]: good.knowledge? green[50]: grey[50], backgroundColor: alpha(defaultCal.knowledge? grey[900]: bad.knowledge? red[900]: regular.knowledge? yellow[900]: good.knowledge? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
-          />
-                <FieldTForm name="knowledgeSkills" label="" variant='outlined' type="number" 
-                inputProps={{ max: 100 }}
+            />
+            <FieldTForm 
+                name={name} 
+                label="" 
+                variant='outlined' 
+                type="number" 
+                inputProps={{ max: maxValue, min: 0, step: 0.5 }}
                 sx={{
                     width: '100%',
                     '& .MuiOutlinedInput-root': {
-                    borderRadius: 6,
+                        borderRadius: 2,
+                        height: 56,
+                    },
+                    '& .MuiOutlinedInput-input': {
+                        fontSize: '1.125rem',
+                        fontWeight: 500,
+                        textAlign: 'center'
                     },
                     '& input::-webkit-outer-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input[type=number]': {
-                    MozAppearance: 'textfield', 
-                    },
-                }}/>
-                </Box>
-                <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <Chip
-                label="Habilidades del negociación"
-                sx={{ typography: "caption", color: defaultCal.negotiation? grey[50]: bad.negotiation? red[50]: regular.negotiation? yellow[50]: good.negotiation? green[50]: grey[50], backgroundColor: alpha(defaultCal.negotiation? grey[900]: bad.negotiation? red[900]: regular.negotiation? yellow[900]: good.negotiation? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
-          />
-                <FieldTForm name="negotiationSkills" label="" variant='outlined' type="number" 
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                    borderRadius: 6,
-                    },
-                    '& input::-webkit-outer-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input[type=number]': {
-                    MozAppearance: 'textfield', 
-                    },
-                }}/>
-                </Box>
-                </Stack>
-                <Stack display="flex" flexDirection="column" rowGap={2}>
-                    <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <Chip
-                label="Habilidades de comunicación"
-                sx={{ typography: "caption", color: defaultCal.communication? grey[50]: bad.communication? red[50]: regular.communication? yellow[50]: good.communication? green[50]: grey[50], backgroundColor: alpha(defaultCal.communication? grey[900]: bad.communication? red[900]: regular.communication? yellow[900]: good.communication? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
-          />
-                <FieldTForm name="communicationSkills" label="" variant='outlined' type="number" sx={{
-                    '& .MuiOutlinedInput-root': {
-                    borderRadius: 6,
-                    },
-                    '& input::-webkit-outer-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input[type=number]': {
-                    MozAppearance: 'textfield',
-                    },
-                }}/>
-                </Box>
-                <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <Chip
-                label="Habilidades interpersonales"
-                sx={{ typography: "caption", color: defaultCal.interpersonal? grey[50]: bad.interpersonal? red[50]: regular.interpersonal? yellow[50]: good.interpersonal? green[50]: grey[50], backgroundColor: alpha(defaultCal.interpersonal? grey[900]: bad.interpersonal? red[900]: regular.interpersonal? yellow[900]: good.interpersonal? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
-          />
-                <FieldTForm name="interpersonalSkills" label="" variant='outlined' type="number" 
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                    borderRadius: 6,
-                    },
-                    '& input::-webkit-outer-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input::-webkit-inner-spin-button': {
-                    WebkitAppearance: 'none',
-                    margin: 0,
-                    },
-                    '& input[type=number]': {
-                    MozAppearance: 'textfield', 
-                    },
-                }}/>
-                </Box>
-                </Stack>
-                <Stack display="flex" justifyContent="center" alignContent="center">
-                    <Box display="flex" flexDirection="column" justifyContent="center" alignContent="center">
-                <Chip
-                label="Habilidades analíticas"
-                sx={{ typography: "caption", color: defaultCal.analytical? grey[50]: bad.analytical? red[50]: regular.analytical? yellow[50]: good.analytical? green[50]: grey[50], backgroundColor: alpha(defaultCal.analytical? grey[900]: bad.analytical? red[900]: regular.analytical? yellow[900]: good.analytical? green[900]: grey[900], 0.9), fontWeight: "bold", borderRadius: 4, padding: "0 8px", height: 40, mb: 1 }}
-          />
-                    <FieldTForm name="analyticalSkills" label="" variant='outlined' type="number" 
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                        borderRadius: 6,
-                        },
-                        '& input::-webkit-outer-spin-button': {
                         WebkitAppearance: 'none',
                         margin: 0,
-                        },
-                        '& input::-webkit-inner-spin-button': {
+                    },
+                    '& input::-webkit-inner-spin-button': {
                         WebkitAppearance: 'none',
                         margin: 0,
-                        },
-                        '& input[type=number]': {
-                        MozAppearance: 'textfield',
-                        },
-                    }} />
+                    },
+                    '& input[type=number]': {
+                        MozAppearance: 'textfield', 
+                    },
+                }}
+            />
+        </Box>
+    );
+
+    const totalScore = 
+        (Number(investigacionAnalisis) || 0) + 
+        (Number(pensamientoCritico) || 0) + 
+        (Number(oratoria) || 0) + 
+        (Number(argumentacion) || 0) + 
+        (Number(redaccion) || 0) + 
+        (Number(negociacion) || 0) + 
+        (Number(resolucionConflictos) || 0) + 
+        (Number(liderazgo) || 0) + 
+        (Number(colaboracion) || 0);
+
+    return (
+        <Dialog open={open} maxWidth="lg" fullWidth slotProps={{paper: {sx: {borderRadius: 4, maxHeight: '90vh'}}}}>
+            <FormManaged methods={methods} onSubmit={onSubmit}>
+            <DialogTitle sx={{ p: 3, pb: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Icon icon="solar:clipboard-check-bold" style={{ fontSize: 28, color: theme.palette.primary.main }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontFamily: '"Inter", "Roboto", sans-serif', fontWeight: 600, lineHeight: 1.2 }}>
+                      Calificaciones del Delegado
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ 
+                      fontFamily: '"Inter", "Roboto", sans-serif',
+                      color: theme.palette.text.secondary,
+                      fontWeight: 500
+                    }}>
+                      {student?.name} {student?.lastname}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'flex-end',
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  p: 2,
+                  borderRadius: 2
+                }}>
+                  <Typography variant="caption" sx={{ fontWeight: 500, color: theme.palette.text.secondary }}>
+                    TOTAL
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+                    {totalScore.toFixed(1)}
+                  </Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 500, color: theme.palette.text.secondary }}>
+                    / 100 pts
+                  </Typography>
+                </Box>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                    {/* Investigación y análisis crítico (30%) */}
+                    <Box>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1, 
+                          mb: 2,
+                          p: 1.5,
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          borderRadius: 2
+                        }}>
+                          <Icon icon="solar:document-text-bold" style={{ fontSize: 20, color: theme.palette.primary.main }} />
+                          <Typography variant="subtitle1" sx={{fontWeight: 600, color: theme.palette.primary.main}}>
+                            Investigación y análisis crítico (30%)
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2}>
+                          {renderFieldBox("investigacionAnalisis", "Investigación y análisis", "investigacion", 15)}
+                          {renderFieldBox("pensamientoCritico", "Pensamiento crítico", "pensamiento", 15)}
+                        </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Comunicación y lenguaje (30%) */}
+                    <Box>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1, 
+                          mb: 2,
+                          p: 1.5,
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          borderRadius: 2
+                        }}>
+                          <Icon icon="solar:chat-round-bold" style={{ fontSize: 20, color: theme.palette.primary.main }} />
+                          <Typography variant="subtitle1" sx={{fontWeight: 600, color: theme.palette.primary.main}}>
+                            Comunicación y lenguaje (30%)
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2}>
+                          {renderFieldBox("oratoria", "Oratoria", "oratoria", 10)}
+                          {renderFieldBox("argumentacion", "Argumentación", "argumentacion", 10)}
+                          {renderFieldBox("redaccion", "Redacción", "redaccion", 10)}
+                        </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Negociación y resolución de conflictos (20%) */}
+                    <Box>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1, 
+                          mb: 2,
+                          p: 1.5,
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          borderRadius: 2
+                        }}>
+                          <Icon icon="solar:user-hands-bold" style={{ fontSize: 20, color: theme.palette.primary.main }} />
+                          <Typography variant="subtitle1" sx={{fontWeight: 600, color: theme.palette.primary.main}}>
+                            Negociación y resolución (20%)
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2}>
+                          {renderFieldBox("negociacion", "Negociación", "negociacion", 10)}
+                          {renderFieldBox("resolucionConflictos", "Resolución de conflictos", "resolucion", 10)}
+                        </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Liderazgo y colaboración (20%) */}
+                    <Box>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1, 
+                          mb: 2,
+                          p: 1.5,
+                          bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          borderRadius: 2
+                        }}>
+                          <Icon icon="solar:users-group-rounded-bold" style={{ fontSize: 20, color: theme.palette.primary.main }} />
+                          <Typography variant="subtitle1" sx={{fontWeight: 600, color: theme.palette.primary.main}}>
+                            Liderazgo y colaboración (20%)
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={2}>
+                          {renderFieldBox("liderazgo", "Liderazgo", "liderazgo", 10)}
+                          {renderFieldBox("colaboracion", "Colaboración", "colaboracion", 10)}
+                        </Stack>
                     </Box>
                 </Stack>
-                </Stack>
             </DialogContent>
-            <DialogActions sx={{ p: 3, pt: 1, gap: 1.5 }}>
+            <DialogActions sx={{ p: 3, pt: 2, gap: 1.5, borderTop: `1px solid ${theme.palette.divider}` }}>
                 <Button 
                   variant='outlined' 
                   startIcon={<Icon icon="solar:close-circle-bold" />}
                   onClick={()=> {setOpen(false); reset()}}  
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 2,
                     px: 3,
+                    py: 1,
                     textTransform: 'none',
                     fontFamily: '"Inter", "Roboto", sans-serif',
                     fontWeight: 500
                   }}
                   color="error"
                 >
-                  Cerrar
+                  Cancelar
                 </Button>
                 <Button 
                   variant='contained' 
                   startIcon={<Icon icon="solar:check-circle-bold" />}
                   type="submit" 
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 2,
                     px: 4,
+                    py: 1,
                     textTransform: 'none',
                     fontFamily: '"Inter", "Roboto", sans-serif',
                     fontWeight: 500
                   }} 
-                  fullWidth
                 >
-                  Confirmar Calificaciones
+                  Guardar Calificaciones
                 </Button>
             </DialogActions>
             </FormManaged>

@@ -42,10 +42,29 @@ export default function ResponsiveView({
                 sx={{
                     backgroundColor: "#ffffff", 
                     width: { xs: "90vw", sm: "70vw", md: "50vw" },
-                    height: 'auto', 
-                    borderRadius: 5, 
+                    minWidth: "300px",
+                    maxWidth: "600px",
+                    height: 'auto',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    borderRadius: 5,
+                    my: 3,
                     p: { xs: 4, sm: 5 }, 
-                    boxShadow: '7px 10px 15px rgba(0, 0, 0, 0.5)'
+                    boxShadow: '7px 10px 15px rgba(0, 0, 0, 0.5)',
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'transparent',
+                        borderRadius: 5,
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'rgba(0,0,0,0.2)',
+                        borderRadius: 4,
+                        '&:hover': {
+                            backgroundColor: 'rgba(0,0,0,0.3)',
+                        },
+                    },
                 }}
             >
                 {/* Mensajes de estado */}

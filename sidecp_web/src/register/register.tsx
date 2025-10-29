@@ -17,7 +17,8 @@ export default function Register() {
   useEffect(() => {
     document.body.style.margin = '0';
     document.body.style.padding = '0';
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflowX = 'hidden';
+    document.body.style.overflowY = 'auto';
     
     return () => {
       document.body.style.overflow = 'auto';
@@ -25,7 +26,7 @@ export default function Register() {
   }, []);
 
   return (
-    <Box sx={{ margin: 0, padding: 0, width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <Box sx={{ margin: 0, padding: 0, width: '100vw', minHeight: '100vh', height: 'auto', overflowX: 'hidden', overflowY: 'auto' }}>
       <BackgroundLogin size={device.computadora ? "large" : "small"}>
         <RegisterForm size={device.computadora ? "large" : "small"} />
       </BackgroundLogin>

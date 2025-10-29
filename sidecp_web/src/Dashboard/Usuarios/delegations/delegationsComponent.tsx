@@ -11,7 +11,7 @@ import { esES } from '@mui/x-data-grid/locales';
 import { Link as RouterLink } from 'react-router-dom';
 import { createStudent } from "../../../API/userAPI";
 import { countriesWithLabelId } from "../../../../public/flags"
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import React from 'react';
 
 type data = {
@@ -53,11 +53,16 @@ type student = {
 
 type scores = {
   scoreid: string | undefined,
-  knowledgeskills: number,
-  negotiationskills: number,
-  communicationskills: number,
-  interpersonalskills: number,
-  analyticalskills: number
+  investigacion_analisis: number,
+  pensamiento_critico: number,
+  oratoria: number,
+  argumentacion: number,
+  redaccion: number,
+  negociacion: number,
+  resolucion_conflictos: number,
+  liderazgo: number,
+  colaboracion: number,
+  total: number
 };
 
 export default function DelegationsComp_(){
@@ -138,7 +143,6 @@ const [selectedDeleteComm, setSelectedDeleteComm] = useState<string>("");
 
   // Handler para importar después de seleccionar comisión
   const handleImportExcel = async () => {
-    debugger
   if (!pendingFile || !selectedCommitte) return;
   setImporting(true);
 
@@ -256,13 +260,8 @@ const handleConfirmExport = () => {
 
   const studentsWithTotal = filteredStudents.map(student => {
     const score = scores.find(s => s.scoreid === student.scoreid);
-    const total =
-      ((Number(score?.knowledgeskills)) +
-      (Number(score?.negotiationskills)) +
-      (Number(score?.interpersonalskills)) +
-      (Number(score?.analyticalskills)) +
-      (Number(score?.communicationskills)))/5;
-    return { ...student, total };
+    const total = score?.total || 0;
+    return { ...student, score, total };
   });
 
   const sorted = [...studentsWithTotal].sort((a, b) => b.total - a.total);
@@ -271,30 +270,184 @@ const handleConfirmExport = () => {
     top10Map.set(s.studentid, idx + 1);
   });
 
-  const exportData = studentsWithTotal.map(student => {
-    const score = scores.find(s => s.scoreid === student.scoreid);
-    const commite = commities.find(c => c.committeid === student.committeid);
-    const topPosition = top10Map.get(student.studentid);
-    return {
-      "Nombre de estudiante": student.name,
-      "Apellidos": student.lastname,
-      "Delegación": student.delegation,
-      "Comisión": commite?.committename ?? "",
-      "Conocimientos": score?.knowledgeskills ?? "",
-      "Negociación": score?.negotiationskills ?? "",
-      "Comunicación": score?.communicationskills ?? "",
-      "Interpersonales": score?.interpersonalskills ?? "",
-      "Analíticos": score?.analyticalskills ?? "",
-      "Nota total": student.total,
-      "Top 10": topPosition ? `#${topPosition}` : ""
+  // Crear workbook y worksheet vacío
+  const workbook = XLSX.utils.book_new();
+  const worksheet: any = {};
+
+  // Configurar rangos de merge para el encabezado
+  const merges = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 14 } }, // Título principal
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 14 } }, // Subtítulo
+    { s: { r: 2, c: 0 }, e: { r: 2, c: 14 } }, // Centro Educativo
+    { s: { r: 3, c: 0 }, e: { r: 3, c: 14 } }, // Distrito Educativo
+    { s: { r: 4, c: 0 }, e: { r: 4, c: 14 } }, // Comisión simulada
+    // Headers de categorías
+    { s: { r: 6, c: 3 }, e: { r: 6, c: 4 } }, // Investigación y análisis crítico (30%)
+    { s: { r: 6, c: 5 }, e: { r: 6, c: 7 } }, // Comunicación y lenguaje (30%)
+    { s: { r: 6, c: 8 }, e: { r: 6, c: 9 } }, // Negociación y resolución de conflictos (20%)
+    { s: { r: 6, c: 10 }, e: { r: 6, c: 11 } }, // Liderazgo y colaboración (20%)
+    // Headers adicionales
+    { s: { r: 6, c: 14 }, e: { r: 7, c: 14 } }, // Ganadores
+    { s: { r: 6, c: 15 }, e: { r: 7, c: 15 } }, // Menciones Honoríficas
+    { s: { r: 6, c: 16 }, e: { r: 7, c: 16 } }, // Comentarios
+    { s: { r: 6, c: 0 }, e: { r: 7, c: 0 } },   // No.
+    { s: { r: 6, c: 1 }, e: { r: 7, c: 1 } },   // Delegado
+    { s: { r: 6, c: 2 }, e: { r: 7, c: 2 } },   // Delegación
+    { s: { r: 6, c: 12 }, e: { r: 7, c: 12 } }, // Total General
+    { s: { r: 6, c: 13 }, e: { r: 7, c: 13 } }  // 100%
+  ];
+
+  worksheet['!merges'] = merges;
+
+  // Estilo para encabezado principal (verde)
+  const headerMainStyle = {
+    fill: { fgColor: { rgb: "92D050" } },
+    font: { bold: true, sz: 11, color: { rgb: "000000" } },
+    alignment: { horizontal: "center", vertical: "center", wrapText: true },
+    border: {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } }
     }
+  };
+
+  // Estilo para encabezados de datos (amarillo claro)
+  const headerDataStyle = {
+    fill: { fgColor: { rgb: "FFFF99" } },
+    font: { bold: true, sz: 9, color: { rgb: "000000" } },
+    alignment: { horizontal: "center", vertical: "center", wrapText: true },
+    border: {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } }
+    }
+  };
+
+  // Estilo para celdas de datos
+  const dataCellStyle = {
+    alignment: { horizontal: "center", vertical: "center" },
+    border: {
+      top: { style: "thin", color: { rgb: "000000" } },
+      bottom: { style: "thin", color: { rgb: "000000" } },
+      left: { style: "thin", color: { rgb: "000000" } },
+      right: { style: "thin", color: { rgb: "000000" } }
+    }
+  };
+
+  // Agregar encabezado principal
+  worksheet['A1'] = { t: 's', v: 'PROGRAMA DE LIDERAZGO EDUCATIVO- PLERD - CLUB DE LIDERAZGO EDUCATIVO REGIONAL 04', s: headerMainStyle };
+  worksheet['A2'] = { t: 's', v: 'Sistema Simplificado de Evaluación de Modelos de Naciones Unidas 2025 - 2026', s: headerMainStyle };
+  worksheet['A3'] = { t: 's', v: 'Centro Educativo:', s: headerMainStyle };
+  worksheet['A4'] = { t: 's', v: 'Distrito Educativo:', s: headerMainStyle };
+  worksheet['A5'] = { t: 's', v: 'Comisión simulada: ' + (selectedExportCommitte !== 'all' ? commities.find(c => c.committeid === selectedExportCommitte)?.committename : 'Todas'), s: headerMainStyle };
+
+  // Fila 6 vacía
+  worksheet['A6'] = { t: 's', v: '', s: { fill: { fgColor: { rgb: "FFFFFF" } } } };
+
+  // Encabezados principales (fila 7)
+  worksheet['A7'] = { t: 's', v: 'No.', s: headerDataStyle };
+  worksheet['B7'] = { t: 's', v: 'Delegado', s: headerDataStyle };
+  worksheet['C7'] = { t: 's', v: 'Delegación', s: headerDataStyle };
+  worksheet['D7'] = { t: 's', v: 'Investigación y análisis crítico (30%)', s: headerDataStyle };
+  worksheet['F7'] = { t: 's', v: 'Comunicación y lenguaje (30%)', s: headerDataStyle };
+  worksheet['I7'] = { t: 's', v: 'Negociación y resolución de conflictos (20%)', s: headerDataStyle };
+  worksheet['K7'] = { t: 's', v: 'Liderazgo y colaboración (20%)', s: headerDataStyle };
+  worksheet['M7'] = { t: 's', v: 'Total Gral. (100%)', s: headerDataStyle };
+  worksheet['O7'] = { t: 's', v: 'Ganadores', s: headerDataStyle };
+  worksheet['P7'] = { t: 's', v: 'Menciones Honoríficas', s: headerDataStyle };
+  worksheet['Q7'] = { t: 's', v: 'Comentarios Constructivos', s: headerDataStyle };
+
+  // Sub-encabezados (fila 8)
+  worksheet['D8'] = { t: 's', v: 'Investigación y análisis (15%)', s: headerDataStyle };
+  worksheet['E8'] = { t: 's', v: 'Pensamiento crítico (15%)', s: headerDataStyle };
+  worksheet['F8'] = { t: 's', v: 'Oratoria (10%)', s: headerDataStyle };
+  worksheet['G8'] = { t: 's', v: 'Argumentación (10%)', s: headerDataStyle };
+  worksheet['H8'] = { t: 's', v: 'Redacción (10%)', s: headerDataStyle };
+  worksheet['I8'] = { t: 's', v: 'Negociación (10%)', s: headerDataStyle };
+  worksheet['J8'] = { t: 's', v: 'Resolución de conflictos (10%)', s: headerDataStyle };
+  worksheet['K8'] = { t: 's', v: 'Liderazgo (10%)', s: headerDataStyle };
+  worksheet['L8'] = { t: 's', v: 'Colaboración (10%)', s: headerDataStyle };
+  worksheet['N8'] = { t: 's', v: '100%', s: headerDataStyle };
+
+  // Agregar datos de estudiantes
+  studentsWithTotal.forEach((student, index) => {
+    const rowNum = index + 9; // Comienza en fila 9
+    const topPosition = top10Map.get(student.studentid);
+    
+    const cellData = [
+      { col: 'A', val: index + 1 },
+      { col: 'B', val: `${student.name} ${student.lastname}` },
+      { col: 'C', val: `${student.delegation} - ${commities.find(c => c.committeid === student.committeid)?.committename || ''}` },
+      { col: 'D', val: student.score?.investigacion_analisis ?? 0 },
+      { col: 'E', val: student.score?.pensamiento_critico ?? 0 },
+      { col: 'F', val: student.score?.oratoria ?? 0 },
+      { col: 'G', val: student.score?.argumentacion ?? 0 },
+      { col: 'H', val: student.score?.redaccion ?? 0 },
+      { col: 'I', val: student.score?.negociacion ?? 0 },
+      { col: 'J', val: student.score?.resolucion_conflictos ?? 0 },
+      { col: 'K', val: student.score?.liderazgo ?? 0 },
+      { col: 'L', val: student.score?.colaboracion ?? 0 },
+      { col: 'M', val: student.total },
+      { col: 'N', val: student.total },
+      { col: 'O', val: topPosition ? `#${topPosition}` : '' },
+      { col: 'P', val: '' },
+      { col: 'Q', val: '' }
+    ];
+
+    cellData.forEach(({ col, val }) => {
+      const cellRef = `${col}${rowNum}`;
+      worksheet[cellRef] = {
+        t: typeof val === 'number' ? 'n' : 's',
+        v: val,
+        s: dataCellStyle
+      };
+    });
   });
 
-  const worksheet = XLSX.utils.json_to_sheet(exportData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Delegados");
+  // Establecer ancho de columnas
+  worksheet['!cols'] = [
+    { wch: 5 },   // A - No.
+    { wch: 30 },  // B - Delegado (nombre completo)
+    { wch: 35 },  // C - Delegación (país - comisión)
+    { wch: 12 },  // D - Investigación
+    { wch: 12 },  // E - Pensamiento
+    { wch: 10 },  // F - Oratoria
+    { wch: 12 },  // G - Argumentación
+    { wch: 10 },  // H - Redacción
+    { wch: 11 },  // I - Negociación
+    { wch: 12 },  // J - Resolución
+    { wch: 10 },  // K - Liderazgo
+    { wch: 12 },  // L - Colaboración
+    { wch: 8 },   // M - Total Gral
+    { wch: 8 },   // N - 100%
+    { wch: 12 },  // O - Ganadores
+    { wch: 15 },  // P - Menciones
+    { wch: 30 }   // Q - Comentarios
+  ];
 
-  XLSX.writeFile(workbook, "delegados.xlsx");
+  // Establecer altura de filas
+  worksheet['!rows'] = [
+    { hpt: 30 },  // Fila 1
+    { hpt: 20 },  // Fila 2
+    { hpt: 20 },  // Fila 3
+    { hpt: 20 },  // Fila 4
+    { hpt: 20 },  // Fila 5
+    { hpt: 5 },   // Fila 6 (vacía)
+    { hpt: 35 },  // Fila 7 (headers principales)
+    { hpt: 35 }   // Fila 8 (sub-headers)
+  ];
+
+  // Configurar el rango de la hoja
+  const range = {
+    s: { r: 0, c: 0 },
+    e: { r: studentsWithTotal.length + 8, c: 16 }
+  };
+  worksheet['!ref'] = XLSX.utils.encode_range(range);
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Evaluación Delegados');
+  XLSX.writeFile(workbook, 'evaluacion_delegados_plerd.xlsx');
   setExportDialogOpen(false);
   setSelectedExportCommitte('all');
 };
