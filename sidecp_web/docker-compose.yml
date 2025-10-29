@@ -13,7 +13,27 @@ services:
       - sidecp-network
     environment:
       - NODE_ENV=production
+    depends_on:
+      - backend-general
+      - backend-auth
+
+  # Referencia a los servicios del backend
+  backend-general:
+    image: express-app-general
+    container_name: sidecp-app-general
+    external_links:
+      - sidecp-app-general
+    networks:
+      - sidecp-network
+
+  backend-auth:
+    image: express-app-auth
+    container_name: sidecp-app-auth
+    external_links:
+      - sidecp-app-auth
+    networks:
+      - sidecp-network
 
 networks:
   sidecp-network:
-    driver: bridge
+    external: true
