@@ -444,7 +444,6 @@ function RadarScoresChart() {
         
         const scoresResponse = await getScores();
         console.log('scoresResponse', scoresResponse);
-        debugger
         // Filtrar y procesar los scores, manteniendo solo los que tienen al menos una puntuación válida
         const validScores: scores[] = scoresResponse.data.scores_
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
