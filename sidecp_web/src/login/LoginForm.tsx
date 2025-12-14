@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AxiosError } from 'axios';
 import * as yup from "yup"
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,8 +10,6 @@ import React from 'react';
 import MainView from './differentsViews/mainView';
 import ResponsiveView from './differentsViews/responsiveView';
 
-
-
 type Inputs ={
     Email: string;
     Password: string;
@@ -22,10 +20,12 @@ type props = {
 }
 
 export default function Loginform({size}: props){
-    const { login } = useAuthContext()
+    const { login, user } = useAuthContext()
+    const role = localStorage.getItem("role")
     const navigate = useNavigate()
     const [userNotFound, setNotFound] = useState(false);
     const [serverError, setError] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     const yupSchema= yup.object().shape({
         Email: yup.string().email("Debe ser un email válido").required("Se requiere correo"),
@@ -42,16 +42,27 @@ export default function Loginform({size}: props){
         resolver: yupResolver(yupSchema)
     })
 
+    // Navegar automáticamente cuando el usuario esté logueado
+    useEffect(() => {
+        if (user && role && isLoggingIn) {
+            console.log('✅ Usuario detectado, navegando a dashboard...');
+            navigate("/dashboard/inicio");
+        }
+    }, [user, role, navigate, isLoggingIn]);
+
     const handleLogin = async (Email: string, Password: string) => {
         try{
+            setIsLoggingIn(true);
+           
             await login({
                 Email: Email,
                 Password: Password,
-            },
-        );
-
-        navigate("/dashboard/inicio")
-        }catch(err){
+            });
+           
+            // El useEffect de arriba manejará la navegación
+           
+        } catch(err){
+            setIsLoggingIn(false);
             const error = err as AxiosError
             console.error('An error occur', err);
             if(error.message.includes("500")){
@@ -63,22 +74,19 @@ export default function Loginform({size}: props){
             }
         }
     }
-    
-
-    const { handleSubmit } = methods; 
-    
-
+   
+    const { handleSubmit } = methods;
+   
     const onSubmit = handleSubmit(async (data)=>{
        await handleLogin(data.Email, data.Password);
     })
-
 
     return(
         <>
         <FormManaged onSubmit={onSubmit} methods={methods}>
            {size === "large" && <MainView serverError={serverError} userNotFound={userNotFound}/>}
            {size === "small" && <ResponsiveView serverError={serverError} userNotFound={userNotFound}/>}
-            </FormManaged>
+        </FormManaged>
         </>
     )
 }

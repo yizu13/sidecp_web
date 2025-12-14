@@ -94,6 +94,7 @@ export default function CreateCommitte(){
         setValue("institutionRepresentated", "");
         setValue("location", "");
         setValue("description", ""); 
+        navigate("/dashboard/comisiones/cerrar")
     } catch (err) {
         console.log("error:", err);
     }

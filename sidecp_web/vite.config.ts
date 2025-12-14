@@ -29,12 +29,12 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api1': {
-        target: 'http://localhost:3000',  // Primera API
+        target: 'https://api.sidecpplatform.uk',  // Primera API
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api1/, '')
       },
       '/api2': {
-        target: 'http://localhost:3000',  // Segunda API
+        target: 'https://api.sidecpplatform.uk',  // Segunda API
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api2/, '')
       }

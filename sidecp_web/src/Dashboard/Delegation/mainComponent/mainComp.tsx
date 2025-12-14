@@ -67,7 +67,7 @@ export default function DelegationEval(){
     const [selected, setSelected] = useState('');
     const [students, setStudents] = useState<student[]>([]);
     const [studentsFiltered, setStudentFilter] = useState<student[]>([]);
-    const userString = sessionStorage.getItem("user");
+    const userString = localStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : null;
     const [ committeDefined, setCommitteDef ] = useState<string | undefined>(undefined);
     const [ committe, setcommitte ] = useState<Committe[]>([]);

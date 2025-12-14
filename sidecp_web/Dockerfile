@@ -24,8 +24,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copiar configuración personalizada de nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Exponer puerto 5173
-EXPOSE 5173
+# Exponer puerto 80
+EXPOSE 4000
 
 # Comando para iniciar nginx
 CMD ["nginx", "-g", "daemon off;"]

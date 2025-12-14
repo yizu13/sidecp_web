@@ -18,7 +18,7 @@ type Props = {
 export function TextPage({ pageObject }: Props){
     const { theme } = useSettingContext()
     const navigation = useNavigate()
-    const role = sessionStorage.getItem("role")
+    const role = localStorage.getItem("role")
     
     const committePage = [
         {label: "Crear", navigation: "/dashboard/comisiones/crear", icon: "solar:add-square-bold"}, 
@@ -287,7 +287,7 @@ export function IconPage({ pageObject }: Props){
     const navigation = useNavigate()
     const { theme } = useSettingContext()
     // const { openSubMenus, toggleSubMenu } = useSidebar()
-    const role = sessionStorage.getItem("role")
+    const role = localStorage.getItem("role")
     
     const committePage = [
         {label: "Crear", navigation: "/dashboard/comisiones/crear", icon: "solar:add-square-bold"}, 

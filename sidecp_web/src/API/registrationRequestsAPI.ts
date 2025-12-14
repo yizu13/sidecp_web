@@ -1,4 +1,5 @@
-import axiosLog from "./AxiosLogServer";
+import axiosInstance from "./axiosServer"; // ← CAMBIAR de axiosLog a axiosInstance
+
 export interface RegistrationRequest {
     id: string;
     firstName: string;
@@ -27,19 +28,21 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * Crear una nueva solicitud de registro
+ * Crear una nueva solicitud de registro (pública, sin token)
+ * ESTA sí usa axiosLog porque es pública
  */
+import axiosLog from "./AxiosLogServer";
 export const createRegistrationRequest = async (data: RegistrationRequestData) => {
     const response = await axiosLog.post('/api/auth/register', data);
     return response.data;
 };
 
 /**
- * Obtener todas las solicitudes de registro pendientes
+ * Obtener todas las solicitudes de registro pendientes (requiere auth)
  */
 export const getPendingRegistrationRequests = async (page: number = 1, limit: number = 10) => {
-    const response = await axiosLog.get<PaginatedResponse<RegistrationRequest>>(
-        '/api/auth/registration-requests', 
+    const response = await axiosInstance.get<PaginatedResponse<RegistrationRequest>>(
+        '/api/auth/registration-requests',
         {
             params: { status: 'pending', page, limit }
         }
@@ -48,38 +51,38 @@ export const getPendingRegistrationRequests = async (page: number = 1, limit: nu
 };
 
 /**
- * Aprobar una solicitud de registro
+ * Aprobar una solicitud de registro (requiere auth)
  */
 export const approveRegistrationRequest = async (requestId: string, role: 'admin' | 'evaluator') => {
-    const response = await axiosLog.post(`/api/auth/registration-requests/${requestId}/approve`, {
+    const response = await axiosInstance.post(`/api/auth/registration-requests/${requestId}/approve`, {
         role
     });
     return response.data;
 };
 
 /**
- * Rechazar una solicitud de registro
+ * Rechazar una solicitud de registro (requiere auth)
  */
 export const rejectRegistrationRequest = async (requestId: string, reason?: string) => {
-    const response = await axiosLog.post(`/api/auth/registration-requests/${requestId}/reject`, {
+    const response = await axiosInstance.post(`/api/auth/registration-requests/${requestId}/reject`, {
         reason
     });
     return response.data;
 };
 
 /**
- * Obtener el conteo de solicitudes pendientes
+ * Obtener el conteo de solicitudes pendientes (requiere auth)
  */
 export const getPendingRequestsCount = async () => {
-    const response = await axiosLog.get<{ count: number }>('/api/auth/registration-requests/count');
+    const response = await axiosInstance.get<{ count: number }>('/api/auth/registration-requests/count');
     return response.data.count;
 };
 
 /**
- * Obtener el token de registro actual
+ * Obtener el token de registro actual (requiere auth)
  */
 export const getRegistrationToken = async () => {
-    const response = await axiosLog.get<{
+    const response = await axiosInstance.get<{
         token: string;
         expiresAt: string;
         timeRemaining: number;
@@ -89,7 +92,7 @@ export const getRegistrationToken = async () => {
 };
 
 /**
- * Validar un token de registro
+ * Validar un token de registro (pública)
  */
 export const validateRegistrationToken = async (token: string) => {
     const response = await axiosLog.post<{
@@ -101,9 +104,9 @@ export const validateRegistrationToken = async (token: string) => {
 };
 
 /**
- * Regenerar el token de registro
+ * Regenerar el token de registro (requiere auth)
  */
 export const regenerateRegistrationToken = async () => {
-    const response = await axiosLog.post('/api/auth/registration-token/regenerate');
+    const response = await axiosInstance.post('/api/auth/registration-token/regenerate');
     return response.data;
 };

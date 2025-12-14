@@ -26,6 +26,8 @@ export default function MainLayout({ setPage, children }: props){
     const pageSelected = useRef(setPage) 
     const { isCollapsed, setIsCollapsed } = useSidebar()
     const navigation = useNavigate()
+    const userString = localStorage.getItem("user");
+    const user = userString ? JSON.parse(userString) : null;
     const { theme, themefunc } = useSettingContext()
     const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
     const [requestsSidebarOpen, setRequestsSidebarOpen] = useState(false)
@@ -405,11 +407,11 @@ export default function MainLayout({ setPage, children }: props){
                     onConfirm={handleLogoutConfirm}
                 />
 
-                {/* Registration Requests Sidebar */}
-                <RegistrationRequestsSidebar
+             
+                { user.role === "admin" && <RegistrationRequestsSidebar
                     open={requestsSidebarOpen}
                     onClose={handleRequestsSidebarClose}
-                />
+                />}
             </Stack>
         );
     }

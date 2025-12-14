@@ -6,7 +6,7 @@ type props = {
 }
 
 export function AdminRoute({ children }: props) {
-  const role = sessionStorage.getItem("role")
+  const role = localStorage.getItem("role")
   console.log(role)
 
   if (role !== "admin") {
@@ -17,7 +17,7 @@ export function AdminRoute({ children }: props) {
 }
 
 export function EvaluatorRoute({ children }: props) {
-  const role = sessionStorage.getItem("role")
+  const role = localStorage.getItem("role")
   console.log(role)
 
   if (role === "admin") {

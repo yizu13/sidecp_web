@@ -31,7 +31,7 @@ export default function OptionsNavigation({subPages, pageObject, title, mainRefe
     const { setCommitteForEdit } = useEditCommitte()
     const navigation = useNavigate();
     const inPage = pageObject.page === mainReference
-    const userRole = sessionStorage.getItem("role")
+    const userRole = localStorage.getItem("role")
     const {theme} = useSettingContext()
     const { openSubMenus, toggleSubMenu } = useSidebar()
     

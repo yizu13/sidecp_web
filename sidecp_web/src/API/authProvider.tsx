@@ -16,9 +16,28 @@ type user = {
 
 export interface userProps {
   login: (data: object) => Promise<void>;
+  logout: () => void;
   role: string | null;
   user: user | undefined | null;
 }
+
+// Variables globales para refresh token
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any = null, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 export default function Authsystem({ children }: props) {
   const [accessToken, setAccesToken] = useState<string | null>(null);
@@ -28,6 +47,7 @@ export default function Authsystem({ children }: props) {
   const navigation = useNavigate();
 
   const sessionExpiredAlertShown = useRef(false);
+  const interceptorSetup = useRef(false);
 
   // Inicializar datos desde storage
   useEffect(() => {
@@ -41,95 +61,115 @@ export default function Authsystem({ children }: props) {
       setrefreshToken(storedRefreshToken);
       setUser(JSON.parse(storedUser));
       setRole(storedRole);
-
-      // también guardar en sessionStorage para compatibilidad
-      sessionStorage.setItem("token", storedRefreshToken);
-      sessionStorage.setItem("user", storedUser);
-      sessionStorage.setItem("role", storedRole);
+      console.log("✅ Sesión restaurada desde localStorage");
     }
   }, []);
 
-  // Auto-refresh cada 10 minutos
-  useEffect(() => {
-    if (refreshToken && refreshToken !== 'refresh') {
-      const autoCheck = setTimeout(async () => {
-        try {
-          const response = await axiosLog.post("/auth/token", { token: refreshToken });
-          const newAccessToken = response.data.accessToken;
-          setAccesToken(newAccessToken);
-          localStorage.setItem("accessToken", newAccessToken);
-        } catch (error) {
-          console.error("Auto-refresh failed:", error);
-        }
-      }, 10 * 60 * 1000);
-
-      return () => clearTimeout(autoCheck);
+  // Función de logout con useRef para evitar re-creación
+  const logoutRef = useRef<() => void>();
+ 
+  logoutRef.current = () => {
+    if (!sessionExpiredAlertShown.current) {
+      sessionExpiredAlertShown.current = true;
+      alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
+      setTimeout(() => (sessionExpiredAlertShown.current = false), 1000);
     }
-  }, [refreshToken]);
 
-  // Interceptores para axios
+    localStorage.clear();
+    localStorage.clear();
+    setAccesToken(null);
+    setrefreshToken(null);
+    setRole(null);
+    setUser(null);
+    navigation('/login');
+    console.log("🚪 Logout completado");
+  };
+
+  const logout = useCallback(() => {
+    logoutRef.current?.();
+  }, []);
+
+  // Interceptor de response - SIN DEPENDENCIAS
   useEffect(() => {
-    const setupInterceptors = (instance: typeof axiosInstance) => {
-      const requestInterceptor = instance.interceptors.request.use(config => {
-        const token = localStorage.getItem("accessToken");
-        if (token) config.headers['Authorization'] = `Bearer ${token}`;
-        return config;
-      });
+    if (interceptorSetup.current) return;
+    interceptorSetup.current = true;
 
-      const responseInterceptor = instance.interceptors.response.use(
-        res => res,
-        async err => {
-          const originalRequest = err.config;
-          if ((err.response?.status === 401 || err.response?.status === 402) && !originalRequest._retry) {
-            originalRequest._retry = true;
+    const responseInterceptor = axiosInstance.interceptors.response.use(
+      response => response,
+      async (err) => {
+        const originalRequest = err.config;
 
-            try {
-              const currentRefreshToken = localStorage.getItem("refreshToken") || sessionStorage.getItem("token");
-              if (!currentRefreshToken) throw new Error("No refresh token available");
-
-              const response = await axiosLog.post('/auth/token', { token: currentRefreshToken });
-              const newAccessToken = response.data.accessToken;
-
-              setAccesToken(newAccessToken);
-              localStorage.setItem("accessToken", newAccessToken);
-
-              originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-              return instance(originalRequest);
-            } catch (refreshError) {
-              if (!sessionExpiredAlertShown.current) {
-                sessionExpiredAlertShown.current = true;
-                alert("Sesión expirada. Por favor, inicia sesión nuevamente.");
-                setTimeout(() => (sessionExpiredAlertShown.current = false), 1000);
-              }
-
-              sessionStorage.clear();
-              localStorage.clear();
-              setAccesToken(null);
-              setrefreshToken(null);
-              setRole(null);
-              setUser(null);
-              navigation('/login');
-
-              return Promise.reject(refreshError);
-            }
-          }
+        // Solo manejar 401/402
+        if (err.response?.status !== 401 && err.response?.status !== 402) {
           return Promise.reject(err);
         }
-      );
 
-      return { requestInterceptor, responseInterceptor };
-    };
+        // Si ya se intentó, hacer logout
+        if (originalRequest._retry) {
+          console.error("⛔ Refresh falló, haciendo logout");
+          logoutRef.current?.();
+          return Promise.reject(err);
+        }
 
-    const axiosLogInterceptors = setupInterceptors(axiosLog);
-    const axiosInstanceInterceptors = setupInterceptors(axiosInstance);
+        // Si ya está refrescando, agregar a cola
+        if (isRefreshing) {
+          console.log("⏳ Agregando a cola de refresh");
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          }).then(token => {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          });
+        }
 
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          const currentRefreshToken = localStorage.getItem("refreshToken");
+         
+          if (!currentRefreshToken) {
+            throw new Error("No refresh token");
+          }
+
+          console.log("🔄 Refrescando access token...");
+         
+          const response = await axiosLog.post('/auth/token', {
+            token: currentRefreshToken
+          });
+         
+          const newAccessToken = response.data.accessToken;
+
+          localStorage.setItem("accessToken", newAccessToken);
+          setAccesToken(newAccessToken);
+
+          console.log("✅ Token refrescado");
+
+          processQueue(null, newAccessToken);
+
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          return axiosInstance(originalRequest);
+
+        } catch (refreshError) {
+          console.error("❌ Refresh token falló:", refreshError);
+          processQueue(refreshError, null);
+          logoutRef.current?.();
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
+      }
+    );
+
+    console.log("✅ Response interceptor configurado (PERMANENTE)");
+
+    // Solo limpiar al desmontar el componente principal
     return () => {
-      axiosLog.interceptors.request.eject(axiosLogInterceptors.requestInterceptor);
-      axiosLog.interceptors.response.eject(axiosLogInterceptors.responseInterceptor);
-      axiosInstance.interceptors.request.eject(axiosInstanceInterceptors.requestInterceptor);
-      axiosInstance.interceptors.response.eject(axiosInstanceInterceptors.responseInterceptor);
+      axiosInstance.interceptors.response.eject(responseInterceptor);
+      interceptorSetup.current = false;
+      console.log("🧹 Interceptor limpiado (componente desmontado)");
     };
-  }, [navigation]);
+  }, []); // ← SIN DEPENDENCIAS
 
   const login = useCallback(async (credentials: object) => {
     try {
@@ -141,18 +181,16 @@ export default function Authsystem({ children }: props) {
       setRole(userData.role);
       setUser(userData);
 
-      // Guardar en localStorage y sessionStorage
       localStorage.setItem("accessToken", newAccessToken);
       localStorage.setItem("refreshToken", newRefreshToken);
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("role", userData.role);
 
-      sessionStorage.setItem("token", newRefreshToken);
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      sessionStorage.setItem("role", userData.role);
-
       sessionExpiredAlertShown.current = false;
+     
+      console.log("✅ Login exitoso");
     } catch (err) {
+      console.error("❌ Login falló:", err);
       setRole(null);
       setUser(null);
       throw err;
@@ -161,9 +199,11 @@ export default function Authsystem({ children }: props) {
 
   const memo = useMemo(() => ({
     login,
+    logout,
     role,
     user
-  }), [login, user, role]);
+  }), [login, logout, user, role]);
 
   return <Auth.Provider value={memo}>{children}</Auth.Provider>;
 }
+
