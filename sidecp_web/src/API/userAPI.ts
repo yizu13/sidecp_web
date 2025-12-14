@@ -1,37 +1,39 @@
-import { axiosIntercep } from "./methods"
+import axiosInstance from "./axiosServer"
+
+
 
 export const userData = async () =>{
-    const response = await axiosIntercep.get("/userInfo")
+    const response = await axiosInstance.get("/userInfo")
     return response.data
 }
 
 export const createCommitte = async (payload: object)=>{
-    const response = await axiosIntercep.post("/committes",payload);
+    const response = await axiosInstance.post("/committes",payload);
     return response
 }
 
 export const getEventsById = async (id: string)=>{
-    const response = await axiosIntercep.get(`/committes/events/${id}`);
+    const response = await axiosInstance.get(`/committes/events/${id}`);
     return response
 }
 
 export const getUsers = async ()=>{
-    const response = await axiosIntercep.get(`/users`);
+    const response = await axiosInstance.get(`/users`);
     return response
 }
 
 export const getCommitties = async ()=>{
-    const response = await axiosIntercep.get(`/committes`);
+    const response = await axiosInstance.get(`/committes`);
     return response
 }
 
 export const getEvaluators = async ()=>{
-    const response = await axiosIntercep.get(`/evaluators`);
+    const response = await axiosInstance.get(`/evaluators`);
     return response
 }
 
 export const getEvaluator = async (id: string)=>{
-    const response = await axiosIntercep.get(`/evaluators/${id}`);
+    const response = await axiosInstance.get(`/evaluators/${id}`);
     return response
 }
 
@@ -42,17 +44,17 @@ type evaluatorInfo = {
 }
 
 export const createEvaluator = async (payload: evaluatorInfo)=>{
-    const response = await axiosIntercep.post(`/evaluators`, payload);
+    const response = await axiosInstance.post(`/evaluators`, payload);
     return response
 }
 
 export const deleteEvaluator = async (id: string)=>{
-    const response = await axiosIntercep.delete(`/evaluators/${id}`);
+    const response = await axiosInstance.delete(`/evaluators/${id}`);
     return response
 }
 
 export const deleteCommitte = async (id: string)=>{
-    const response = await axiosIntercep.delete(`/committes/${id}`);
+    const response = await axiosInstance.delete(`/committes/${id}`);
     return response;
 }
 
@@ -66,17 +68,17 @@ type row = {
 }
 
 export const createStudent = async(payload: row)=>{
-    const response = await axiosIntercep.post(`/students`, payload)
+    const response = await axiosInstance.post(`/students`, payload)
     return response
 }
 
 export const getStudents = async () =>{
-    const response = await axiosIntercep.get("/students");
+    const response = await axiosInstance.get("/students");
     return response
 }
 
 export const deleteStudent = async (id: string)=>{
-    const response = await axiosIntercep.delete(`/students/${id}`);
+    const response = await axiosInstance.delete(`/students/${id}`);
     return response
 }
 
@@ -107,21 +109,21 @@ export const scoresUpdate = async (payload: scores) => {
         liderazgo: payload.liderazgo,
         colaboracion: payload.colaboracion
     };
-    const response = await axiosIntercep.post(`/scores`, backendPayload);
+    const response = await axiosInstance.post(`/scores`, backendPayload);
     return response
 }
 
 export const getScores = async ()=>{
-    const response = await axiosIntercep.get("/scores");
+    const response = await axiosInstance.get("/scores");
     return response;
 }
 
 export const openCommitte = async (id: string)=>{
-    const response = await axiosIntercep.post(`/committes/open/${id}`)
+    const response = await axiosInstance.post(`/committes/open/${id}`)
     return response
 }
 
 export const closeCommitte = async (id: string)=>{
-    const response = await axiosIntercep.post(`/committes/close/${id}`)
+    const response = await axiosInstance.post(`/committes/close/${id}`)
     return response
 }

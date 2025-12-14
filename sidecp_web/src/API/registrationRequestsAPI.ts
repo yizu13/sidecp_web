@@ -1,5 +1,4 @@
-import { axiosIntercep } from "./methods"
-
+import axiosLog from "./AxiosLogServer";
 export interface RegistrationRequest {
     id: string;
     firstName: string;
@@ -31,7 +30,7 @@ export interface PaginatedResponse<T> {
  * Crear una nueva solicitud de registro
  */
 export const createRegistrationRequest = async (data: RegistrationRequestData) => {
-    const response = await axiosIntercep.post('/api/auth/register', data);
+    const response = await axiosLog.post('/api/auth/register', data);
     return response.data;
 };
 
@@ -39,7 +38,7 @@ export const createRegistrationRequest = async (data: RegistrationRequestData) =
  * Obtener todas las solicitudes de registro pendientes
  */
 export const getPendingRegistrationRequests = async (page: number = 1, limit: number = 10) => {
-    const response = await axiosIntercep.get<PaginatedResponse<RegistrationRequest>>(
+    const response = await axiosLog.get<PaginatedResponse<RegistrationRequest>>(
         '/api/auth/registration-requests', 
         {
             params: { status: 'pending', page, limit }
@@ -52,7 +51,7 @@ export const getPendingRegistrationRequests = async (page: number = 1, limit: nu
  * Aprobar una solicitud de registro
  */
 export const approveRegistrationRequest = async (requestId: string, role: 'admin' | 'evaluator') => {
-    const response = await axiosIntercep.post(`/api/auth/registration-requests/${requestId}/approve`, {
+    const response = await axiosLog.post(`/api/auth/registration-requests/${requestId}/approve`, {
         role
     });
     return response.data;
@@ -62,7 +61,7 @@ export const approveRegistrationRequest = async (requestId: string, role: 'admin
  * Rechazar una solicitud de registro
  */
 export const rejectRegistrationRequest = async (requestId: string, reason?: string) => {
-    const response = await axiosIntercep.post(`/api/auth/registration-requests/${requestId}/reject`, {
+    const response = await axiosLog.post(`/api/auth/registration-requests/${requestId}/reject`, {
         reason
     });
     return response.data;
@@ -72,7 +71,7 @@ export const rejectRegistrationRequest = async (requestId: string, reason?: stri
  * Obtener el conteo de solicitudes pendientes
  */
 export const getPendingRequestsCount = async () => {
-    const response = await axiosIntercep.get<{ count: number }>('/api/auth/registration-requests/count');
+    const response = await axiosLog.get<{ count: number }>('/api/auth/registration-requests/count');
     return response.data.count;
 };
 
@@ -80,7 +79,7 @@ export const getPendingRequestsCount = async () => {
  * Obtener el token de registro actual
  */
 export const getRegistrationToken = async () => {
-    const response = await axiosIntercep.get<{
+    const response = await axiosLog.get<{
         token: string;
         expiresAt: string;
         timeRemaining: number;
@@ -93,7 +92,7 @@ export const getRegistrationToken = async () => {
  * Validar un token de registro
  */
 export const validateRegistrationToken = async (token: string) => {
-    const response = await axiosIntercep.post<{
+    const response = await axiosLog.post<{
         valid: boolean;
         message: string;
         timeRemaining?: number;
@@ -105,6 +104,6 @@ export const validateRegistrationToken = async (token: string) => {
  * Regenerar el token de registro
  */
 export const regenerateRegistrationToken = async () => {
-    const response = await axiosIntercep.post('/api/auth/registration-token/regenerate');
+    const response = await axiosLog.post('/api/auth/registration-token/regenerate');
     return response.data;
 };

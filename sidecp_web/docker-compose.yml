@@ -8,6 +8,6 @@ services:
     container_name: sidecp-web
     restart: unless-stopped
     ports:
-      - "5173:80"
+      - "5173:5173"
     environment:
       - NODE_ENV=production
